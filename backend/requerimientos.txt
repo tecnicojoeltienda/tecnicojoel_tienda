@@ -1,0 +1,8 @@
+npm init -y
+npm install express mysql2 cors dotenv nodemon
+npm install --save-dev nodemon
+npm install bcryptjs jsonwebtoken
+npm install multer
+npm install multer --save
+npm install nodemon --save
+npm install cookie-parser

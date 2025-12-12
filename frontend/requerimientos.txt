@@ -1,0 +1,6 @@
+npm create vite@latest . -- --template react
+npm install tailwindcss @tailwindcss/vite
+npm install axios
+npm install react-router-dom
+npm install react-icons
+npm install prop-types
