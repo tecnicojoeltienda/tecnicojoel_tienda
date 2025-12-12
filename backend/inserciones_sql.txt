@@ -120,3 +120,176 @@ VALUES
   ('TECNICO10', 10.00, 5, 0, 1)
 ON DUPLICATE KEY UPDATE 
   codigo = VALUES(codigo);
+
+
+  
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// Crear una conexión (no pool) y exportarla como `conexion`.
+// Nota: `mysql.createConnection(...)` devuelve una Promise, así que `conexion` será una Promise
+// que resuelve a la conexión. En los módulos que la consuman debes `await`arla.
+export const conexion = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+conexion
+  .then((conn) => {
+    console.log("Conexión a la base de datos exitosa");
+    // Mantener la conexión abierta para reutilizarla desde otros módulos
+  })
+  .catch((error) => {
+    console.error("Error de conexión a la base de datos:", error);
+  });
+
+export default conexion;
+
+
+DROP TABLE IF EXISTS `administrador`;
+CREATE TABLE `administrador` (
+  `id_admin` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `usuario` varchar(50) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `clave` varchar(255) NOT NULL,
+  `rol` enum('admin','super_admin') DEFAULT 'admin',
+  `estado` enum('activo','inactivo') DEFAULT 'activo',
+  PRIMARY KEY (`id_admin`),
+  UNIQUE KEY `usuario` (`usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `administrador` VALUES 
+(1,'Joel Ortiz','tecnicojoel','tecnicojoeltienda@gmail.com','$2b$10$yl/1qEy3bRCq/mmuqZ0VJeA72jjMGaD8FaOuU6lc2q23jr.8JuQXS','super_admin','activo');
+
+
+DROP TABLE IF EXISTS `categoria`;
+CREATE TABLE `categoria` (
+  `id_categoria` int NOT NULL AUTO_INCREMENT,
+  `nombre_categoria` varchar(100) NOT NULL,
+  `descripcion` text,
+  PRIMARY KEY (`id_categoria`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `categoria` VALUES
+(1,'PCs','Computadoras de escritorio de alto rendimiento'),
+(2,'Laptops','Portátiles para trabajo, estudio y gaming'),
+(3,'Monitores','Pantallas LED, IPS y gamers de diferentes pulgadas'),
+(4,'Mouse','Ratones ópticos, inalámbricos y gamers'),
+(5,'Accesorios','Complementos tecnológicos para tu setup'),
+(6,'Sonido','Parlantes, audífonos y equipos de audio'),
+(7,'Tintas','Cartuchos y botellas de tinta para impresoras'),
+(8,'Licencias','Software y licencias originales'),
+(9,'Reacondicionados','Equipos reacondicionados con garantía'),
+(10,'Redes','Routers, cables y dispositivos de conexión'),
+(11,'Impresoras','Impresoras multifuncionales, láser y de inyección de tinta'),
+(12,'Componentes','Partes internas como procesadores, memorias RAM, discos y tarjetas gráficas'),
+(13,'Estabilizadores','Equipos eléctricos para proteger tus dispositivos de variaciones de voltaje');
+
+
+DROP TABLE IF EXISTS `cliente`;
+CREATE TABLE `cliente` (
+  `id_cliente` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `apellido` varchar(100) NOT NULL,
+  `dni` varchar(15) DEFAULT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `direccion` varchar(255) DEFAULT NULL,
+  `clave` varchar(255) NOT NULL,
+  `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_cliente`),
+  UNIQUE KEY `dni` (`dni`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `codigo_descuento`;
+CREATE TABLE `codigo_descuento` (
+  `id_codigo` int NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(50) NOT NULL,
+  `porcentaje` decimal(5,2) NOT NULL,
+  `max_usos` int NOT NULL DEFAULT '5',
+  `usos_actuales` int NOT NULL DEFAULT '0',
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_codigo`),
+  UNIQUE KEY `codigo` (`codigo`),
+  KEY `idx_codigo` (`codigo`),
+  KEY `idx_activo` (`activo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `codigo_descuento` VALUES
+(1,'TECNICO5',5.00,5,0,1,'2025-12-06 23:45:10'),
+(2,'TECNICO10',10.00,5,0,1,'2025-12-06 23:45:10');
+
+
+DROP TABLE IF EXISTS `pedido`;
+CREATE TABLE `pedido` (
+  `id_pedido` int NOT NULL AUTO_INCREMENT,
+  `id_cliente` int NOT NULL,
+  `fecha_pedido` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `estado` enum('pendiente','enviado','cancelado','completado') DEFAULT 'pendiente',
+  `total` decimal(10,2) DEFAULT '0.00',
+  `codigo_descuento` varchar(50) DEFAULT NULL,
+  `porcentaje_descuento` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`id_pedido`),
+  KEY `id_cliente` (`id_cliente`),
+  CONSTRAINT `pedido_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+DROP TABLE IF EXISTS `producto`;
+CREATE TABLE `producto` (
+  `id_producto` int NOT NULL AUTO_INCREMENT,
+  `nombre_producto` varchar(150) NOT NULL,
+  `descripcion` text,
+  `especificaciones` text,
+  `id_categoria` int DEFAULT NULL,
+  `precio_venta` decimal(10,2) NOT NULL,
+  `imagen_url` varchar(255) DEFAULT NULL,
+  `stock` int DEFAULT '0',
+  `stock_minimo` int DEFAULT '5',
+  `en_promocion` enum('si','no') DEFAULT 'no',
+  `estado` enum('disponible','agotado') DEFAULT 'disponible',
+  PRIMARY KEY (`id_producto`),
+  KEY `id_categoria` (`id_categoria`),
+  CONSTRAINT `producto_ibfk_1` FOREIGN KEY (`id_categoria`) REFERENCES `categoria` (`id_categoria`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `producto` VALUES (1,'Laptop Lenovo LOQ 15IRX9 ','Pantalla15.6\" FHD IPS, Procesador Core i7-13650HX 2.6/4.9GHz RAM 12GB DDR5-4800MHz SSD 512GB Gráfica RTX 3050 6GB',NULL,2,3750.00,'/uploads/1762625824415-471901730.webp',5,2,'no','disponible'),(2,'Laptop Lenovo LOQ 15IAX9','Pantalla 15.6\" FHD IPS, Procesador Core i5-12450HX hasta 4.4GHz, RAM 8GB DDR5-4800MHz, SSD 512GB, Gráfica RTX 3050 6GB','Poner especificaciones: todo okey  estado: dispuesto ',2,3050.00,'/uploads/1762625991735-847867521.webp',5,0,'no','disponible'),(3,'Laptop Lenovo V15 G4 IRU ','Procesador Intel Core i7-1355U, RAM 8GB, SSD 512GB, Pantalla 15.6\" FHD ',NULL,2,2650.00,'/uploads/1762626115351-758984374.webp',5,0,'no','disponible'),(4,'Laptop Lenovo V15 G4 IRU','Pantalla 15.6\" FHD TN, Procesador Core i3-1315U 1.2 / 4.5GHz, RAM 8GB DDR4-3200MHz,  256GB SSD M.2 2242 PCIe 4.0x4 NVMe, Integrado Intel UHD Graphics',NULL,2,1430.00,'/uploads/1762626331816-503259970.webp',5,2,'no','disponible'),(5,'Laptop Lenovo Ideapad Slim 3 15ABR8 ','Procesador AMD Ryzen 7 5825U 1, RAM 6GB, 512GB SSD, Pantalla 15.6\" FHD',NULL,2,1890.00,'/uploads/1762626773684-320429690.webp',5,0,'no','disponible'),(6,'Monitor plano TEROS TE-1915S ','Pantalla 19.5\" HD+ Refresco TN 75Hz 5ms Conexión HDMI VGA Color negro','Segunda prueba: Especificaciones \nDisponible: claro que si \nEspecificación: si \nEspecificación: 1\nEspecificación: 2 ',3,260.00,'/uploads/T1.webp',5,2,'no','disponible'),(7,'Monitor plano TEROS TE-2130CS ','Pantalla 21.5\" FHD IPS, Refresco 100Hz 5ms, Conexión HDMI VGA, Color negro',NULL,3,260.00,'/uploads/1762634425881-354936067.webp',5,1,'no','disponible'),(8,'Monitor plano TEROS TE-2128S ','Pantalla 21.5\" FHD IPS, Refresco 100Hz 1ms, Conexión HDMI VGA, Color negro',NULL,3,270.00,'/uploads/1762636037802-402200631.webp',5,1,'no','disponible'),(9,'Monitor plano TEROS TE-2419CS ','Pantalla 24\" WUXGA IPS, Refresco 75Hz 5ms, Conexión HDMI VGA, Color negro',NULL,3,280.00,'/uploads/1762637473641-255846201.webp',5,0,'no','disponible'),(10,'Impresora Multifuncional de tinta HP Smart Tank 585','Impresión/Escaneo/Copia, Conexión Wi-Fi/Bluetooth LE/USB',NULL,11,670.00,'/uploads/1762637717715-907129384.webp',5,0,'no','disponible'),(11,'Impresora Multifuncional de tinta Epson EcoTank L3210','Imprime / Escanea / Copia, Conexión USB',NULL,11,698.00,'/uploads/1762637878053-440351945.webp',5,0,'no','disponible'),(12,'Impresora Multifuncional de tinta Epson L3250','Conexión USB de alta velocidad (compatible con USB 2.0)',NULL,11,780.00,'/uploads/I1.webp',3,1,'no','disponible'),(13,'Impresora Multifuncional de tinta Epson EcoTank L4360',' imprime/escanea/copia/Duplex, Conexión Wi-Fi/USB',NULL,11,930.00,'/uploads/1762638427049-446473471.webp',5,0,'no','disponible'),(14,'PC All-in-One Lenovo IdeaCentre 3 24ALC6','Pantalla 23.8\" FHD IPS, Procesador Ryzen 5 7430U 2.3/4.3G, RAM 16GB DDR4-3200',NULL,1,2199.00,'/uploads/1762639990777-945054464.webp',5,1,'no','disponible'),(15,'PC All-in-One Lenovo IdeaCentre 3 27ALC6 ','Pantalla 27\" FHD IPS, Procesador Ryzen 7 7730U 2.0/4.5GHz, RAM 16GB DDR4-3200',NULL,1,2470.00,'/uploads/1762642309208-435850849.webp',5,0,'no','disponible'),(16,'PC All-in-One Lenovo IdeaCentre 27IRH9 ','Pantalla 27\" FHD IPS, Procesador Core i5-13420H hasta 4.6GHz, RAM 16GB DDR5-5200',NULL,1,2590.00,'/uploads/1762642768683-574010259.webp',5,1,'no','disponible'),(17,'PC All-in-One HP CR0350LA','Pantalla 23.8” FHD IPS, Procesador Core i5 1334U Hasta 4.6GHz, RAM 8GB DDR4-3200M, Almacenamiento 512GB',NULL,1,2690.00,'/uploads/1762642833364-79644312.webp',5,0,'no','disponible'),(18,'Accesorio Cargador TEROS TE-70207W','USB-A USB-C, GaN, PD 65W,  Color blanco',NULL,5,20.00,'/uploads/1762642967924-369203668.webp',3,0,'no','disponible'),(19,'Accesorio Cable Poder Universal PC','Cable de alimentación  con enchufe de 3 clavijas a conector hembra de 3 ranuras\nConductor material : Aluminio recubierto de cobre\nTipo de conector: NEMA de 3 clavijas a conector hembra de 3 ranuras\nColor: Negro\nVoltage: 110-250V',NULL,5,15.00,'/uploads/1762643292915-760458414.webp',5,0,'no','disponible'),(20,'Accesorio Cable Poder Universal LAPTOP','Conductor material : Aluminio recubierto de cobre\nTipo: Cable de alimentación para computador portátil\nTipo de conector: TREBOL\nColor: Negro\nVoltage: 110-250V',NULL,5,15.00,'/uploads/1762643384671-676797055.webp',5,1,'no','disponible'),(21,'Accesorio Cable de Poder Impresora','Cable de poder de 2 puntas de alta calidad para Canon, EPSON, HP y otros modelos\nColor negro',NULL,5,15.00,'/uploads/1762643822183-721020918.webp',5,1,'no','disponible'),(22,'Accesorio Cable USB Impresora','Cable USB 2.0 Para Impresora',NULL,5,15.00,'/uploads/1762643886129-487256576.webp',5,1,'no','disponible'),(23,'Mouse óptico TEROS TE-1229S','USB, 4 botones, Color negro',NULL,4,25.00,'/uploads/1762645522118-470469324.webp',5,1,'no','disponible'),(24,'Mouse óptico TEROS TE-1225S','Resolución 800-1200-1600 DPI, USB, 4 botones, color blanco',NULL,4,25.00,'/uploads/1762645572107-594566418.webp',5,1,'no','disponible'),(25,'Mouse inalámbrico TEROS TE-1228S','Color Negro, 6 botones, Receptor USB',NULL,4,30.00,'/uploads/1762645615072-121380806.webp',5,1,'no','disponible'),(26,'Mouse gamer TEROS TE-1233G','Resolución DPI hasta 7200, Luces RGB, 7 botones, USB, Color negro',NULL,4,46.99,'/uploads/1762645746221-105100944.webp',5,1,'no','disponible');
+
+
+DROP TABLE IF EXISTS `detalle_pedido`;
+CREATE TABLE `detalle_pedido` (
+  `id_detalle_pedido` int NOT NULL AUTO_INCREMENT,
+  `id_pedido` int NOT NULL,
+  `id_producto` int NOT NULL,
+  `cantidad` int NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) GENERATED ALWAYS AS (`cantidad` * `precio_unitario`) STORED,
+  PRIMARY KEY (`id_detalle_pedido`),
+  KEY `id_pedido` (`id_pedido`),
+  KEY `id_producto` (`id_producto`),
+  CONSTRAINT `detalle_pedido_ibfk_1` FOREIGN KEY (`id_pedido`) REFERENCES `pedido` (`id_pedido`) ON DELETE CASCADE,
+  CONSTRAINT `detalle_pedido_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `movimiento_stock`;
+CREATE TABLE `movimiento_stock` (
+  `id_movimiento` int NOT NULL AUTO_INCREMENT,
+  `id_producto` int DEFAULT NULL,
+  `tipo` enum('entrada','salida') NOT NULL,
+  `cantidad` int NOT NULL,
+  `descripcion` text,
+  `fecha_movimiento` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_movimiento`),
+  KEY `id_producto` (`id_producto`),
+  CONSTRAINT `movimiento_stock_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
