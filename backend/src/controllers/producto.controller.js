@@ -8,7 +8,8 @@ export async function listar(req, res) {
     const rows = await model.obtenerProductos();
     res.json(rows);
   } catch (e) {
-    res.status(500).json({ error: "Error al listar productos" });
+    console.error("ERROR DETALLADO:", e); 
+    res.status(500).json({ error: "Error al listar productos", mensaje: e.message });
   }
 }
 
