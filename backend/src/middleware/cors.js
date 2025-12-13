@@ -11,6 +11,8 @@ const FRONTENDS = [
   'http://localhost:3000',
   'http://tecnicojoel01.unaux.com',   
   'https://tecnicojoel01.unaux.com', 
+  'https://tiendatecnicojoel.onrender.com/',
+  'https://tecnicojoel-tienda.onrender.com'
 ];
 
 const corsOptions = DEV
