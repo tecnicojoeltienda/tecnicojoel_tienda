@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiShoppingCart, FiUsers, FiPackage, FiRefreshCw, FiDollarSign, FiTrendingUp, FiTrendingDown, FiUserCheck } from "react-icons/fi";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 // Símbolo de soles peruanos
 const SolesIcon = () => (

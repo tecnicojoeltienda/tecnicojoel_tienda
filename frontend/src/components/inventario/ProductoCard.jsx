@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { resolveImageUrl } from "../../service/api"; // <-- usar la utilidad central
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 export default function ProductoCard({ producto, onUpdated }) {
   const img = resolveImageUrl(producto?.imagen_url);

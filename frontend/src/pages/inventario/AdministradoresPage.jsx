@@ -3,7 +3,7 @@ import api from "../../service/api.js";
 import { FiKey, FiPower, FiRefreshCw, FiEdit2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 export default function AdministradoresPage() {
   const [admins, setAdmins] = useState([]);

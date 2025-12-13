@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 function formatDate(d) {
   if (!d) return "-";

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiUpload, FiX, FiImage, FiSave, FiArrowLeft } from "react-icons/fi";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 export default function ProductCreatePage() {
   const navigate = useNavigate();
