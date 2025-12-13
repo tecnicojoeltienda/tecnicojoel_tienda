@@ -23,10 +23,10 @@ const app = express();
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser()); // <-- aquí a nivel app
+app.use(cookieParser()); 
 app.use(corsMiddleware);
 
-// Asegurar que exista la carpeta uploads y exponerla estáticamente
+
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir));

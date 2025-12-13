@@ -12,7 +12,9 @@ const FRONTENDS = [
   'http://tecnicojoel01.unaux.com',   
   'https://tecnicojoel01.unaux.com', 
   'https://tiendatecnicojoel.onrender.com/',
-  'https://tecnicojoel-tienda.onrender.com'
+  'https://tecnicojoel-tienda.onrender.com',
+  'https://tecnicojoel-tienda-1.onrender.com',
+  'https://www.tecnicojoel-tienda1-onrender.com'
 ];
 
 const corsOptions = DEV
