@@ -3,7 +3,7 @@ import { FiInstagram, FiFacebook, FiTwitter, FiYoutube, FiMail, FiPhone, FiMapPi
 
 export default function FooterTienda() {
   const [email, setEmail] = useState("");
-  const waPhone = "51926700418"; // <- reemplaza por tu número en formato internacional si es necesario
+  const waPhone = "51926700418"; 
 
   const handleSubscribe = (e) => {
     e.preventDefault();

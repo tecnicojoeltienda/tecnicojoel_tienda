@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiSave, FiArrowLeft, FiEdit3, FiPackage, FiCamera } from "react-icons/fi";
 
-const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL 
+//|| "http://localhost:4000";
 
 export default function ProductEditPage() {
   const { id } = useParams();

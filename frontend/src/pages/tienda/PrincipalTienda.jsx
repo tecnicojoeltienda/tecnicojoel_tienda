@@ -1,6 +1,6 @@
-// ...existing code...
+
 import HeaderTienda from "../../layouts/tienda/HeaderTienda";
-//import AsideIzquierdo from "../../layouts/tienda/AsideIzquierdo";
+
 import CarruselPrincipal from "../../components/tienda/CarruselPrincipal";
 import Novedades from "../../components/tienda/Novedades";
 //import CategoriasGrid from "../../components/tienda/CategoriasGrid";
@@ -34,4 +34,3 @@ function PrincipalTienda() {
 }
 
 export default PrincipalTienda;
-// ...existing code...

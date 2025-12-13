@@ -7,7 +7,7 @@ import FiltersPanel from "../../layouts/tienda/FiltersPanel";
 import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
 
-export default function CategoriaPage() {
+export default function CategoriasPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();

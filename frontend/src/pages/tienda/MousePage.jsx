@@ -6,7 +6,7 @@ import FiltersPanel from "../../layouts/tienda/FiltersPanel";
 import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
 
-export default function MonitoresPage() {
+export default function MousePage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
 
