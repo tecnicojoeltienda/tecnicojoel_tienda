@@ -41,7 +41,7 @@ export default function DashboardLayout() {
 
   const fetchLowStock = async () => {
     try {
-      const res = await api.get('/api/productos/paginar', { params: { page: 1, perPage: 1000 } });
+      const res = await api.get('/apij/productos');
       const payload = res.data ?? {};
       const items = Array.isArray(payload.items) ? payload.items : (Array.isArray(payload.data) ? payload.data : []);
       const low = items.filter(p => {
