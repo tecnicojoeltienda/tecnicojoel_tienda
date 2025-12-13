@@ -401,7 +401,7 @@ export default function CarritoPage() {
 
       // Esperar antes de abrir WhatsApp
       setTimeout(() => {
-        const telefono = "51926700418";
+        const telefono = "51984122549";
         const url = `https://wa.me/${telefono}?text=${encodeURIComponent(body)}`;
         window.open(url, "_blank");
       }, 2000);
@@ -410,7 +410,7 @@ export default function CarritoPage() {
       console.error("Error crear pedido:", err);
       const openAnyway = confirm("❌ No fue posible registrar el pedido en el servidor. ¿Deseas abrir WhatsApp para coordinar igualmente?");
       if (openAnyway) {
-        const telefono = "51926700418";
+        const telefono = "51984122549";
         const url = `https://wa.me/${telefono}?text=${encodeURIComponent(body)}`;
         window.open(url, "_blank");
       }
