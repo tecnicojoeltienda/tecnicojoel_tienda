@@ -113,7 +113,7 @@ export default function ProductosDetallesPage() {
               </button>
               <button 
                 onClick={() => navigate("/")} 
-                className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
+                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
               >
                 Ir al inicio
               </button>
@@ -132,9 +132,9 @@ export default function ProductosDetallesPage() {
         {/* Breadcrumb mejorado */}
         <nav className="mb-6">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <button onClick={() => navigate("/")} className="hover:text-indigo-600 transition-colors">Inicio</button>
+            <button onClick={() => navigate("/")} className="hover:text-blue-600 transition-colors">Inicio</button>
             <span>›</span>
-            <button onClick={() => navigate(-1)} className="hover:text-indigo-600 transition-colors">
+            <button onClick={() => navigate(-1)} className="hover:text-blue-600 transition-colors">
               {product.categoria || "Productos"}
             </button>
             <span>›</span>
@@ -151,7 +151,7 @@ export default function ProductosDetallesPage() {
         <div className="mt-16">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-              <FiPackage className="w-6 h-6 text-indigo-600" />
+              <FiPackage className="w-6 h-6 text-blue-600" />
               Productos relacionados
             </h2>
             <p className="text-gray-600">Descubre otros productos que podrían interesarte</p>

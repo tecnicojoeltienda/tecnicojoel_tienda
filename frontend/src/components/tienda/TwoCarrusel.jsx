@@ -37,7 +37,7 @@ function ProductCardSimple({ p, onClick }) {
       <div className="relative w-full h-48 bg-gradient-to-br from-white-50 to-white-100 flex items-center justify-center overflow-hidden">
         {/* Badge de categoría */}
         {p.categoria && (
-          <div className="absolute top-3 left-3 z-10 px-2 py-1 bg-indigo-600 text-white text-xs font-medium rounded-lg">
+          <div className="absolute top-3 left-3 z-10 px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-lg">
             {p.categoria}
           </div>
         )}
@@ -56,8 +56,8 @@ function ProductCardSimple({ p, onClick }) {
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-gray-400">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center mb-2">
-              <span className="text-lg font-bold text-indigo-600">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mb-2">
+              <span className="text-lg font-bold text-blue-600">
                 {getInitials(p.nombre_producto)}
               </span>
             </div>
@@ -94,7 +94,7 @@ function ProductCardSimple({ p, onClick }) {
         {/* Precio y stock */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
-            <div className="text-lg font-bold text-indigo-600">
+            <div className="text-lg font-bold text-blue-600">
               {p.precio_venta != null ? `S/. ${Number(p.precio_venta).toLocaleString()}` : "Consultar"}
             </div>
             {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
@@ -115,7 +115,7 @@ function ProductCardSimple({ p, onClick }) {
         </div>
 
         {/* Botón de acción al hover */}
-        <button className="w-full mt-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-700 flex items-center justify-center gap-2">
+        <button className="w-full mt-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-700 flex items-center justify-center gap-2">
           <FiShoppingCart className="w-4 h-4" />
           Ver detalles
         </button>
@@ -303,16 +303,16 @@ export default function TwoCarrusel({ currentProductId = null }) {
               <button 
                 aria-label="Anterior" 
                 onClick={() => scroll(group.ref, -1)} 
-                className="group w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-gray-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all"
+                className="group w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
               >
-                <FiChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-indigo-600 transition-colors" />
+                <FiChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
               </button>
               <button 
                 aria-label="Siguiente" 
                 onClick={() => scroll(group.ref, 1)} 
-                className="group w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-gray-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all"
+                className="group w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
               >
-                <FiChevronRight className="w-5 h-5 text-gray-600 group-hover:text-indigo-600 transition-colors" />
+                <FiChevronRight className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
               </button>
             </div>
           </div>
@@ -364,7 +364,7 @@ export default function TwoCarrusel({ currentProductId = null }) {
               {[...Array(Math.ceil(group.items.length / 4))].map((_, i) => (
                 <div 
                   key={i} 
-                  className="w-2 h-2 rounded-full bg-gray-300 hover:bg-indigo-600 transition-colors cursor-pointer"
+                  className="w-2 h-2 rounded-full bg-gray-300 hover:bg-blue-600 transition-colors cursor-pointer"
                   onClick={() => {
                     const el = group.ref.current;
                     if (el) {

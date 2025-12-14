@@ -156,7 +156,7 @@ export default function ProductDetail({
           {/* Header del producto */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                 {product.categoria || "Producto"}
               </span>
               {product.estado === "nuevo" && (
@@ -184,9 +184,9 @@ export default function ProductDetail({
           </div>
 
           {/* Precio */}
-          <div className="mb-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-100">
+          <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl border border-blue-100">
             <div className="flex items-baseline gap-4">
-              <div className="text-4xl font-extrabold text-indigo-600">
+              <div className="text-4xl font-extrabold text-blue-600">
                 {product.precio_venta != null ? `S/. ${Number(product.precio_venta).toLocaleString()}` : "Consultar"}
               </div>
               {product.precio_lista && Number(product.precio_lista) > Number(product.precio_venta) && (
@@ -250,7 +250,7 @@ export default function ProductDetail({
               className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-3 ${
                 addedToCart 
                   ? "bg-green-600 text-white" 
-                  : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white"
+                  : "bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white"
               }`}
             >
               {addedToCart ? (
@@ -271,7 +271,7 @@ export default function ProductDetail({
           {product.descripcion && (
             <div className="mb-8 p-6 bg-gray-50 rounded-xl">
               <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <FiInfo className="w-5 h-5 text-indigo-600" />
+                <FiInfo className="w-5 h-5 text-blue-600" />
                 Descripción
               </h3>
               <div className="text-gray-700 leading-relaxed whitespace-pre-line">
@@ -289,13 +289,13 @@ export default function ProductDetail({
             <details className="group bg-gray-50 rounded-xl overflow-hidden">
               <summary className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-3">
-                  <FiSettings className="w-5 h-5 text-indigo-600" />
+                  <FiSettings className="w-5 h-5 text-blue-600" />
                   <span className="text-lg font-bold text-gray-900">Especificaciones técnicas</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <span>Mostrar detalles</span>
-                  <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center group-open:rotate-180 transition-transform">
-                    <FiPlus className="w-3 h-3 text-indigo-600" />
+                  <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center group-open:rotate-180 transition-transform">
+                    <FiPlus className="w-3 h-3 text-blue-600" />
                   </div>
                 </div>
               </summary>
@@ -310,7 +310,7 @@ export default function ProductDetail({
                     <ul className="space-y-2">
                       {specsNormalized.map((s, i) => (
                         <li key={i} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                          <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
                           <span className="text-gray-800">{String(s)}</span>
                         </li>
                       ))}
