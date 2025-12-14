@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // IMPORTACION GLOBAL
 import CarritoPage from "./pages/tienda/CarritoPage.jsx";
 import NotAuthorized404 from "./pages/NotAuthorized404.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 // IMPORTACIONES DEL INVENTARIO
 import DashboardLayout from "./layouts/inventario/DashboardLayout.jsx";
@@ -52,13 +53,11 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
+        <ScrollToTop behavior="smooth" />
           <Routes>
-            {/* redirigir /inventario a login */}
+            
             <Route path="/inventario" element={<Navigate to="/inventario/login" replace />} />
 
-           
-
-            {/* Rutas del inventario protegidas y anidadas dentro de DashboardLayout */}
             <Route
               path="/inventario/*"
               element={
@@ -76,7 +75,6 @@ function App() {
               <Route path="productos/nuevo" element={<ProductCreatePage />} />
               <Route path="productos/:id/editar" element={<ProductEditPage />} />
 
-              {/* Solo super_admin puede acceder a clientes, lista y creación de administradores */}
               <Route
                 path="clientes"
                 element={
@@ -103,7 +101,6 @@ function App() {
               />
             </Route>
 
-            {/* Tienda pública / autenticación */}
             <Route path="/" element={<PrincipalTienda />} />
             <Route path="/login" element={<LoginTiendaPage />} />
             <Route path="/registro" element={<RegisterTiendaPage />} />
@@ -123,7 +120,6 @@ function App() {
             <Route path="/carrito" element={<CarritoPage />} />
             <Route path="/:category/:slug" element={<ProductosDetallesPage />} />
 
-            {/* Rutas que requieren estar autenticado (tienda) */}
             <Route
               path="/pedidos"
               element={
