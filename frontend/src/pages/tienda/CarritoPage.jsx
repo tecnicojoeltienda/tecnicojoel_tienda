@@ -384,22 +384,21 @@ export default function CarritoPage() {
         await Promise.all(detallePromises);
       }
 
-      // guardar items asociados al pedido para mostrar en historial
+      
       const storeId = nuevoId ?? `local_${Date.now()}`;
       try { localStorage.setItem(`pedido_items_${storeId}`, JSON.stringify(items)); } catch (e) { /* ignore */ }
 
-      // Mostrar modal de éxito
+    
       setLastPedidoId(nuevoId);
       setShowSuccessModal(true);
 
-      // limpiar carrito y descuento
+    
       await clearAll();
       if (discount) {
         sessionStorage.removeItem(APPLIED_KEY);
         setDiscount(null);
       }
 
-      // Esperar antes de abrir WhatsApp
       setTimeout(() => {
         const telefono = "51984122549";
         const url = `https://wa.me/${telefono}?text=${encodeURIComponent(body)}`;
@@ -426,7 +425,7 @@ export default function CarritoPage() {
           {/* Header mejorado */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-              <FiShoppingCart className="w-10 h-10 text-indigo-600" />
+              <FiShoppingCart className="w-10 h-10 text-blue-600" />
               Tu carrito de compras
             </h1>
             <p className="text-gray-600 text-lg">
@@ -447,7 +446,7 @@ export default function CarritoPage() {
                     <p className="text-gray-600 mb-6">Explora nuestros productos y agrega algunos a tu carrito.</p>
                     <button 
                       onClick={() => window.history.back()}
-                      className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
                     >
                       Continuar comprando
                     </button>
@@ -553,7 +552,7 @@ export default function CarritoPage() {
               <div className="sticky top-6">
                 <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
                   <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                    <FiTag className="w-5 h-5 text-indigo-600" />
+                    <FiTag className="w-5 h-5 text-blue-600" />
                     Resumen del pedido
                   </h2>
 
@@ -608,14 +607,14 @@ export default function CarritoPage() {
                           <input
                             value={discountCodeInput}
                             onChange={(e) => setDiscountCodeInput(e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             placeholder=""
                             disabled={hasPromoItems}
                           />
                           <button 
                             onClick={applyDiscountCode}
                             disabled={hasPromoItems}
-                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
                           >
                             Aplicar
                           </button>
@@ -706,7 +705,7 @@ export default function CarritoPage() {
                 ¡Pedido Generado!
               </h2>
               <p className="text-lg text-gray-600 mb-2">
-                Tu pedido <span className="font-bold text-indigo-600">#{lastPedidoId}</span> se ha creado exitosamente
+                Tu pedido <span className="font-bold text-blue-600">#{lastPedidoId}</span> se ha creado exitosamente
               </p>
               <p className="text-sm text-gray-500 mb-6">
                 Se abrirá WhatsApp para coordinar los detalles de envío
@@ -714,7 +713,7 @@ export default function CarritoPage() {
 
               <button
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 Entendido
               </button>

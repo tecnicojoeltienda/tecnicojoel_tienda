@@ -232,7 +232,7 @@ export default function DobleCarrusel() {
         <div className="relative w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
           {/* Badge de categoría */}
           {p.categoria && (
-            <div className="absolute top-2 left-2 z-10 px-2 py-1 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-md">
+            <div className="absolute top-2 left-2 z-10 px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded-lg shadow-md">
               {p.categoria}
             </div>
           )}
@@ -255,8 +255,8 @@ export default function DobleCarrusel() {
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-gray-400">
-              <div className="w-14 h-14 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center mb-2">
-                <span className="text-lg font-bold text-indigo-600">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mb-2">
+                <span className="text-lg font-bold text-blue-600">
                   {getInitials(p.nombre_producto)}
                 </span>
               </div>
@@ -267,7 +267,7 @@ export default function DobleCarrusel() {
           {/* Overlay al hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
             <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-2 text-xs font-bold text-gray-800 shadow-lg">
-              <FiPackage className="w-4 h-4 text-indigo-600" />
+              <FiPackage className="w-4 h-4 text-blue-600" />
               Ver detalles
             </div>
           </div>
@@ -276,7 +276,7 @@ export default function DobleCarrusel() {
         {/* Información del producto */}
         <div className="p-4">
           {/* Título */}
-          <h4 className="text-sm font-bold text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem] leading-tight group-hover:text-indigo-600 transition-colors">
+          <h4 className="text-sm font-bold text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem] leading-tight group-hover:text-blue-600 transition-colors">
             {p.nombre_producto}
           </h4>
 
@@ -293,7 +293,7 @@ export default function DobleCarrusel() {
           {/* Precio y acción */}
           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
             <div className="flex flex-col">
-              <div className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
                 {p.precio_venta != null ? `S/. ${Number(p.precio_venta).toLocaleString()}` : "Consultar"}
               </div>
               {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
@@ -310,7 +310,7 @@ export default function DobleCarrusel() {
                 addToCart(p);
               }}
               aria-label={`Añadir ${p.nombre_producto} al carrito`}
-              className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex items-center justify-center hover:scale-110 transition-all duration-200 shadow-lg"
+              className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-blue-600 text-white flex items-center justify-center hover:scale-110 transition-all duration-200 shadow-lg"
             >
               <FiShoppingCart className="w-4 h-4" />
             </button>
@@ -347,7 +347,7 @@ export default function DobleCarrusel() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-                  <FiPackage className="w-6 h-6 text-indigo-600" />
+                  <FiPackage className="w-6 h-6 text-blue-600" />
                   Accesorios
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">Complementa tu setup</p>
@@ -356,18 +356,18 @@ export default function DobleCarrusel() {
                 <button
                   onClick={() => scrollOne(containerLeft, -1)}
                   disabled={!canLeftPrev}
-                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-indigo-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
+                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
                   aria-label="Anterior accesorios"
                 >
-                  <FiChevronLeft className="w-5 h-5 text-indigo-600" />
+                  <FiChevronLeft className="w-5 h-5 text-blue-600" />
                 </button>
                 <button
                   onClick={() => scrollOne(containerLeft, 1)}
                   disabled={!canLeftNext}
-                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-indigo-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
+                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
                   aria-label="Siguiente accesorios"
                 >
-                  <FiChevronRight className="w-5 h-5 text-indigo-600" />
+                  <FiChevronRight className="w-5 h-5 text-blue-600" />
                 </button>
               </div>
             </div>
@@ -415,7 +415,7 @@ export default function DobleCarrusel() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-                  <FiPackage className="w-6 h-6 text-indigo-600" />
+                  <FiPackage className="w-6 h-6 text-blue-600" />
                   Componentes
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">Potencia tu equipo</p>
@@ -424,18 +424,18 @@ export default function DobleCarrusel() {
                 <button
                   onClick={() => scrollOne(containerRight, -1)}
                   disabled={!canRightPrev}
-                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-indigo-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
+                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
                   aria-label="Anterior componentes"
                 >
-                  <FiChevronLeft className="w-5 h-5 text-indigo-600" />
+                  <FiChevronLeft className="w-5 h-5 text-blue-600" />
                 </button>
                 <button
                   onClick={() => scrollOne(containerRight, 1)}
                   disabled={!canRightNext}
-                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-indigo-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
+                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
                   aria-label="Siguiente componentes"
                 >
-                  <FiChevronRight className="w-5 h-5 text-indigo-600" />
+                  <FiChevronRight className="w-5 h-5 text-blue-600" />
                 </button>
               </div>
             </div>

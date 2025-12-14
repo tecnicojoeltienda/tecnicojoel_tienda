@@ -99,7 +99,7 @@ export default function CategoriasCarrusel() {
                                     className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
                                     disabled={index === 0}
                                 >
-                                    <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-indigo-600 transition-colors" />
+                                    <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
                                 </button>
                                 <button
                                     onClick={next}
@@ -107,7 +107,7 @@ export default function CategoriasCarrusel() {
                                     className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
                                     disabled={index >= maxIndex}
                                 >
-                                    <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-indigo-600 transition-colors" />
+                                    <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
                                 </button>
                             </div>
                         </div>
@@ -124,7 +124,7 @@ export default function CategoriasCarrusel() {
                                             aria-label={`Ir a página ${i + 1}`}
                                             className={`h-1.5 rounded-full transition-all duration-300 ${
                                                 i === index 
-                                                    ? 'w-8 bg-gradient-to-r from-indigo-600 to-blue-600' 
+                                                    ? 'w-8 bg-gradient-to-r from-blue-600 to-blue-600' 
                                                     : 'w-1.5 bg-gray-300 hover:bg-gray-400'
                                             }`}
                                         />
@@ -143,7 +143,7 @@ export default function CategoriasCarrusel() {
                                     <button
                                         key={c.id}
                                         onClick={() => goToCategory(c.label)}
-                                        className="group flex-shrink-0 flex flex-col items-center justify-start bg-transparent border-0 p-2 sm:p-3 md:p-4 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-xl"
+                                        className="group flex-shrink-0 flex flex-col items-center justify-start bg-transparent border-0 p-2 sm:p-3 md:p-4 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl"
                                         style={{ width: `${100 / visible}%` }}
                                         aria-label={`Ver categoría ${c.label}`}
                                     >
@@ -208,12 +208,12 @@ export default function CategoriasCarrusel() {
                                             />
 
                                             {/* Overlay hover */}
-                                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/0 to-blue-500/0 group-hover:from-indigo-500/10 group-hover:to-blue-500/10 transition-all duration-300" />
+                                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/10 group-hover:to-blue-500/10 transition-all duration-300" />
                                         </div>
 
                                         {/* Etiqueta de categoría */}
                                         <span
-                                            className="mt-3 sm:mt-4 md:mt-5 text-center font-bold text-gray-900 group-hover:text-indigo-600 transition-colors duration-200 leading-tight px-2"
+                                            className="mt-3 sm:mt-4 md:mt-5 text-center font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 leading-tight px-2"
                                             style={{ 
                                                 fontSize: "clamp(0.75rem, 2vw, 1.25rem)",
                                                 lineHeight: 1.2,
@@ -225,7 +225,7 @@ export default function CategoriasCarrusel() {
                                         </span>
 
                                         {/* Indicador visual al hover */}
-                                        <div className="w-0 h-0.5 bg-gradient-to-r from-indigo-600 to-blue-600 group-hover:w-12 transition-all duration-300 mt-2 rounded-full" />
+                                        <div className="w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-600 group-hover:w-12 transition-all duration-300 mt-2 rounded-full" />
                                     </button>
                                 ))}
                             </div>
@@ -234,7 +234,7 @@ export default function CategoriasCarrusel() {
                         {/* Contador de categorías */}
                         <div className="mt-6 text-center">
                             <p className="text-sm font-semibold text-gray-500">
-                                <span className="text-indigo-600 font-bold text-base">{categories.length}</span> categorías disponibles
+                                <span className="text-blue-600 font-bold text-base">{categories.length}</span> categorías disponibles
                             </p>
                         </div>
                     </div>

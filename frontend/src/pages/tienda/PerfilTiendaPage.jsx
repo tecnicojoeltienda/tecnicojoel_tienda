@@ -45,13 +45,13 @@ export default function PerfilTiendaPage() {
         const all = res?.data ?? [];
         const clienteId = user.id ?? user.id_cliente ?? user.idCliente;
         
-        // filtrar pedidos del cliente actual
+       
         const misPedidos = all.filter((p) => {
           const idCliente = p.id_cliente ?? p.idCliente ?? p.cliente_id ?? p.cliente ?? null;
           return Number(idCliente) === Number(clienteId);
         });
 
-        // calcular total gastado
+        
         const totalGastado = misPedidos.reduce((sum, p) => {
           return sum + (Number(p.total ?? p.monto ?? 0) || 0);
         }, 0);
@@ -161,8 +161,8 @@ export default function PerfilTiendaPage() {
         <HeaderTienda />
         <main className="w-full max-w-4xl mx-auto px-6 py-24">
           <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
-            <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FiUser className="w-10 h-10 text-indigo-600" />
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FiUser className="w-10 h-10 text-blue-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Debes iniciar sesión</h1>
             <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
@@ -171,7 +171,7 @@ export default function PerfilTiendaPage() {
             <div className="flex justify-center gap-4">
               <button 
                 onClick={() => navigate("/login")} 
-                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg"
+                className="px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg"
               >
                 Iniciar sesión
               </button>
@@ -199,16 +199,16 @@ export default function PerfilTiendaPage() {
       <HeaderTienda />
       <main className="w-full max-w-4xl mx-auto px-6 py-12">
         {/* Header del perfil */}
-        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-8 mb-8 text-white shadow-xl">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-600 rounded-2xl p-8 mb-8 text-white shadow-xl">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
               <FiUser className="w-12 h-12 text-white" />
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold mb-2">¡Hola, {user.nombre ?? "Usuario"}!</h1>
-              <p className="text-indigo-100 text-lg">Bienvenido a tu perfil personal</p>
+              <p className="text-blue-100 text-lg">Bienvenido a tu perfil personal</p>
               {fechaRegistro && (
-                <p className="text-indigo-200 text-sm mt-1 flex items-center gap-2">
+                <p className="text-blue-200 text-sm mt-1 flex items-center gap-2">
                   <FiClock className="w-4 h-4" />
                   Miembro desde {fechaRegistro.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
@@ -230,8 +230,8 @@ export default function PerfilTiendaPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                  <FiUser className="w-4 h-4 text-indigo-600" />
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FiUser className="w-4 h-4 text-blue-600" />
                 </div>
                 Información personal
               </h2>
@@ -289,7 +289,7 @@ export default function PerfilTiendaPage() {
               </div>
 
               {/* Información adicional */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl border border-blue-100">
                 <div className="flex items-center gap-3 mb-3">
                   <FiShield className="w-5 h-5 text-blue-600" />
                   <h3 className="font-semibold text-blue-900">Información de la cuenta</h3>
@@ -323,7 +323,7 @@ export default function PerfilTiendaPage() {
               <div className="space-y-3">
                 <button 
                   onClick={() => navigate("/pedidos")} 
-                  className="w-full p-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-3 shadow-sm"
+                  className="w-full p-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-3 shadow-sm"
                 >
                   <FiPackage className="w-5 h-5" />
                   Ver mis pedidos
@@ -410,7 +410,7 @@ export default function PerfilTiendaPage() {
                   name="nombre"
                   value={form.nombre}
                   onChange={handleChange}
-                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
@@ -420,7 +420,7 @@ export default function PerfilTiendaPage() {
                   name="apellido"
                   value={form.apellido}
                   onChange={handleChange}
-                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
@@ -431,7 +431,7 @@ export default function PerfilTiendaPage() {
                   value={form.email}
                   onChange={handleChange}
                   type="email"
-                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
@@ -447,7 +447,7 @@ export default function PerfilTiendaPage() {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 inline-flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 inline-flex items-center gap-2"
                   disabled={editLoading}
                 >
                   {editLoading ? "Guardando..." : "Guardar cambios"}

@@ -238,7 +238,7 @@ export default function Novedades() {
                 {/* Título alineado a la izquierda */}
                 <div>
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                    <FiPackage className="w-8 h-8 text-indigo-600" />
+                    <FiPackage className="w-8 h-8 text-blue-600" />
                     Productos Populares
                   </h2>
                   <p className="text-gray-600 text-sm md:text-base">Descubre los productos más destacados y mejor valorados</p>
@@ -254,8 +254,8 @@ export default function Novedades() {
                         onClick={() => setCategory(CATEGORY_KEYS[k])}
                         className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
                           active
-                            ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg scale-105"
-                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-indigo-300 hover:shadow-md"
+                            ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg scale-105"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-blue-300 hover:shadow-md"
                         }`}
                       >
                         {CATEGORY_LABELS[CATEGORY_KEYS[k]]}
@@ -272,7 +272,7 @@ export default function Novedades() {
               <button
                 onClick={() => scrollByWidth(-1)}
                 aria-label="Anterior"
-                className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-20 w-14 h-14 rounded-full bg-white shadow-2xl items-center justify-center hover:bg-indigo-50 hover:scale-110 transition-all duration-200 border-2 border-gray-100"
+                className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-20 w-14 h-14 rounded-full bg-white shadow-2xl items-center justify-center hover:bg-blue-50 hover:scale-110 transition-all duration-200 border-2 border-gray-100"
               >
                 <FiChevronLeft className="w-6 h-6 text-gray-700" />
               </button>
@@ -280,7 +280,7 @@ export default function Novedades() {
               <button
                 onClick={() => scrollByWidth(1)}
                 aria-label="Siguiente"
-                className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-20 w-14 h-14 rounded-full bg-white shadow-2xl items-center justify-center hover:bg-indigo-50 hover:scale-110 transition-all duration-200 border-2 border-gray-100"
+                className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-20 w-14 h-14 rounded-full bg-white shadow-2xl items-center justify-center hover:bg-blue-50 hover:scale-110 transition-all duration-200 border-2 border-gray-100"
               >
                 <FiChevronRight className="w-6 h-6 text-gray-700" />
               </button>
@@ -323,7 +323,7 @@ export default function Novedades() {
                         <div className="relative w-full h-56 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
                           {/* Badge de categoría */}
                           {p.categoria && (
-                            <div className="absolute top-3 left-3 z-10 px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-lg">
+                            <div className="absolute top-3 left-3 z-10 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg shadow-lg">
                               {p.categoria}
                             </div>
                           )}
@@ -346,8 +346,8 @@ export default function Novedades() {
                             />
                           ) : (
                             <div className="flex flex-col items-center justify-center text-gray-400">
-                              <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-3">
-                                <span className="text-2xl font-bold text-indigo-600">
+                              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-3">
+                                <span className="text-2xl font-bold text-blue-600">
                                   {getInitials(p.nombre_producto)}
                                 </span>
                               </div>
@@ -358,7 +358,7 @@ export default function Novedades() {
                           {/* Overlay al hover */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
                             <div className="bg-white/95 backdrop-blur-sm rounded-xl px-5 py-2.5 flex items-center gap-2 text-sm font-bold text-gray-800 shadow-xl">
-                              <FiPackage className="w-5 h-5 text-indigo-600" />
+                              <FiPackage className="w-5 h-5 text-blue-600" />
                               Ver detalles
                             </div>
                           </div>
@@ -367,7 +367,7 @@ export default function Novedades() {
                         {/* Información del producto */}
                         <div className="p-5">
                           {/* Título */}
-                          <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-3 min-h-[3rem] leading-tight group-hover:text-indigo-600 transition-colors">
+                          <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-3 min-h-[3rem] leading-tight group-hover:text-blue-600 transition-colors">
                             {p.nombre_producto}
                           </h3>
 
@@ -391,7 +391,7 @@ export default function Novedades() {
                           {/* Precio y acción */}
                           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                             <div className="flex flex-col">
-                              <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                              <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
                                 {p.precio_venta != null ? `S/. ${Number(p.precio_venta).toLocaleString()}` : "Consultar"}
                               </div>
                               {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
@@ -408,7 +408,7 @@ export default function Novedades() {
                                 addToCart(p);
                               }}
                               aria-label={`Añadir ${p.nombre_producto} al carrito`}
-                              className="w-12 h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex items-center justify-center hover:scale-110 hover:shadow-xl transition-all duration-200"
+                              className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 text-white flex items-center justify-center hover:scale-110 hover:shadow-xl transition-all duration-200"
                             >
                               <FiShoppingCart className="w-5 h-5" />
                             </button>
@@ -434,7 +434,7 @@ export default function Novedades() {
                   {[...Array(Math.min(5, Math.ceil(products.length / 3)))].map((_, i) => (
                     <div 
                       key={i} 
-                      className="w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-indigo-600 transition-all cursor-pointer hover:scale-125"
+                      className="w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-blue-600 transition-all cursor-pointer hover:scale-125"
                       onClick={() => {
                         const el = containerRef.current;
                         if (el) {

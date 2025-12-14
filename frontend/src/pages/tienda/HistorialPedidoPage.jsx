@@ -166,8 +166,8 @@ export default function HistorialPedidoPage() {
         <HeaderTienda />
         <main className="w-full max-w-4xl mx-auto px-6 py-24">
           <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
-            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FiPackage className="w-8 h-8 text-indigo-600" />
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FiPackage className="w-8 h-8 text-blue-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Necesitas una cuenta para ver tus pedidos</h1>
             <p className="text-gray-600 text-lg mb-8 max-w-lg mx-auto">
@@ -176,7 +176,7 @@ export default function HistorialPedidoPage() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => navigate("/login")}
-                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg"
+                className="px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg"
               >
                 Iniciar sesión
               </button>
@@ -235,7 +235,7 @@ export default function HistorialPedidoPage() {
               </p>
               <button 
                 onClick={() => navigate("/carrito")} 
-                className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg inline-flex items-center"
+                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg inline-flex items-center"
               >
                 <FiShoppingCart className="w-5 h-5 mr-2" />
                 Ir al carrito
@@ -254,8 +254,8 @@ export default function HistorialPedidoPage() {
                 <div className="flex items-start justify-between gap-6">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                        <FiPackage className="w-6 h-6 text-indigo-600" />
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <FiPackage className="w-6 h-6 text-blue-600" />
                       </div>
                       <div>
                         <div className="text-sm text-gray-500 font-medium">Pedido #{id}</div>
@@ -311,7 +311,7 @@ export default function HistorialPedidoPage() {
                   <div className="text-right">
                     <button
                       onClick={() => openDetalles(id, p)}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-sm inline-flex items-center"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm inline-flex items-center"
                     >
                       <FiEye className="w-4 h-4 mr-2" />
                       Ver detalles
@@ -330,10 +330,10 @@ export default function HistorialPedidoPage() {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModal}></div>
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
             {/* Header del modal */}
-            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-indigo-50 to-blue-50">
+            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-50 to-blue-50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <FiPackage className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <FiPackage className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">Detalle del pedido #{selectedId}</h3>
@@ -390,8 +390,8 @@ export default function HistorialPedidoPage() {
                               }}
                             />
                           ) : null}
-                          <div className={`w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-lg border-2 border-gray-200 flex items-center justify-center ${d.imagen_url ? 'hidden' : 'flex'}`}>
-                            <span className="text-sm font-bold text-indigo-700">
+                          <div className={`w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-100 rounded-lg border-2 border-gray-200 flex items-center justify-center ${d.imagen_url ? 'hidden' : 'flex'}`}>
+                            <span className="text-sm font-bold text-blue-700">
                               {getInitials(d.nombre_producto)}
                             </span>
                           </div>
@@ -426,9 +426,9 @@ export default function HistorialPedidoPage() {
                   {/* Total del pedido */}
                   {selectedPedido && (
                     <div className="border-t pt-4 mt-6">
-                      <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl">
+                      <div className="flex justify-between items-center bg-blue-50 p-4 rounded-xl">
                         <span className="text-lg font-semibold text-gray-900">Total del pedido:</span>
-                        <span className="text-2xl font-bold text-indigo-600">
+                        <span className="text-2xl font-bold text-blue-600">
                           {formatCurrency(selectedPedido.total)}
                         </span>
                       </div>
