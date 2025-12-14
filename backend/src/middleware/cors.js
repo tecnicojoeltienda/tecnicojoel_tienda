@@ -15,9 +15,9 @@ const FRONTENDS = [
   'http://tecnicojoel01.unaux.com', 
   'https://tecnicojoel01.unaux.com', 
 
- 
   'https://tecnicojoel-tienda.onrender.com',
   'https://tecnicojoel-tienda-1.onrender.com',
+  'https://tecnicojoel-tienda.onrender.com/',
   
   
   'https://tiendatecnicojoel.vercel.app',
