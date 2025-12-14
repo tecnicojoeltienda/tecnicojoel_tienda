@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductoCard from "../../components/inventario/ProductoCard.jsx";
 
-const API = import.meta.env.VITE_API_BASE_URL 
-//|| "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL;
 
-export default function DashboardPage() {
+export default function ProductosPage() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,22 +61,22 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 sm:px-6 lg:px-8 py-6">
       <div className="max-w-7xl mx-auto">
         <header className="mb-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-3">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-3">
                 <span>Inventario</span>
                 <span className="inline-block ml-2 px-2 py-1 text-xs font-semibold rounded bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">Admin</span>
               </h1>
               <p className="mt-1 text-sm text-gray-600">Administra productos — crea, edita y filtra fácilmente.</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => cargarProductos()}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow hover:from-blue-700 hover:to-blue-800 transition"
+                className="w-full sm:w-auto inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow hover:from-blue-700 hover:to-blue-800 transition text-sm justify-center"
                 title="Actualizar lista"
               >
                 Actualizar
@@ -85,7 +84,7 @@ export default function DashboardPage() {
 
               <button
                 onClick={() => navigate("/inventario/productos/nuevo")}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-400 to-rose-500 text-white rounded-lg shadow hover:from-rose-500 hover:to-rose-600 transition"
+                className="w-full sm:w-auto inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-400 to-rose-500 text-white rounded-lg shadow hover:from-rose-500 hover:to-rose-600 transition text-sm justify-center"
                 title="Crear nuevo producto"
               >
                 + Crear producto
@@ -100,7 +99,7 @@ export default function DashboardPage() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Ej. Laptop Lenovo"
-                className="w-full border rounded-lg px-4 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full border rounded-lg px-4 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm"
               />
             </div>
 
@@ -109,7 +108,7 @@ export default function DashboardPage() {
               <select
                 value={categoriaId}
                 onChange={(e) => setCategoriaId(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full border rounded-lg px-3 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm"
               >
                 <option value="">Todas</option>
                 {categorias.map((c) => (
@@ -125,7 +124,7 @@ export default function DashboardPage() {
               <select
                 value={estado}
                 onChange={(e) => setEstado(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full border rounded-lg px-3 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm"
               >
                 <option value="">Todos</option>
                 <option value="disponible">Disponible</option>
@@ -135,8 +134,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex flex-row flex-wrap gap-3">
               <div className="px-3 py-2 bg-white rounded-lg border shadow-sm">
                 <div className="text-xs text-gray-500">Total</div>
                 <div className="text-lg font-semibold text-gray-900">{productos.length}</div>
@@ -163,7 +162,11 @@ export default function DashboardPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {productosFiltrados.map((p) => (
-                  <div key={p.id_producto || p.id} className="relative group">
+                  <div
+                    key={p.id_producto || p.id}
+                    className="relative group"
+                    role="group"
+                  >
                     <ProductoCard producto={p} onUpdated={cargarProductos} />
                     <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
