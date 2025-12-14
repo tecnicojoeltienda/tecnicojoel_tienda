@@ -52,7 +52,7 @@ function ProductosChart({ data = [] }) {
           const percentage = (producto.total_vendido / max) * 100;
           const barColor =
             idx === 0 ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-            idx === 1 ? 'bg-gradient-to-r from-indigo-500 to-indigo-600' :
+            idx === 1 ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
             idx === 2 ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
             idx === 3 ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
             idx === 4 ? 'bg-gradient-to-r from-rose-500 to-rose-600' :
@@ -138,7 +138,7 @@ function TopProductsList({ items = [] }) {
               idx === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
               idx === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-600' :
               idx === 2 ? 'bg-gradient-to-br from-orange-500 to-orange-700' :
-              'bg-gradient-to-br from-indigo-500 to-purple-600'
+              'bg-gradient-to-br from-blue-500 to-purple-600'
             }`}>
               {idx + 1}
             </div>
@@ -235,7 +235,7 @@ export default function DashboardPage() {
           <StatCard
             title="Total Movimientos"
             value={stats ? stats.total_movimientos.toLocaleString() : "—"}
-            accent="bg-gradient-to-br from-indigo-500 to-indigo-700"
+            accent="bg-gradient-to-br from-blue-500 to-blue-700"
             icon={<FiTrendingUp className="w-6 h-6 md:w-8 md:h-8" />}
           />
           <StatCard

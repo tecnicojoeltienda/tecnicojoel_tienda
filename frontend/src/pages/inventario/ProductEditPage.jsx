@@ -189,10 +189,10 @@ export default function ProductEditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FiPackage className="w-8 h-8 text-indigo-600 animate-pulse" />
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FiPackage className="w-8 h-8 text-blue-600 animate-pulse" />
           </div>
           <p className="text-lg text-gray-600">Cargando producto...</p>
         </div>
@@ -202,12 +202,12 @@ export default function ProductEditPage() {
 
   if (!form) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-lg">{error || "Producto no encontrado"}</div>
           <button
             onClick={() => navigate(-1)}
-            className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-lg"
+            className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg"
           >
             Volver
           </button>
@@ -235,24 +235,24 @@ export default function ProductEditPage() {
   const keysToRender = Object.keys(form).sort().filter(k => !excludeKeys.has(k));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 p-6 font-['Inter','system-ui',sans-serif]">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 font-['Inter','system-ui',sans-serif]">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-6">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                   <FiEdit3 className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-1">Editar Producto</h1>
-                  <p className="text-indigo-100 text-lg">ID: {id} • Modifica los campos necesarios</p>
+                  <p className="text-blue-100 text-lg">ID: {id} • Modifica los campos necesarios</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate(-1)}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-lg transition-all duration-300"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg transition-all duration-300"
                 >
                   <FiArrowLeft className="w-5 h-5" />
                   Volver
@@ -260,7 +260,7 @@ export default function ProductEditPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-2 bg-white text-indigo-700 font-semibold rounded-lg hover:bg-indigo-50 transition-all duration-300 disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-all duration-300 disabled:opacity-50"
                 >
                   <FiSave className="w-5 h-5" />
                   {saving ? "Guardando..." : "Guardar"}
@@ -311,7 +311,7 @@ export default function ProductEditPage() {
                               type="file"
                               accept="image/*"
                               onChange={handleImageChange}
-                              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700"
+                              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700"
                             />
                             <div className="mt-3 flex gap-3">
                               <button
@@ -346,7 +346,7 @@ export default function ProductEditPage() {
                                 value={rawValue}
                                 onChange={onChange}
                                 type="text"
-                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                                 placeholder="https://... o /uploads/archivo.jpg"
                               />
                             </div>
@@ -367,7 +367,7 @@ export default function ProductEditPage() {
                           name={key}
                           value={String(rawValue ?? "")}
                           onChange={onChange}
-                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                         >
                           <option value="">-- Seleccionar --</option>
                           <option value="no"> No</option>
@@ -391,7 +391,7 @@ export default function ProductEditPage() {
                           name={key}
                           value={String(rawValue ?? "")}
                           onChange={onChange}
-                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                         >
                           <option value="disponible"> Disponible</option>
                           <option value="no disponible"> No disponible</option>
@@ -420,7 +420,7 @@ export default function ProductEditPage() {
                           value={specValue}
                           onChange={onChange}
                           rows={8}
-                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                         />
                         <p className="mt-2 text-sm text-gray-600">
                           💡 Puede ser JSON o líneas 'Clave: Valor'. Ej: <code className="bg-gray-100 px-2 py-1 rounded">Tamaño: 24 pulgadas</code>
@@ -440,7 +440,7 @@ export default function ProductEditPage() {
                           value={rawValue}
                           onChange={onChange}
                           rows={key === "descripcion" ? 4 : 8}
-                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                         />
                         <p className="mt-2 text-sm text-gray-600">
                           {key === "caracteristicas" ? "💡 Una característica por línea" : "💡 Información detallada"}
@@ -461,7 +461,7 @@ export default function ProductEditPage() {
                           onChange={onChange}
                           type="number"
                           step={key === "precio_venta" ? "0.01" : "1"}
-                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                         />
                       </div>
                     );
@@ -477,7 +477,7 @@ export default function ProductEditPage() {
                           name={key}
                           value={String(rawValue)}
                           onChange={onChange}
-                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                         >
                           <option value="true"> true</option>
                           <option value="false"> false</option>
@@ -496,19 +496,19 @@ export default function ProductEditPage() {
                         value={rawValue}
                         onChange={onChange}
                         type="text"
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-300 transition-all duration-300"
+                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                       />
                     </div>
                   );
                 })}
               </div>
 
-              <div className="bg-indigo-50 rounded-xl p-6 border border-indigo-200">
+              <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
                 <div className="flex items-start gap-3">
-                  <div className="text-indigo-600 text-2xl">💡</div>
+                  <div className="text-blue-600 text-2xl">💡</div>
                   <div>
-                    <h3 className="text-lg font-bold text-indigo-900 mb-2">Consejos para editar</h3>
-                    <ul className="space-y-1 text-indigo-800">
+                    <h3 className="text-lg font-bold text-blue-900 mb-2">Consejos para editar</h3>
+                    <ul className="space-y-1 text-blue-800">
                       <li>• Revisa el nombre y precio antes de guardar</li>
                       <li>• Los campos grandes aceptan JSON o formato línea por línea</li>
                       <li>• Las características se separan automáticamente por líneas</li>
@@ -529,7 +529,7 @@ export default function ProductEditPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     "Guardando..."

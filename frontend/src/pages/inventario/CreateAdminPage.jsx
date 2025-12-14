@@ -70,7 +70,7 @@ export default function CreateAdmin() {
   return (
     <div className="min-h-screen bg-blue-50 flex items-start justify-center py-12">
       <div className="w-full max-w-2xl mx-6">
-        <div className="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-t-2xl p-8 text-center text-white shadow-lg">
+        <div className="bg-gradient-to-r from-blue-700 to-blue-600 rounded-t-2xl p-8 text-center text-white shadow-lg">
           <div className="flex items-center justify-center mb-4">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
               <FiUser className="w-7 h-7 text-white" />
@@ -178,7 +178,7 @@ export default function CreateAdmin() {
                   />
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center">
-                      <FiCheck className="text-indigo-600" />
+                      <FiCheck className="text-blue-600" />
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">Super admin.</div>
