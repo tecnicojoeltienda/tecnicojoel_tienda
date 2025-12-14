@@ -146,7 +146,7 @@ export default function ComputadorasPage() {
           key={p.id_producto || p.id || p.codigo}
           className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 rounded-xl hover:shadow-lg transition-all duration-200 bg-white"
         >
-          <div className="w-full sm:w-40 h-52 sm:h-40 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
+          <div className="w-full sm:w-40 h-52 sm:h-40 flex items-center justify-center bg-white-50 rounded-lg overflow-hidden flex-shrink-0">
             {imageUrl ? (
               <Link
                 to={detailPath}
