@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 
-const API = import.meta.env.VITE_API_BASE_URL 
+const API = import.meta.env.VITE_API_BASE_URL;
 //|| "http://localhost:4000";
 
 function formatDate(d) {
@@ -13,19 +13,19 @@ function formatMoney(v) {
   return `S/. ${Number(v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-/* Small reusable Modal component */
+
 function Modal({ open, onClose, title, children, footer }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
-      <div className="relative max-w-4xl w-full mx-4 bg-white rounded-xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-lg md:max-w-4xl mx-4 bg-white rounded-xl shadow-2xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
-          <h3 className="text-white font-bold text-lg">{title}</h3>
+          <h3 className="text-white font-bold text-lg truncate">{title}</h3>
           <button onClick={onClose} className="text-blue-100 hover:text-white text-xl font-bold">✕</button>
         </div>
-        <div className="p-6">{children}</div>
-        {footer && <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">{footer}</div>}
+        <div className="p-4 md:p-6">{children}</div>
+        {footer && <div className="px-4 md:px-6 py-4 bg-gray-50 flex flex-col sm:flex-row sm:justify-end gap-3">{footer}</div>}
       </div>
     </div>
   );
@@ -35,33 +35,33 @@ function Modal({ open, onClose, title, children, footer }) {
 function Pagination({ currentPage, totalPages, onPageChange }) {
   const pages = [];
   const maxVisiblePages = 5;
-  
+
   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
   let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-  
+
   if (endPage - startPage + 1 < maxVisiblePages) {
     startPage = Math.max(1, endPage - maxVisiblePages + 1);
   }
-  
+
   for (let i = startPage; i <= endPage; i++) {
     pages.push(i);
   }
 
   return (
-    <div className="flex items-center justify-center space-x-2 mt-8">
+    <div className="flex items-center justify-center space-x-2 mt-4 md:mt-8">
       <button
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Anterior
       </button>
-      
+
       {pages.map(page => (
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`px-4 py-2 text-sm font-medium rounded-lg ${
+          className={`px-3 py-2 text-sm font-medium rounded-lg ${
             page === currentPage
               ? "bg-blue-600 text-white border-blue-600"
               : "text-gray-700 bg-white border border-gray-300 hover:bg-blue-50"
@@ -70,11 +70,11 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
           {page}
         </button>
       ))}
-      
+
       <button
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Siguiente
       </button>
@@ -107,7 +107,7 @@ export default function PedidosPage() {
 
   const [q, setQ] = useState("");
   const [estadoFilter, setEstadoFilter] = useState("");
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -164,7 +164,7 @@ export default function PedidosPage() {
   }, [pedidos, q, estadoFilter]);
 
   // Pagination calculations
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filtered.slice(startIndex, endIndex);
@@ -215,7 +215,6 @@ export default function PedidosPage() {
   // Open change-state modal
   function openChangeModal(order) {
     setSelectedOrder(order);
-    // normalize to enum values
     const current = (order.estado || "pendiente").toString();
     setChangeStateValue(current);
     setChangeModalOpen(true);
@@ -243,7 +242,6 @@ export default function PedidosPage() {
         const json = await res.json().catch(() => ({}));
         throw new Error(json?.message || "Error actualizando estado");
       }
-      // optionally read response JSON if controller returns ventaId etc.
       await cargar();
       setChangeModalOpen(false);
     } catch (err) {
@@ -286,39 +284,104 @@ export default function PedidosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 font-['Inter','system-ui',sans-serif]">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-6 font-['Inter','system-ui',sans-serif]">
       <div className="max-w-7xl mx-auto">
-        <header className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Gestión de Pedidos</h1>
-            <p className="text-lg text-gray-600">Lista de pedidos con información del cliente y estado actual.</p>
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1 truncate">Gestión de Pedidos</h1>
+            <p className="text-sm md:text-lg text-gray-600">Lista de pedidos con información del cliente y estado actual.</p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={cargar} className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              {loading ? "Cargando..." : " Actualizar"}
+          <div className="w-full md:w-auto flex gap-3">
+            <button
+              onClick={cargar}
+              className="w-full md:w-auto px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm md:text-lg font-semibold rounded-xl shadow hover:shadow-xl transition-all duration-200"
+            >
+              {loading ? "Cargando..." : "Actualizar"}
             </button>
           </div>
         </header>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-6">
+        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-3">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder=" Buscar por ID, cliente, email o total..."
-              className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-lg mb-4 lg:mb-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              placeholder="Buscar por ID, cliente, email o total..."
+              className="w-full md:flex-1 border-2 border-gray-200 rounded-xl px-3 md:px-4 py-2 md:py-3 text-sm md:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
             />
-            <select value={estadoFilter} onChange={(e) => setEstadoFilter(e.target.value)} className="border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-48">
+            <select
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="w-full md:w-64 border-2 border-gray-200 rounded-xl px-3 py-2 text-sm md:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
               <option value="">Todos los estados</option>
               {estados.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
         </div>
 
-        {error && <div className="mb-6 p-4 text-lg text-red-700 bg-red-50 border border-red-200 rounded-xl">{error}</div>}
+        {error && <div className="mb-6 p-4 text-sm md:text-lg text-red-700 bg-red-50 border border-red-200 rounded-xl">{error}</div>}
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        {/* MOBILE: cards list */}
+        <div className="space-y-3 md:hidden">
+          {loading && <div className="text-center py-8 text-gray-500">Cargando pedidos...</div>}
+          {!loading && currentItems.length === 0 && <div className="text-center py-8 text-gray-500">No se encontraron pedidos</div>}
+
+          {!loading && currentItems.map((p) => (
+            <div key={p.id_pedido || p.id} className="bg-white rounded-2xl shadow p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-bold text-gray-900">#{p.id_pedido ?? p.id}</div>
+                    <div className="text-xs text-gray-500">{formatDate(p.fecha_pedido || p.created_at || p.fecha)}</div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="font-semibold text-base text-gray-900 truncate">{p.cliente_nombre || "Cliente anónimo"}</div>
+                    <div className="text-sm text-gray-500">{p.cliente_email || p.cliente_telefono || ""}</div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-2">
+                  <div className="text-base font-bold text-green-600">{formatMoney(p.total_calc ?? p.total)}</div>
+                  <div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      String(p.estado).includes("en") || String(p.estado).includes("pendiente") ? "bg-yellow-100 text-yellow-800 border border-yellow-300" :
+                      String(p.estado).includes("complet") || String(p.estado).includes("entregado") ? "bg-green-100 text-green-800 border border-green-300" :
+                      "bg-red-100 text-red-800 border border-red-300"
+                    }`}>
+                      {p.estado || "pendiente"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 flex gap-2">
+                <button onClick={() => openDetailModal(p)} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow text-sm">
+                  <FiEye /> Ver
+                </button>
+                <button onClick={() => openChangeModal(p)} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg shadow text-sm">
+                  <FiEdit /> Estado
+                </button>
+                <button onClick={() => openDeleteModal(p)} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow text-sm">
+                  <FiTrash2 /> Eliminar
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {filtered.length > 0 && (
+            <div className="pt-3">
+              <div className="text-sm text-gray-600 text-center mb-2">
+                Mostrando {startIndex + 1} - {Math.min(endIndex, filtered.length)} de {filtered.length}
+              </div>
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            </div>
+          )}
+        </div>
+
+        {/* DESKTOP: table */}
+        <div className="hidden md:block bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1200px]">
               <thead className="bg-gradient-to-r from-gray-800 to-gray-900">
@@ -342,7 +405,7 @@ export default function PedidosPage() {
                 )}
 
                 {currentItems.map((p, index) => (
-                  <tr key={p.id_pedido || p.id} className={`hover:bg-blue-25 transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-25' : 'bg-white'}`}>
+                  <tr key={p.id_pedido || p.id} className={`transition-all duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                     <td className="px-6 py-5 text-lg font-bold text-gray-900">#{p.id_pedido ?? p.id}</td>
                     <td className="px-6 py-5 text-base text-gray-700">{formatDate(p.fecha_pedido || p.created_at || p.fecha)}</td>
                     <td className="px-6 py-5">
@@ -362,13 +425,13 @@ export default function PedidosPage() {
                     </td>
                     <td className="px-6 py-5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openChangeModal(p)} title="Cambiar estado" aria-label="Cambiar estado" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <button onClick={() => openChangeModal(p)} title="Cambiar estado" aria-label="Cambiar estado" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-md hover:shadow-lg transition-all duration-200">
                           <FiEdit className="w-5 h-5" />
                         </button>
-                        <button onClick={() => openDeleteModal(p)} title="Eliminar pedido" aria-label="Eliminar pedido" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <button onClick={() => openDeleteModal(p)} title="Eliminar pedido" aria-label="Eliminar pedido" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
                           <FiTrash2 className="w-5 h-5" />
                         </button>
-                        <button onClick={() => openDetailModal(p)} title="Ver detalles" aria-label="Ver detalles" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <button onClick={() => openDetailModal(p)} title="Ver detalles" aria-label="Ver detalles" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
                           <FiEye className="w-5 h-5" />
                         </button>
                       </div>
@@ -378,14 +441,14 @@ export default function PedidosPage() {
               </tbody>
             </table>
           </div>
-          
+
           {filtered.length > 0 && (
             <div className="px-6 py-4 bg-gray-50 border-t">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div className="text-lg text-gray-600">
                   Mostrando <span className="font-bold text-blue-600">{startIndex + 1}</span> a <span className="font-bold text-blue-600">{Math.min(endIndex, filtered.length)}</span> de <span className="font-bold text-blue-600">{filtered.length}</span> pedidos
                 </div>
-                <Pagination 
+                <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={setCurrentPage}
@@ -401,12 +464,12 @@ export default function PedidosPage() {
         open={detailModalOpen}
         onClose={() => { setDetailModalOpen(false); setOrderDetails([]); setSelectedOrder(null); }}
         title={`📋 Detalle del Pedido #${selectedOrder?.id_pedido ?? selectedOrder?.id ?? ""}`}
-        footer={<button onClick={() => { setDetailModalOpen(false); setOrderDetails([]); setSelectedOrder(null); }} className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">Cerrar</button>}
+        footer={<button onClick={() => { setDetailModalOpen(false); setOrderDetails([]); setSelectedOrder(null); }} className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg shadow-md">Cerrar</button>}
       >
-        <div className="space-y-6">
+        <div className="space-y-4">
           {selectedOrder && (
-            <div className="text-base text-gray-700 bg-gray-50 p-4 rounded-lg">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="text-base text-gray-700 bg-gray-50 p-3 md:p-4 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div><strong className="text-blue-600">Cliente:</strong> {selectedOrder.cliente_nombre || "Cliente anónimo"}</div>
                 <div><strong className="text-blue-600">Contacto:</strong> {selectedOrder.cliente_email || selectedOrder.cliente_telefono || "-"}</div>
                 <div><strong className="text-blue-600">Fecha:</strong> {formatDate(selectedOrder.fecha_pedido)}</div>
@@ -415,31 +478,30 @@ export default function PedidosPage() {
             </div>
           )}
 
-          <div className="border-t pt-4">
-            <h4 className="text-xl font-bold mb-4 text-gray-800">Artículos del Pedido</h4>
+          <div>
+            <h4 className="text-lg md:text-xl font-bold mb-3 text-gray-800">Artículos del Pedido</h4>
             {orderDetails.length === 0 ? (
-              <div className="text-base text-gray-500 text-center py-8">No hay artículos (o cargando)...</div>
+              <div className="text-base text-gray-500 text-center py-6">No hay artículos (o cargando)...</div>
             ) : (
               <div className="space-y-3">
                 {orderDetails.map(d => (
-                  <div key={d.id_detalle_pedido || `${d.id_producto}-${d.cantidad}`} className="flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div key={d.id_detalle_pedido || `${d.id_producto}-${d.cantidad}`} className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
                     <div>
-                      <div className="font-semibold text-lg text-gray-900">{d.nombre_producto ?? `Producto #${d.id_producto}` ?? "Producto"}</div>
-                      <div className="text-base text-blue-600 font-medium">Cantidad: {d.cantidad}</div>
+                      <div className="font-semibold text-base text-gray-900">{d.nombre_producto ?? `Producto #${d.id_producto}` ?? "Producto"}</div>
+                      <div className="text-sm text-blue-600 font-medium">Cantidad: {d.cantidad}</div>
                     </div>
-                    <div className="text-lg font-bold text-green-600">{formatMoney(d.subtotal ?? (d.cantidad * (d.precio_unitario ?? 0)))}</div>
+                    <div className="text-base md:text-lg font-bold text-green-600">{formatMoney(d.subtotal ?? (d.cantidad * (d.precio_unitario ?? 0)))}</div>
                   </div>
                 ))}
                 <div className="flex justify-end pt-4 border-t">
-                  <div className="text-xl font-bold text-gray-900">Total: <span className="text-green-600">{formatMoney(selectedOrder?.total_calc ?? selectedOrder?.total)}</span></div>
+                  <div className="text-lg md:text-xl font-bold text-gray-900">Total: <span className="text-green-600">{formatMoney(selectedOrder?.total_calc ?? selectedOrder?.total)}</span></div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Mostrar código de descuento si existe */}
           {selectedOrder?.codigo_descuento && (
-            <div className="col-span-2 border-t pt-3 mt-2">
+            <div className="border-t pt-3 mt-2">
               <div className="flex items-center gap-2 bg-green-50 p-3 rounded-lg border border-green-200">
                 <span className="text-2xl">🎁</span>
                 <div className="flex-1">
@@ -466,18 +528,18 @@ export default function PedidosPage() {
         title={`Cambiar Estado - Pedido #${selectedOrder?.id_pedido ?? selectedOrder?.id ?? ""}`}
         footer={
           <>
-            <button onClick={() => { setChangeModalOpen(false); setSelectedOrder(null); }} className="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-300">Cancelar</button>
-            <button onClick={submitChangeState} className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"> Guardar</button>
+            <button onClick={() => { setChangeModalOpen(false); setSelectedOrder(null); }} className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-200">Cancelar</button>
+            <button onClick={submitChangeState} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg shadow-md">Guardar</button>
           </>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="text-base text-gray-700">Selecciona el nuevo estado para este pedido:</div>
-          <select value={changeStateValue} onChange={(e) => setChangeStateValue(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="pendiente"> Pendiente</option>
+          <select value={changeStateValue} onChange={(e) => setChangeStateValue(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="pendiente">Pendiente</option>
             <option value="enviado">Enviado</option>
-            <option value="cancelado"> Cancelado</option>
-            <option value="completado"> Completado</option>
+            <option value="cancelado">Cancelado</option>
+            <option value="completado">Completado</option>
           </select>
           <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-lg">
             💡 <strong>Tip:</strong> Al marcar como "completado" se creará automáticamente una venta y se ajustará el inventario.
@@ -489,15 +551,15 @@ export default function PedidosPage() {
       <Modal
         open={deleteModalOpen}
         onClose={() => { setDeleteModalOpen(false); setSelectedOrder(null); }}
-        title={` Eliminar Pedido #${selectedOrder?.id_pedido ?? selectedOrder?.id ?? ""}`}
+        title={`Eliminar Pedido #${selectedOrder?.id_pedido ?? selectedOrder?.id ?? ""}`}
         footer={
           <>
-            <button onClick={() => { setDeleteModalOpen(false); setSelectedOrder(null); }} className="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-300">Cancelar</button>
-            <button onClick={confirmDelete} className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"> Eliminar</button>
+            <button onClick={() => { setDeleteModalOpen(false); setSelectedOrder(null); }} className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-200">Cancelar</button>
+            <button onClick={confirmDelete} className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg shadow-md">Eliminar</button>
           </>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="text-base text-gray-700">¿Estás seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.</div>
           <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
             ⚠️ <strong>Advertencia:</strong> Pedido #{selectedOrder?.id_pedido ?? selectedOrder?.id} será eliminado permanentemente.
