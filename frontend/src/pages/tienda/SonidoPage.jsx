@@ -10,7 +10,6 @@ export default function SonidoPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // add cart
   const { addToCart } = useCart();
 
   const [filters, setFilters] = useState({
@@ -107,11 +106,22 @@ export default function SonidoPage() {
 
     if (filters.view === "list") {
       return (
-        <article key={p.id_producto || p.id || p.codigo} className="flex items-center gap-6 p-6 rounded-xl hover:shadow-lg transition-all duration-200 bg-white">
-          <div className="w-69 h-66 flex items-center justify-center bg-white-50 rounded-lg overflow-hidden flex-shrink-0">
+        <article
+          key={p.id_producto || p.id || p.codigo}
+          className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 rounded-xl hover:shadow-lg transition-all duration-200 bg-white"
+        >
+          <div className="w-full sm:w-40 h-52 sm:h-40 flex items-center justify-center bg-white-50 rounded-lg overflow-hidden flex-shrink-0">
             {imageUrl ? (
-              <Link to={detailPath} className="block w-full h-full flex items-center justify-center" title={p.nombre_producto}>
-                <img src={imageUrl} alt={p.nombre_producto} className="max-w-full max-h-full object-contain" />
+              <Link
+                to={detailPath}
+                className="block w-full h-full flex items-center justify-center"
+                title={p.nombre_producto}
+              >
+                <img
+                  src={imageUrl}
+                  alt={p.nombre_producto}
+                  className="max-w-full max-h-full object-contain p-2"
+                />
               </Link>
             ) : (
               <div className="text-xs text-gray-400">Sin imagen</div>
@@ -119,29 +129,46 @@ export default function SonidoPage() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-xm font-semibold text-gray-900 mb-1">
-              <Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
+              <Link to={detailPath} className="hover:underline">
+                {p.nombre_producto}
+              </Link>
             </h2>
-            <p className="text-xs text-gray-600 mb-2 line-clamp-3">{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
-            <div className="flex items-center gap-2">
+
+            <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+              {p.descripcion || p.resumen || "Sin descripción disponible"}
+            </p>
+
+            <div className="flex items-center gap-2 mb-3">
               <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">En stock</span>
             </div>
-          </div>
 
-          <div className="flex flex-col items-end justify-center">
-            <div className="text-base font-semibold mb-1 text-black">S/. {Number(p.precio_venta || 0).toFixed(2)}</div>
-            <div className="text-xs text-gray-500 line-through">S/. {(Number(p.precio_venta || 0) * 1.2).toFixed(2)}</div>
-            <div className="mt-3 flex gap-2">
-              <Link to={detailPath} onClick={(e) => e.stopPropagation()} className="px-3 py-2 bg-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-300 transition-colors">
-                Ver detalles
-              </Link>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p); }}
-                className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                aria-label={`Añadir ${p.nombre_producto} al carrito`}
-              >
-                Añadir
-              </button>
+            <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="text-base sm:text-lg font-semibold text-gray-900">
+                S/. {Number(p.precio_venta || 0).toFixed(2)}
+              </div>
+
+              <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
+                <Link
+                  to={detailPath}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 sm:inline-block px-3 py-2 bg-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-300 text-center"
+                >
+                  Ver detalles
+                </Link>
+
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addToCart(p);
+                  }}
+                  className="flex-1 sm:inline-block px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  aria-label={`Añadir ${p.nombre_producto} al carrito`}
+                >
+                  Añadir
+                </button>
+              </div>
             </div>
           </div>
         </article>
