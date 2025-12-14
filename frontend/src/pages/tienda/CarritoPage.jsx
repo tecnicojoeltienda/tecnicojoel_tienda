@@ -422,7 +422,7 @@ export default function CarritoPage() {
 
       <main className="w-full mx-0 px-6 sm:px-8 lg:px-12 py-12">
         <div className="max-w-screen-2xl mx-auto">
-          {/* Header mejorado */}
+          
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
               <FiShoppingCart className="w-10 h-10 text-blue-600" />
@@ -434,7 +434,7 @@ export default function CarritoPage() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left: lista de items mejorada */}
+         
             <section className="flex-1 order-2 lg:order-1">
               <div className="space-y-4">
                 {items.length === 0 ? (
@@ -461,10 +461,10 @@ export default function CarritoPage() {
                     return (
                       <div
                         key={it.id_producto ?? it.id ?? it._id}
-                        className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow"
+                        className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 hover:shadow-md transition-shadow"
                       >
-                        <div className="flex items-start gap-6">
-                          <div className="w-32 h-32 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                          <div className="w-full sm:w-32 h-40 sm:h-32 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 relative">
                             {enPromo && (
                               <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
                                 OFERTA
@@ -474,7 +474,7 @@ export default function CarritoPage() {
                               <img
                                 src={resolveImageUrl(it.imagen_url)}
                                 alt={it.nombre_producto}
-                                className="max-h-full max-w-full object-contain"
+                                className="max-h-full max-w-full object-contain p-2"
                               />
                             ) : (
                               <div className="text-center">
@@ -485,9 +485,9 @@ export default function CarritoPage() {
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-4 mb-4">
+                            <div className="flex items-start justify-between gap-4 mb-3">
                               <div className="flex-1">
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
                                   {it.nombre_producto ?? it.nombre ?? it.title}
                                 </h3>
                                 {(it.descripcion || it.resumen) && (
@@ -499,30 +499,31 @@ export default function CarritoPage() {
 
                               <button
                                 onClick={() => removeItem(it)}
-                                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                                 title="Eliminar producto"
+                                aria-label="Eliminar producto"
                               >
-                                <FiTrash2 className="w-5 h-5" />
+                                <FiTrash2 className="w-4 h-4" />
                               </button>
                             </div>
 
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                              <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => decrease(it)}
-                                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                                  className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                                   aria-label="Disminuir cantidad"
                                 >
                                   <FiMinus className="w-4 h-4" />
                                 </button>
 
-                                <div className="w-16 h-10 flex items-center justify-center bg-gray-50 rounded-xl font-semibold text-gray-900">
+                                <div className="w-12 h-9 flex items-center justify-center bg-gray-50 rounded-lg font-semibold text-gray-900">
                                   {qty}
                                 </div>
 
                                 <button
                                   onClick={() => increase(it)}
-                                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                                  className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                                   aria-label="Aumentar cantidad"
                                 >
                                   <FiPlus className="w-4 h-4" />
@@ -530,12 +531,8 @@ export default function CarritoPage() {
                               </div>
 
                               <div className="text-right">
-                                <div className="text-sm text-gray-500 mb-1">
-                                  S/. {precio.toFixed(2)} c/u
-                                </div>
-                                <div className="text-xl font-bold text-gray-900">
-                                  S/. {subtotal.toFixed(2)}
-                                </div>
+                                <div className="text-sm text-gray-500 mb-1">S/. {precio.toFixed(2)} c/u</div>
+                                <div className="text-lg sm:text-xl font-bold text-gray-900">S/. {subtotal.toFixed(2)}</div>
                               </div>
                             </div>
                           </div>
@@ -548,9 +545,9 @@ export default function CarritoPage() {
             </section>
 
             {/* Right: resumen mejorado */}
-            <aside className="order-1 lg:order-2 w-full lg:w-96 self-start">
-              <div className="sticky top-6">
-                <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+            <aside className="order-2 lg:order-2 w-full lg:w-96 self-start">
+              <div className="lg:sticky lg:top-6">
+                <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100">
                   <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                     <FiTag className="w-5 h-5 text-blue-600" />
                     Resumen del pedido
