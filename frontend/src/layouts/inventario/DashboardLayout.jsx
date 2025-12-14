@@ -238,214 +238,198 @@ export default function DashboardLayout() {
       return labelMatch || subMatch;
     });
 
-  // Extract sidebar content so we can reuse for desktop and mobile slide-over
-  const SidebarContent = () => (
-    <>
-      {/* Header */}
-      <div className="px-4 py-4 flex items-center justify-between border-b border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <img 
-              src="/assets/logo.png" 
-              alt="Logo Tecnico Joel" 
-              className="hidden md:block w-20 h-20 object-contain rounded-lg bg-white/10 p-2"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                const next = e.target.nextElementSibling;
-                if (next) next.style.display = 'flex';
-              }}
-            />
-            <div className="flex items-center">
-              <button 
-                onClick={() => navigate('/inventario/dashboard')} 
-                className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center shadow-lg text-white font-bold md:hidden"
-                title="Inicio"
-              >
-                TJ
-              </button>
-            </div>
-          </div>
-          <div className="ml-2">
-            <div className="text-sm md:text-lg font-bold text-white">Tecnico Joel</div>
-            <div className="text-xs text-gray-400">Panel Administrativo</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button title="Expandir" onClick={() => setIsExpanded(e => !e)} className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <path d={isExpanded ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Search */}
-      {isExpanded && (
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-3 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
-            <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
-              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
-            <input
-              value={searchMenu}
-              onChange={(e) => setSearchMenu(e.target.value)}
-              placeholder="Buscar menú..."
-              className="bg-transparent w-full text-sm text-white placeholder-gray-400 focus:outline-none"
-            />
-          </div>
-        </div>
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+      {/* overlay for mobile */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Navigation */}
-      <nav className="px-3 py-4 overflow-auto space-y-2 max-h-[60vh]">
-        {filteredMenu.map(item => {
-          if (item.type === 'link') {
-            return (
-              <NavLink
-                key={item.key}
-                to={item.to}
-                onClick={() => { setSidebarOpen(false); }}
-                className={({ isActive }) =>
-                  `group flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/20' 
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }`
-                }
+      <aside className={`fixed z-40 left-0 top-0 h-full bg-gray-900 shadow-2xl border-r border-gray-800 transition-all duration-300 flex flex-col ${isExpanded ? 'w-72' : 'w-20'}`}>
+        {/* Header */}
+        <div className="px-4 py-6 flex items-center justify-between border-b border-gray-800">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <img 
+                src="/assets/logo.png" 
+                alt="Logo Tecnico Joel" 
+                className="w-24 h-24 object-contain rounded-lg bg-white/10 p-2"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
+              />
+              <button 
+                onClick={() => navigate('/inventario/dashboard')} 
+                className="w-14 h-14 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center shadow-lg hidden"
               >
-                <div className="flex items-center justify-center">
-                  {item.icon}
-                </div>
-                {isExpanded && <span className="text-sm font-medium">{item.label}</span>}
-                {!isExpanded && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {item.label}
-                  </div>
-                )}
-              </NavLink>
-            );
-          }
+                <span className="text-white font-bold text-lg">TJ</span>
+              </button>
+            </div>
+            {isExpanded && (
+              <div>
+                <div className="text-lg font-bold text-white">Tecnico Joel</div>
+                <div className="text-xs text-gray-400">Panel Administrativo</div>
+              </div>
+            )}
+          </div>
 
-          if (item.type === 'expandable') {
-            const isAnySubActive = item.subItems?.some(subItem => location.pathname === subItem.to);
-            const shouldExpand = item.expanded || isAnySubActive;
+          <div className="flex items-center gap-2">
+            <button title="Expandir" onClick={() => setIsExpanded(e => !e)} className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <path d={isExpanded ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-            return (
-              <div key={item.key} className="space-y-1">
-                <button
-                  onClick={() => toggleSubmenu(item.key)}
-                  className={`w-full group flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
-                    isAnySubActive 
-                      ? 'bg-blue-900/30 text-blue-400 border border-blue-800' 
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }`}
+        {/* Search */}
+        {isExpanded && (
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-3 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+              <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
+                <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
+              </svg>
+              <input
+                value={searchMenu}
+                onChange={(e) => setSearchMenu(e.target.value)}
+                placeholder="Buscar menú..."
+                className="bg-transparent w-full text-sm text-white placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 px-3 py-4 overflow-auto space-y-2">
+          {filteredMenu.map(item => {
+            if (item.type === 'link') {
+              return (
+                <NavLink
+                  key={item.key}
+                  to={item.to}
+                  onClick={() => setSidebarOpen(false)}
+                  className={({ isActive }) =>
+                    `group flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/20' 
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }`
+                  }
                 >
                   <div className="flex items-center justify-center">
                     {item.icon}
                   </div>
-                  {isExpanded && (
-                    <>
-                      <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
-                      <div className={`transform transition-transform duration-200 ${shouldExpand ? 'rotate-180' : ''}`}>
-                        {Icon.ChevronDown}
-                      </div>
-                    </>
-                  )}
+                  {isExpanded && <span className="text-sm font-medium">{item.label}</span>}
                   {!isExpanded && (
                     <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                       {item.label}
                     </div>
                   )}
-                </button>
+                </NavLink>
+              );
+            }
 
-                {isExpanded && (
-                  <div className={`overflow-hidden transition-all duration-300 ${shouldExpand ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="ml-6 space-y-1 border-l border-gray-700 pl-4">
-                      {item.subItems?.map(subItem => (
-                        <NavLink
-                          key={subItem.to}
-                          to={subItem.to}
-                          onClick={() => setSidebarOpen(false)}
-                          className={({ isActive }) =>
-                            `group flex items-center gap-3 p-2 rounded-md transition-all duration-200 ${
-                              isActive 
-                                ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-md' 
-                                : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
-                            }`
-                          }
-                        >
-                          <div className="flex items-center justify-center">
-                            {subItem.icon}
-                          </div>
-                          <span className="text-xs font-medium">{subItem.label}</span>
-                        </NavLink>
-                      ))}
+            if (item.type === 'expandable') {
+              const isAnySubActive = item.subItems?.some(subItem => location.pathname === subItem.to);
+              const shouldExpand = item.expanded || isAnySubActive;
+
+              return (
+                <div key={item.key} className="space-y-1">
+                  {/* Parent menu item */}
+                  <button
+                    onClick={() => toggleSubmenu(item.key)}
+                    className={`w-full group flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
+                      isAnySubActive 
+                        ? 'bg-blue-900/30 text-blue-400 border border-blue-800' 
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center">
+                      {item.icon}
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          }
+                    {isExpanded && (
+                      <>
+                        <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
+                        <div className={`transform transition-transform duration-200 ${shouldExpand ? 'rotate-180' : ''}`}>
+                          {Icon.ChevronDown}
+                        </div>
+                      </>
+                    )}
+                    {!isExpanded && (
+                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        {item.label}
+                      </div>
+                    )}
+                  </button>
 
-          return null;
-        })}
-      </nav>
+                  {/* Submenu items */}
+                  {isExpanded && (
+                    <div className={`overflow-hidden transition-all duration-300 ${shouldExpand ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                      <div className="ml-6 space-y-1 border-l border-gray-700 pl-4">
+                        {item.subItems?.map(subItem => (
+                          <NavLink
+                            key={subItem.to}
+                            to={subItem.to}
+                            onClick={() => setSidebarOpen(false)}
+                            className={({ isActive }) =>
+                              `group flex items-center gap-3 p-2 rounded-md transition-all duration-200 ${
+                                isActive 
+                                  ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-md' 
+                                  : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                              }`
+                            }
+                          >
+                            <div className="flex items-center justify-center">
+                              {subItem.icon}
+                            </div>
+                            <span className="text-xs font-medium">{subItem.label}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            }
 
-      {/* Footer / user actions inside sidebar for mobile */}
-      <div className="px-4 py-4 border-t border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg">
-            {initials}
-          </div>
-          {isExpanded && (
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-white">{displayName}</div>
-              <div className="text-xs text-blue-400">{roleLabel}</div>
+            return null;
+          })}
+        </nav>
+
+        {/* User section */}
+        <div className="px-4 py-4 border-t border-gray-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg">
+              {initials}
             </div>
-          )}
-          <div className="flex items-center gap-2">
-            <button onClick={() => toggleTheme()} title="Tema" className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
-              <span className="text-sm">{isDark ? '🌙' : '☀️'}</span>
-            </button>
-            <button onClick={() => setIsLogoutModalOpen(true)} title="Cerrar sesión" className="p-2 rounded-lg hover:bg-red-800 text-red-400 hover:text-red-300 transition-colors">
-              {Icon.Logout}
-            </button>
+            {isExpanded && (
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-white">{displayName}</div>
+                <div className="text-xs text-blue-400">{roleLabel}</div>
+              </div>
+            )}
+            {isExpanded && (
+              <div className="flex items-center gap-1">
+                <button onClick={() => toggleTheme()} title="Tema" className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+                  <span className="text-sm">{isDark ? '🌙' : '☀️'}</span>
+                </button>
+                <button onClick={() => openLogoutModal()} title="Cerrar sesión" className="p-2 rounded-lg hover:bg-red-800 text-red-400 hover:text-red-300 transition-colors">
+                  {Icon.Logout}
+                </button>
+              </div>
+            )}
           </div>
         </div>
-      </div>
-    </>
-  );
-
-  return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
-      {/* overlay for mobile when slide-over open */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* Desktop sidebar (persistent) */}
-      <aside className={`hidden md:flex fixed z-40 left-0 top-0 h-full bg-gray-900 shadow-2xl border-r border-gray-800 transition-all duration-300 flex-col ${isExpanded ? 'w-72' : 'w-20'}`}>
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile slide-over sidebar */}
-      <aside className={`fixed z-40 left-0 top-0 h-full bg-gray-900 shadow-2xl border-r border-gray-800 transition-transform duration-300 md:hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} w-72`}>
-        <div className="p-3 flex items-center justify-between">
-          <div className="text-white font-semibold">Menú</div>
-          <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-md bg-gray-800/60 text-white">
-            ✕
-          </button>
-        </div>
-        <SidebarContent />
       </aside>
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isExpanded ? 'md:ml-72' : 'md:ml-20'} ml-0`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isExpanded ? 'ml-72' : 'ml-20'}`}>
         {/* Top Header */}
-        <header className="sticky top-0 z-20 bg-white shadow-lg border-b border-gray-200 px-4 py-3 md:px-6 md:py-5">
+        <header className="sticky top-0 z-20 bg-white shadow-lg border-b border-gray-200 px-6 py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <button className="md:hidden p-2 rounded-lg bg-gray-100 shadow-sm hover:bg-gray-200" onClick={() => setSidebarOpen(s => !s)}>
                 <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none">
                   <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
@@ -453,24 +437,24 @@ export default function DashboardLayout() {
               </button>
 
               <div>
-                <h2 className="text-lg md:text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-gray-900">
                   Hola, {displayName.split(' ')[0] ?? 'Usuario'}
                 </h2>
-                <div className="text-sm md:text-base text-gray-600 mt-1">
+                <div className="text-base text-gray-600 mt-1">
                   Bienvenido al panel administrativo
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               {/* Notifications */}
               <div className="relative">
-                <button onClick={toggleNotifications} className="relative p-2 md:p-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                <button onClick={toggleNotifications} className="relative p-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
                   <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none">
                     <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v0.68C7.64 5.36 6 7.93 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h11z" stroke="currentColor" strokeWidth="1.4"/>
                   </svg>
                   {unseenCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] md:text-xs px-2 py-1 rounded-full min-w-[1.1rem] text-center font-semibold">
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs px-2 py-1 rounded-full min-w-[1.25rem] text-center font-semibold">
                       {unseenCount > 99 ? '99+' : unseenCount}
                     </span>
                   )}
@@ -478,7 +462,7 @@ export default function DashboardLayout() {
               </div>
 
               {/* User info */}
-              <div className="hidden md:flex items-center gap-4 bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl shadow-sm">
+              <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl shadow-sm">
                 <div className="text-right">
                   <div className="text-base font-semibold text-gray-900">{displayName}</div>
                   <div className="text-sm text-blue-600 font-medium">{roleLabel}</div>
@@ -491,17 +475,17 @@ export default function DashboardLayout() {
               {/* Logout Button */}
               <button 
                 onClick={openLogoutModal}
-                className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm font-medium"
+                className="flex items-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm font-medium"
               >
                 {Icon.Logout}
-                <span className="text-sm hidden md:inline">Cerrar sesión</span>
+                <span className="text-sm">Cerrar sesión</span>
               </button>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-gray-50 p-4 md:p-6">
+        <main className="flex-1 overflow-auto bg-gray-50 p-6">
           <Outlet />
         </main>
       </div>
@@ -510,7 +494,7 @@ export default function DashboardLayout() {
       {isLogoutModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={closeLogoutModal} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 border border-gray-200">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 border border-gray-200">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-red-600" viewBox="0 0 24 24" fill="none">
@@ -518,14 +502,14 @@ export default function DashboardLayout() {
                   <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">¿Cerrar sesión?</h3>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">¿Cerrar sesión?</h3>
               <p className="text-sm text-gray-600">Al cerrar sesión saldrás del panel administrativo.</p>
             </div>
             <div className="flex justify-center gap-4">
-              <button onClick={closeLogoutModal} disabled={loggingOut} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium">
+              <button onClick={closeLogoutModal} disabled={loggingOut} className="px-6 py-3 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium">
                 Cancelar
               </button>
-              <button onClick={handleConfirmLogout} disabled={loggingOut} className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors font-medium">
+              <button onClick={handleConfirmLogout} disabled={loggingOut} className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors font-medium">
                 {loggingOut ? 'Cerrando...' : 'Cerrar sesión'}
               </button>
             </div>
@@ -535,8 +519,8 @@ export default function DashboardLayout() {
 
       {/* Notifications Panel */}
       {showNotifications && (
-        <div className="fixed right-3 top-20 z-50 md:right-6 w-[92%] md:w-96 max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+        <div className="fixed right-6 top-24 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold text-gray-900">Alertas de stock bajo</h4>
               <button 
@@ -567,7 +551,7 @@ export default function DashboardLayout() {
                   const name = p.nombre || p.nombre_producto || 'Sin nombre';
                   const seen = acknowledgedRef.current.has(String(id));
                   return (
-                    <div key={String(id)} className="flex items-start gap-4 p-3 rounded-xl bg-red-50 border border-red-200 hover:bg-red-100 transition-colors">
+                    <div key={String(id)} className="flex items-start gap-4 p-4 rounded-xl bg-red-50 border border-red-200 hover:bg-red-100 transition-colors">
                       <div className="flex-1">
                         <div className="font-medium text-gray-900 text-sm">{name}</div>
                         <div className="text-xs text-gray-600 mt-1">
