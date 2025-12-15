@@ -41,6 +41,8 @@ async function saveBase64Image(dataUrl) {
 export async function crear(req, res) {
   try {
     const data = { ...req.body };
+    
+    console.log("📦 Datos recibidos:", JSON.stringify(data, null, 2)); // <-- AGREGAR
 
     if (req.file && req.file.filename) {
       data.imagen_url = `/uploads/${req.file.filename}`;
@@ -49,16 +51,15 @@ export async function crear(req, res) {
         data.imagen_url = await saveBase64Image(data.imagen_url);
       } catch (err) {
         console.error("Error saving base64 image:", err.message);
-        return res.status(400).json({ error: "Imagen en formato base64 inválida" });
+        return res.status(400).json({ error: "Imagen en formato base64 inválida", detalle: err.message }); // <-- MÁS DETALLE
       }
     }
 
-    // No parsear JSON: aceptar string/array/objeto y dejar que el modelo lo convierta a texto plano
     const id = await model.crearProducto(data);
     res.status(201).json({ ok: true, id });
   } catch (e) {
-    console.error("ERROR crear producto:", e && (e.stack || e.message || e));
-    res.status(500).json({ error: "Error al crear producto" });
+    console.error("ERROR crear producto COMPLETO:", e.stack || e.message || e); // <-- MÁS DETALLE
+    res.status(500).json({ error: "Error al crear producto", detalle: e.message }); // <-- DEVOLVER MENSAJE
   }
 }
 
