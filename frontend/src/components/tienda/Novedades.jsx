@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { resolveImageUrl } from "../../service/api";
-import { FiChevronLeft, FiChevronRight, FiShoppingCart, FiPackage, FiStar, FiHeart } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiShoppingCart, FiPackage,FiBox, FiStar, FiHeart } from "react-icons/fi";
 import { useCart } from "../../context/CartContext";
 
 const CATEGORY_KEYS = {
@@ -232,13 +232,13 @@ export default function Novedades() {
           }}
         >
           <div className="p-6 md:p-8 lg:p-10">
-            {/* Header con título (alineado a la izquierda) y filtros de categoría */}
+          
             <div className="mb-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
-                {/* Título alineado a la izquierda */}
+               
                 <div>
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                    <FiPackage className="w-8 h-8 text-blue-600" />
+                    <FiBox className="w-8 h-8 text-blue-600" />
                     Productos Populares
                   </h2>
                   <p className="text-gray-600 text-sm md:text-base">Descubre los productos más destacados y mejor valorados</p>
@@ -301,7 +301,7 @@ export default function Novedades() {
                 {products.length === 0 ? (
                   <div className="w-full flex flex-col items-center justify-center py-20 text-center">
                     <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                      <FiPackage className="w-10 h-10 text-gray-400" />
+                      <FiBox className="w-10 h-10 text-gray-400" />
                     </div>
                     <p className="text-gray-500 text-xl font-semibold mb-2">No hay productos disponibles</p>
                     <p className="text-gray-400 text-sm">Intenta seleccionar otra categoría</p>

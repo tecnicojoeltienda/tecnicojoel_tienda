@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiGrid } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const categories = [
@@ -71,7 +71,7 @@ export default function CategoriasCarrusel() {
     return (
         <section className="w-full py-4 md:py-6 lg:py-8">
             <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-                {/* Contenedor principal con border-radius y box-shadow originales */}
+               
                 <div
                     className="bg-white rounded-2xl overflow-hidden shadow-2xl"
                     style={{ 
@@ -80,10 +80,11 @@ export default function CategoriasCarrusel() {
                     }}
                 >
                     <div className="p-4 sm:p-5 md:p-6 lg:p-8">
-                        {/* Header con título y controles */}
+                        
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
                             <div>
-                                <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-1 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text">
+                                <FiGrid className="w-8 h-8 text-blue-600" />
+                                <h3 className="text-2xl sm:text-3xl md:text-4xl text-gray-900 mb-1 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text">
                                     Nuestras Categorías
                                 </h3>
                                 <p className="text-sm sm:text-base text-gray-600 font-medium">
