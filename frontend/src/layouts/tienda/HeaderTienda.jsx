@@ -357,8 +357,8 @@ function HeaderTienda() {
                 aria-label="Historial de pedidos"
               >
                 <FiPackage className="w-4 h-4 lg:w-5 lg:h-5" />
-                <span className="hidden xl:inline">Mis pedidos</span>
-                <span className="xl:hidden">Pedidos</span>
+                <span className="hidden xl:inline font-bold uppercase">Mis pedidos</span>
+                <span className="xl:hidden font-bold uppercase">Pedidos</span>
               </button>
 
               {/* Usuario */}
@@ -444,7 +444,6 @@ function HeaderTienda() {
                   key={c}
                   onClick={() => navigate(getRoute(c))}
                   className="text-gray-200 hover:text-white text-base lg:text-xl xl:text-2xl font-bold uppercase tracking-tight px-2 lg:px-3 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
-                  style={{ fontFamily: "Impact, 'Arial Black', sans-serif" }}
                 >
                   {c}
                 </button>
