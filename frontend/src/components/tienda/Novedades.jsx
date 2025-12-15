@@ -244,6 +244,9 @@ export default function Novedades() {
                     </svg> 
                     Productos Populares 
                   </h2>
+                  <p className="text-sm sm:text-base text-gray-600 font-medium">
+                    Descubre los productos más populares entre nuestros clientes
+                  </p>
                 </div>
 
                 {/* Filtros de categoría - responsive */}
