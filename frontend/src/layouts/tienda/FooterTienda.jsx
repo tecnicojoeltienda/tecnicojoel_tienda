@@ -3,7 +3,7 @@ import { FiInstagram, FiFacebook, FiTwitter, FiYoutube, FiMail, FiPhone, FiMapPi
 
 export default function FooterTienda() {
   const [email, setEmail] = useState("");
-  const waPhone = "51926700418"; 
+  const waPhone = "51984122549"; 
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -22,12 +22,11 @@ export default function FooterTienda() {
     <footer className="bg-gray-900 text-gray-100">
       <div className="max-w-screen-xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo + descripción */}
           <div>
             <div className="flex items-center gap-3">
               <div className="w-30 h-30 sm:w-30 sm:h-30 rounded-lg overflow-hidden flex items-center justify-center shadow-sm flex-shrink-0">
                 <img
-                  src="/assets/logo.png"
+                  src="/assets/logo-nuevo.png"
                   alt="Logo Tecnico Joel"
                   className="w-full h-full object-contain"
                   loading="lazy"
@@ -50,13 +49,13 @@ export default function FooterTienda() {
               <a href="#" aria-label="Twitter" className="p-2 rounded-md bg-white/5 hover:bg-white/10">
                 <FiTwitter className="w-5 h-5" />
               </a>
-              <a href="#" aria-label="YouTube" className="p-2 rounded-md bg-white/5 hover:bg-white/10">
+              <a href="https://www.youtube.com/@TecnicoJoel" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 rounded-md bg-white/5 hover:bg-white/10">
                 <FiYoutube className="w-5 h-5" />
               </a>
             </div>
           </div>
 
-          {/* Contacto */}
+        
           <div>
             <h4 className="text-sm font-semibold mb-4">Contacto</h4>
             <ul className="text-sm space-y-3 text-gray-300">
@@ -64,7 +63,7 @@ export default function FooterTienda() {
                 <FiPhone className="mt-0.5 w-5 h-5 text-gray-300" />
                 <div>
                   <div className="text-gray-100 font-medium">Línea de ventas</div>
-                  <div className="text-xs">+51 01 8000 0000</div>
+                  <div className="text-xs">+51 984122549</div>
                 </div>
               </li>
 
@@ -80,7 +79,7 @@ export default function FooterTienda() {
                 <FiMapPin className="mt-0.5 w-5 h-5 text-gray-300" />
                 <div>
                   <div className="text-gray-100 font-medium">Dirección</div>
-                  <div className="text-xs">Av. Ejemplo 123, Oficina 4, Ciudad, País</div>
+                  <div className="text-xs">Urb. Remigio Silva - Parque la resbalera, Chiclayo</div>
                 </div>
               </li>
             </ul>
@@ -90,14 +89,13 @@ export default function FooterTienda() {
           <div>
             <h4 className="text-sm font-semibold mb-4">Enlaces</h4>
             <ul className="text-sm space-y-3 text-gray-300">
-              <li><a href="#" className="hover:underline">Tienda</a></li>
-              <li><a href="#" className="hover:underline">Ofertas</a></li>
-              <li><a href="#" className="hover:underline">Soporte</a></li>
+              <li><a href="/" className="hover:underline">Tienda</a></li>
+              <li><a href="/" className="hover:underline">Ofertas</a></li>
+              <li> <a href={`https://wa.me/${waPhone}?text=${encodeURIComponent("Hola, necesito soporte")}`} target="_blank" rel="noopener noreferrer" className="hover:underline" > Soporte </a> </li>
               <li><a href="#" className="hover:underline">Política de privacidad</a></li>
             </ul>
           </div>
 
-          {/* Suscripción / horario */}
           <div>
             <h4 className="text-sm font-semibold mb-4">Atención</h4>
             <p className="text-sm text-gray-300 mb-4">Lunes a Domingo — Todas las 24 horas</p>
@@ -122,7 +120,7 @@ export default function FooterTienda() {
 
         <div className="border-t border-white/10 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400" style={{ fontFamily: "Impact, Charcoal, sans-serif" }}>
           <div>© {new Date().getFullYear()} Tecnico Joel. Todos los derechos reservados.</div>
-          <div className="mt-3 md:mt-0">Desarrollado por David Mesta · <a href="#" className="text-gray-200 hover:underline">Términos y condiciones</a></div>
+          <div className="mt-3 md:mt-0">Desarrollado por David Mesta y Tecnico Joel · <a href="#" className="text-gray-200 hover:underline">Términos y condiciones</a></div>
         </div>
       </div>
     </footer>
