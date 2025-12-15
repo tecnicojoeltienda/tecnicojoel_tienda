@@ -256,7 +256,7 @@ function HeaderTienda() {
                 title="Ir a inicio"
               >
                 <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 rounded-full flex items-center justify-center overflow-hidden shadow-lg bg-white p-0">
-                  <img src="/assets/logo-nuevo.png" alt="Logo Tecnico Joel" className="w-full h-full object-contain bg-white rounded-lg" loading="lazy" />
+                  <img src="/assets/logo-navidad.jfif" alt="Logo Tecnico Joel" className="w-full h-full object-contain bg-white rounded-lg" loading="lazy" />
                 </div>
                 <span className="hidden sm:inline-block text-lg lg:text-xl xl:text-2xl font-extrabold text-white">
                   Tecnico Joel      
