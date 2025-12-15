@@ -237,11 +237,13 @@ export default function Novedades() {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
                
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                    <FiBox className="w-8 h-8 text-blue-600" />
-                    Productos Populares
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3"> 
+                    <svg className="w-8 h-8 text-blue-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> 
+                      <path d="M3 7l9-4 9 4v10a1 1 0 0 1-1 1h-4v-6H8v6H4a1 1 0 0 1-1-1V7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/> 
+                      <path d="M3 7l9 4 9-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/> 
+                    </svg> 
+                    Productos Populares 
                   </h2>
-                  <p className="text-gray-600 text-sm md:text-base">Descubre los productos más destacados y mejor valorados</p>
                 </div>
 
                 {/* Filtros de categoría - responsive */}

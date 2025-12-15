@@ -82,14 +82,14 @@ export default function CategoriasCarrusel() {
                     <div className="p-4 sm:p-5 md:p-6 lg:p-8">
                         
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
-                            <div>
-                                <FiGrid className="w-8 h-8 text-blue-600" />
-                                <h3 className="text-2xl sm:text-3xl md:text-4xl text-gray-900 mb-1 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text">
-                                    Nuestras Categorías
-                                </h3>
-                                <p className="text-sm sm:text-base text-gray-600 font-medium">
-                                    Explora nuestra amplia variedad de productos tecnológicos
-                                </p>
+                            <div> 
+                                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                                    <FiGrid className="w-8 h-8 text-blue-600" /> 
+                                    Nuestras Categorías 
+                                 </h3> 
+                                 <p className="text-sm sm:text-base text-gray-600 font-medium"> 
+                                    Explora nuestra amplia variedad de productos tecnológicos 
+                                </p> 
                             </div>
 
                             {/* Controles de navegación */}
