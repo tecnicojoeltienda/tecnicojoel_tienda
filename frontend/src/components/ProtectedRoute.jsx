@@ -4,7 +4,7 @@ import useAuth from "../hooks/useAuth";
 import { hasAllowedRole } from "../filters/roles";
 import NotAuthorized404 from "../pages/NotAuthorized404.jsx";
 
-export default function ProtectedRoute({ children, allowedRoles = [] }) {
+export default function ProtectedRoute({ children, allowedRoles = [], redirectToLogin = true }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
@@ -13,8 +13,13 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
   const isInventory = location.pathname.startsWith("/inventario");
 
   if (!user) {
-    const loginPath = isInventory ? "/login" : "/login";
-    return <Navigate to={loginPath} state={{ from: location }} replace />;
+    if (redirectToLogin) {
+      const loginPath = isInventory ? "/login" : "/login";
+      return <Navigate to={loginPath} state={{ from: location }} replace />;
+    } else {
+      
+      return children;
+    }
   }
 
   if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
