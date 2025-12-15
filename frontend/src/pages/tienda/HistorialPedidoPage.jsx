@@ -12,19 +12,26 @@ export default function HistorialPedidoPage() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // modal / detalles de pedido
+  
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [detalleItems, setDetalleItems] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedPedido, setSelectedPedido] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  // leer usuario una vez (evita crear objeto nuevo cada render)
-  useEffect(() => {
-    const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
-    if (!raw) { setUser(null); return; }
-    try { setUser(JSON.parse(raw)); } catch { setUser(null); }
-  }, []);
+
+ useEffect(() => {
+  const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
+  if (!raw) { setUser(null); setAuthModalOpen(true); return; }
+  try {
+    setUser(JSON.parse(raw));
+    setAuthModalOpen(false);
+  } catch {
+    setUser(null);
+    setAuthModalOpen(true);
+  }
+}, []);
 
   async function openDetalles(id, pedidoData) {
     setSelectedId(id);
@@ -140,7 +147,7 @@ export default function HistorialPedidoPage() {
     return styles[estado] || styles.pendiente;
   };
 
-  // función para generar iniciales
+ 
   const getInitials = (name) => {
     if (!name || name.startsWith('Producto #')) return '?';
     return name
@@ -151,7 +158,7 @@ export default function HistorialPedidoPage() {
   };
 
   useEffect(() => {
-    // Evita que la apertura del modal haga desaparecer la scrollbar y mueva el layout
+    
     if (modalOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -166,30 +173,82 @@ export default function HistorialPedidoPage() {
         <HeaderTienda />
         <main className="w-full max-w-4xl mx-auto px-6 py-24">
           <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FiPackage className="w-8 h-8 text-blue-600" />
+            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-yellow-600" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 17h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Necesitas una cuenta para ver tus pedidos</h1>
             <p className="text-gray-600 text-lg mb-8 max-w-lg mx-auto">
-              Crea una cuenta o inicia sesión para ver el historial completo de pedidos que generas desde el carrito.
+              Primero debes crear una cuenta o iniciar sesión para acceder a tu historial de pedidos.
             </p>
+
             <div className="flex justify-center gap-4">
               <button
-                onClick={() => navigate("/login")}
-                className="px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+                onClick={() => setAuthModalOpen(true)}
+                className="px-8 py-3 bg-yellow-500 text-white rounded-xl font-semibold hover:bg-yellow-600 transition-colors shadow-lg inline-flex items-center gap-3"
               >
-                Iniciar sesión
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 17h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Ver opciones
               </button>
+
               <button
-                onClick={() => navigate("/registro")}
+                onClick={() => setAuthModalOpen(true)}
                 className="px-8 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
-                Crear cuenta
+                Cerrar
               </button>
             </div>
           </div>
         </main>
         <FooterTienda />
+
+        {authModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setAuthModalOpen(false)} />
+            <div className="relative w-full max-w-md bg-yellow-50 border border-yellow-300 rounded-xl shadow-2xl overflow-hidden">
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-yellow-100 flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-yellow-600" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 17h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Necesitas iniciar sesión</h3>
+                <p className="text-sm text-gray-700 mb-6">Para ver tu historial de pedidos debes iniciar sesión o crear una cuenta.</p>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => { setAuthModalOpen(false); navigate("/login"); }}
+                    className="w-full sm:w-auto px-4 py-2 bg-white border border-yellow-600 text-yellow-700 font-semibold rounded-lg hover:bg-yellow-50 transition-colors"
+                  >
+                    Iniciar sesión
+                  </button>
+                  <button
+                    onClick={() => { setAuthModalOpen(false); navigate("/registro"); }}
+                    className="w-full sm:w-auto px-4 py-2 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors"
+                  >
+                    Crear cuenta
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setAuthModalOpen(false)}
+                  className="mt-4 text-xs text-gray-600 underline"
+                >
+                  Volver
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -324,7 +383,7 @@ export default function HistorialPedidoPage() {
         </div>
       </main>
 
-      {/* Modal mejorado */}
+
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModal}></div>
