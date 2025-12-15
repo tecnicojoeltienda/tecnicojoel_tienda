@@ -248,7 +248,7 @@ function HeaderTienda() {
           {/* Header principal */}
           <div className="flex items-center justify-between h-20 lg:h-24 gap-2 lg:gap-4">
             {/* Logo y marca - siempre visible */}
-            <div className="flex items-center gap-2 lg:gap-3" style={{ fontFamily: "Impact, 'Arial Black', sans-serif" }}>
+            <div className="flex items-center gap-2 lg:gap-3">
               <button
                 onClick={() => navigate("/")}
                 className="flex items-center gap-2 lg:gap-3 p-1 lg:p-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -259,7 +259,7 @@ function HeaderTienda() {
                   <img src="/assets/logo-nuevo.png" alt="Logo Tecnico Joel" className="w-full h-full object-contain bg-white rounded-lg" loading="lazy" />
                 </div>
                 <span className="hidden sm:inline-block text-lg lg:text-xl xl:text-2xl font-extrabold text-white">
-                  Tecnico Joel
+                  Tecnico Joel      
                 </span>
               </button>
 
@@ -270,7 +270,7 @@ function HeaderTienda() {
                 aria-label="Abrir categorías"
               >
                 <FiMenu className="w-4 h-4 lg:w-5 lg:h-5" />
-                <span>Categorías</span>
+                <span className="uppercase">Categorías</span>
               </button>
             </div>
 
@@ -443,7 +443,7 @@ function HeaderTienda() {
                 <button
                   key={c}
                   onClick={() => navigate(getRoute(c))}
-                  className="text-gray-200 hover:text-white text-base lg:text-xl xl:text-2xl font-bold uppercase tracking-tight px-2 lg:px-3 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
+                  className="text-gray-200 hover:text-white text-sm lg:text-base xl:text-base font-bold uppercase tracking-tight px-2 lg:px-3 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
                 >
                   {c}
                 </button>
@@ -653,7 +653,7 @@ function HeaderTienda() {
         </div>
       )}
 
-      <div className="h-20" />
+      <div className="h-10" />
     </>
   );
 }
