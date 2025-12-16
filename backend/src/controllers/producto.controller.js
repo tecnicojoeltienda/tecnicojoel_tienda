@@ -65,6 +65,34 @@ async function saveBase64Image(dataUrl, nombreProducto = "producto") {
   return `/uploads/${finalFilename}`;
 }
 
+async function saveUploadedFile(file, nombreProducto = "producto") {
+  const uploadsDir = path.join(process.cwd(), "uploads");
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+  
+  // Obtener extensión del archivo original
+  const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+  
+  // Usar el nombre del producto como nombre del archivo
+  const slug = slugify(nombreProducto);
+  const filename = `${slug}${ext}`;
+  const filepath = path.join(uploadsDir, filename);
+  
+  // Si el archivo ya existe, agregar un sufijo numérico
+  let finalFilename = filename;
+  let finalFilepath = filepath;
+  let counter = 1;
+  while (fs.existsSync(finalFilepath)) {
+    finalFilename = `${slug}-${counter}${ext}`;
+    finalFilepath = path.join(uploadsDir, finalFilename);
+    counter++;
+  }
+  
+  // Mover el archivo temporal a la ubicación final
+  await fs.promises.rename(file.path, finalFilepath);
+  
+  return `/uploads/${finalFilename}`;
+}
+
 export async function crear(req, res) {
   try {
     const data = { ...req.body };
@@ -96,12 +124,27 @@ export async function actualizar(req, res) {
   try {
     const data = { ...req.body };
 
+    // Obtener el producto existente para usar su nombre si no viene en data
+    const idProducto = Number(req.params.id);
+    const existing = await model.obtenerProductoPorId(idProducto);
+    if (!existing) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    // Determinar el nombre del producto para el archivo
+    const nombreProducto = data.nombre_producto || existing.nombre_producto || "producto";
+
     if (req.file && req.file.filename) {
-      data.imagen_url = `/uploads/${req.file.filename}`;
-    } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
+      // Archivo subido vía multipart - renombrar con el nombre del producto
       try {
-        // Pasar el nombre del producto para generar el nombre del archivo
-        const nombreProducto = data.nombre_producto || "producto";
+        data.imagen_url = await saveUploadedFile(req.file, nombreProducto);
+      } catch (err) {
+        console.error("Error saving uploaded file:", err.message);
+        return res.status(400).json({ error: "Error al guardar archivo", detalle: err.message });
+      }
+    } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
+      // Base64 image
+      try {
         data.imagen_url = await saveBase64Image(data.imagen_url, nombreProducto);
       } catch (err) {
         console.error("Error saving base64 image (update):", err.message);
@@ -110,18 +153,12 @@ export async function actualizar(req, res) {
     }
 
     // Manejo de stock: calcular delta y siempre crear movimiento si delta != 0.
-    const idProducto = Number(req.params.id);
-    let existing = null;
     let stockProvided = false;
     let newStock = null;
 
     if ("stock" in data) {
       stockProvided = true;
       newStock = Number(data.stock);
-      existing = await model.obtenerProductoPorId(idProducto);
-      if (!existing) {
-        return res.status(404).json({ error: "Producto no encontrado" });
-      }
     }
 
     let delta = 0;

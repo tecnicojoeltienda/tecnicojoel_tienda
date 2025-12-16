@@ -286,69 +286,96 @@ export default function ProductEditPage() {
 
                   // Special handling for imagen_url -> file upload + preview
                   if (key === "imagen_url") {
+                    const displayUrl = previewUrl || (rawValue && rawValue.startsWith('/') ? `${API}${rawValue}` : rawValue);
+                    
                     return (
-                      <div key={key} className={`lg:col-span-2 ${colSpanClass}`}>
-                        <label className="block text-lg font-bold text-gray-800 mb-2">{labelFor(key)}</label>
-                        <div className="flex flex-col sm:flex-row items-start gap-4">
-                          <div className="w-full sm:w-40 h-40 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-200">
-                            {previewUrl ? (
-                              // If relative path (starts with /uploads), show as-is; else show absolute
-                              <img
-                                src={previewUrl}
-                                alt="Preview"
-                                className="w-full h-full object-contain"
-                              />
-                            ) : (
-                              <div className="text-center text-gray-400">
-                                <FiCamera className="w-8 h-8 mx-auto" />
-                                <div className="text-xs mt-2">Sin imagen</div>
+                      <div key={key} className="lg:col-span-2">
+                        <label className="block text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                          <FiCamera className="w-5 h-5 text-blue-600" />
+                          {labelFor(key)}
+                        </label>
+                        
+                        <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-6 border-2 border-gray-200">
+                          <div className="flex flex-col lg:flex-row items-start gap-6">
+                            {/* Vista previa de la imagen */}
+                            <div className="w-full lg:w-64 h-64 bg-white rounded-xl flex items-center justify-center overflow-hidden border-2 border-gray-300 shadow-lg">
+                              {displayUrl ? (
+                                <img
+                                  src={displayUrl}
+                                  alt="Preview"
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`w-full h-full flex-col items-center justify-center text-gray-400 ${displayUrl ? 'hidden' : 'flex'}`}>
+                                <FiCamera className="w-12 h-12 mb-2" />
+                                <div className="text-sm font-medium">Sin imagen</div>
                               </div>
-                            )}
-                          </div>
-
-                          <div className="flex-1">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageChange}
-                              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700"
-                            />
-                            <div className="mt-3 flex gap-3">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  // allow user to keep the current URL as string in the form if they want
-                                  setSelectedFile(null);
-                                  setPreviewUrl(form.imagen_url || null);
-                                }}
-                                className="px-4 py-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors"
-                              >
-                                Usar URL actual
-                              </button>
-                              <button
-                                type="button"
-                                onClick={removeSelectedImage}
-                                className="px-4 py-2 bg-red-50 rounded-lg text-red-600 border border-red-100 hover:bg-red-100 transition-colors"
-                              >
-                                Quitar selección
-                              </button>
                             </div>
 
-                            <p className="mt-2 text-sm text-gray-500">
-                              Puedes subir una imagen para reemplazar la actual. Si subes una imagen se enviará como archivo al servidor.
-                            </p>
+                            {/* Controles */}
+                            <div className="flex-1 space-y-4">
+                              <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Seleccionar archivo</label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleImageChange}
+                                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer"
+                                />
+                              </div>
 
-                            {/* Also show imagen_url input so admin can edit direct URL if they prefer (kept for compatibility) */}
-                            <div className="mt-4">
-                              <label className="block text-sm font-medium text-gray-700 mb-1">URL (opcional)</label>
-                              <input
-                                name="imagen_url"
-                                value={rawValue}
-                                onChange={onChange}
-                                type="text"
-                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
-                                placeholder="https://... o /uploads/archivo.jpg"
-                              />
+                              <div className="flex flex-wrap gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+                                    setSelectedFile(null);
+                                    setPreviewUrl(null);
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                                >
+                                  Usar URL actual
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={removeSelectedImage}
+                                  className="px-4 py-2 bg-red-50 rounded-lg text-red-600 border-2 border-red-200 hover:bg-red-100 transition-colors font-medium text-sm"
+                                >
+                                  Quitar selección
+                                </button>
+                              </div>
+
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <p className="text-sm text-blue-800 flex items-start gap-2">
+                                  <span className="text-blue-600 font-bold">💡</span>
+                                  <span>Puedes subir una nueva imagen para reemplazar la actual. El archivo se guardará con el nombre del producto.</span>
+                                </p>
+                              </div>
+
+                              {/* Campo URL opcional */}
+                              <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">URL de imagen (opcional)</label>
+                                <input
+                                  name="imagen_url"
+                                  value={rawValue}
+                                  onChange={onChange}
+                                  type="text"
+                                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
+                                  placeholder="https://... o /uploads/archivo.jpg"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">Si no subes archivo, se usará esta URL</p>
+                              </div>
+
+                              {/* Mostrar URL actual */}
+                              {rawValue && !previewUrl && (
+                                <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                  <strong>URL actual:</strong> {rawValue}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
