@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../service/api.js";
-import { FiKey, FiPower, FiRefreshCw, FiEdit2 } from "react-icons/fi";
+import { FiKey, FiPower, FiRefreshCw, FiEdit2, FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const API = import.meta.env.VITE_API_BASE_URL;
@@ -11,6 +11,7 @@ export default function AdministradoresPage() {
   const [selected, setSelected] = useState(null);
   const [showPassModal, setShowPassModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [newRole, setNewRole] = useState("admin");
   const [error, setError] = useState(null);
@@ -67,6 +68,7 @@ export default function AdministradoresPage() {
   async function openChangePassword(admin) {
     setSelected(admin);
     setNewPassword("");
+    setShowPassword(false);
     setShowPassModal(true);
   }
 
@@ -313,7 +315,25 @@ export default function AdministradoresPage() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowPassModal(false)}></div>
           <div className="bg-white rounded-xl p-4 z-10 w-full max-w-md mx-4 sm:p-6">
             <h3 className="text-lg font-bold mb-3">Cambiar contraseña — {selected.nombre}</h3>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contraseña" className="w-full px-4 py-3 border rounded-lg mb-4" />
+
+            <div className="relative mb-4">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Nueva contraseña"
+                className="w-full px-4 py-3 border rounded-lg pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md text-gray-600 hover:bg-gray-100"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+
             <div className="flex flex-col sm:flex-row justify-end gap-2">
               <button onClick={() => setShowPassModal(false)} className="px-4 py-2 bg-gray-100 rounded-lg">Cancelar</button>
               <button onClick={submitChangePassword} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Guardar</button>
