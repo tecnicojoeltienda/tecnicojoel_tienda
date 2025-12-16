@@ -23,7 +23,20 @@ export async function ver(req, res) {
   }
 }
 
-async function saveBase64Image(dataUrl) {
+// Función auxiliar para crear slug del nombre
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // eliminar acentos
+    .replace(/[^\w\s-]/g, '') // eliminar caracteres especiales
+    .trim()
+    .replace(/\s+/g, '-') // espacios a guiones
+    .replace(/-+/g, '-'); // múltiples guiones a uno
+}
+
+async function saveBase64Image(dataUrl, nombreProducto = "producto") {
   const matches = dataUrl.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
   if (!matches) throw new Error("Invalid base64 image data");
   const mime = matches[1]; // e.g. image/png
@@ -32,34 +45,50 @@ async function saveBase64Image(dataUrl) {
   const buffer = Buffer.from(base64, "base64");
   const uploadsDir = path.join(process.cwd(), "uploads");
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-  const filename = `${Date.now()}-${Math.round(Math.random()*1e9)}.${ext}`;
+  
+  // Usar el nombre del producto como nombre del archivo
+  const slug = slugify(nombreProducto);
+  const filename = `${slug}.${ext}`;
   const filepath = path.join(uploadsDir, filename);
-  await fs.promises.writeFile(filepath, buffer);
-  return `/uploads/${filename}`;
+  
+  // Si el archivo ya existe, agregar un sufijo numérico
+  let finalFilename = filename;
+  let finalFilepath = filepath;
+  let counter = 1;
+  while (fs.existsSync(finalFilepath)) {
+    finalFilename = `${slug}-${counter}.${ext}`;
+    finalFilepath = path.join(uploadsDir, finalFilename);
+    counter++;
+  }
+  
+  await fs.promises.writeFile(finalFilepath, buffer);
+  return `/uploads/${finalFilename}`;
 }
 
 export async function crear(req, res) {
   try {
     const data = { ...req.body };
     
-    console.log("📦 Datos recibidos:", JSON.stringify(data, null, 2)); // <-- AGREGAR
+    console.log("📦 Datos recibidos:", JSON.stringify(data, null, 2));
 
     if (req.file && req.file.filename) {
       data.imagen_url = `/uploads/${req.file.filename}`;
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
       try {
-        data.imagen_url = await saveBase64Image(data.imagen_url);
+        // Pasar el nombre del producto para generar el nombre del archivo
+        const nombreProducto = data.nombre_producto || "producto";
+        data.imagen_url = await saveBase64Image(data.imagen_url, nombreProducto);
       } catch (err) {
         console.error("Error saving base64 image:", err.message);
-        return res.status(400).json({ error: "Imagen en formato base64 inválida", detalle: err.message }); // <-- MÁS DETALLE
+        return res.status(400).json({ error: "Imagen en formato base64 inválida", detalle: err.message });
       }
     }
 
     const id = await model.crearProducto(data);
     res.status(201).json({ ok: true, id });
   } catch (e) {
-    console.error("ERROR crear producto COMPLETO:", e.stack || e.message || e); // <-- MÁS DETALLE
-    res.status(500).json({ error: "Error al crear producto", detalle: e.message }); // <-- DEVOLVER MENSAJE
+    console.error("ERROR crear producto COMPLETO:", e.stack || e.message || e);
+    res.status(500).json({ error: "Error al crear producto", detalle: e.message });
   }
 }
 
@@ -71,7 +100,9 @@ export async function actualizar(req, res) {
       data.imagen_url = `/uploads/${req.file.filename}`;
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
       try {
-        data.imagen_url = await saveBase64Image(data.imagen_url);
+        // Pasar el nombre del producto para generar el nombre del archivo
+        const nombreProducto = data.nombre_producto || "producto";
+        data.imagen_url = await saveBase64Image(data.imagen_url, nombreProducto);
       } catch (err) {
         console.error("Error saving base64 image (update):", err.message);
         return res.status(400).json({ error: "Imagen en formato base64 inválida" });
@@ -96,15 +127,11 @@ export async function actualizar(req, res) {
     let delta = 0;
     if (stockProvided && existing) {
       delta = newStock - (Number(existing.stock) || 0);
-      // Quitamos stock del objeto 'data' para que la actualización no escriba el valor directamente.
-      // Dejamos que el movimiento ajuste el stock (crearMovimiento hace la suma/resta).
       delete data.stock;
     }
 
-    // actualizar otros campos (sin stock si lo quitamos)
     const affected = await model.actualizarProducto(req.params.id, data);
 
-    // si detectamos cambio en stock (delta != 0), crear movimiento correspondiente
     if (stockProvided && existing && delta !== 0) {
       try {
         const tipo = delta > 0 ? "entrada" : "salida";
@@ -119,7 +146,6 @@ export async function actualizar(req, res) {
         }
       } catch (errMov) {
         console.error("Error creando movimiento tras actualizar stock:", errMov);
-        // no abortamos la respuesta principal
       }
     }
 
