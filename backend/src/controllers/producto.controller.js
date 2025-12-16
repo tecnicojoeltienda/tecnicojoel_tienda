@@ -23,74 +23,20 @@ export async function ver(req, res) {
   }
 }
 
-// Función auxiliar para crear slug del nombre
-function slugify(text) {
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // eliminar acentos
-    .replace(/[^\w\s-]/g, '') // eliminar caracteres especiales
-    .trim()
-    .replace(/\s+/g, '-') // espacios a guiones
-    .replace(/-+/g, '-'); // múltiples guiones a uno
-}
-
-async function saveBase64Image(dataUrl, nombreProducto = "producto") {
+async function saveBase64Image(dataUrl, originalFilename = "image.jpg") {
   const matches = dataUrl.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
   if (!matches) throw new Error("Invalid base64 image data");
-  const mime = matches[1]; // e.g. image/png
-  const ext = mime.split("/")[1] === "jpeg" ? "jpg" : mime.split("/")[1];
+  
   const base64 = matches[2];
   const buffer = Buffer.from(base64, "base64");
   const uploadsDir = path.join(process.cwd(), "uploads");
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
   
-  // Usar el nombre del producto como nombre del archivo
-  const slug = slugify(nombreProducto);
-  const filename = `${slug}.${ext}`;
-  const filepath = path.join(uploadsDir, filename);
+  // Usar el nombre original del archivo
+  const filepath = path.join(uploadsDir, originalFilename);
   
-  // Si el archivo ya existe, agregar un sufijo numérico
-  let finalFilename = filename;
-  let finalFilepath = filepath;
-  let counter = 1;
-  while (fs.existsSync(finalFilepath)) {
-    finalFilename = `${slug}-${counter}.${ext}`;
-    finalFilepath = path.join(uploadsDir, finalFilename);
-    counter++;
-  }
-  
-  await fs.promises.writeFile(finalFilepath, buffer);
-  return `/uploads/${finalFilename}`;
-}
-
-async function saveUploadedFile(file, nombreProducto = "producto") {
-  const uploadsDir = path.join(process.cwd(), "uploads");
-  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-  
-  // Obtener extensión del archivo original
-  const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-  
-  // Usar el nombre del producto como nombre del archivo
-  const slug = slugify(nombreProducto);
-  const filename = `${slug}${ext}`;
-  const filepath = path.join(uploadsDir, filename);
-  
-  // Si el archivo ya existe, agregar un sufijo numérico
-  let finalFilename = filename;
-  let finalFilepath = filepath;
-  let counter = 1;
-  while (fs.existsSync(finalFilepath)) {
-    finalFilename = `${slug}-${counter}${ext}`;
-    finalFilepath = path.join(uploadsDir, finalFilename);
-    counter++;
-  }
-  
-  // Mover el archivo temporal a la ubicación final
-  await fs.promises.rename(file.path, finalFilepath);
-  
-  return `/uploads/${finalFilename}`;
+  await fs.promises.writeFile(filepath, buffer);
+  return `/uploads/${originalFilename}`;
 }
 
 export async function crear(req, res) {
@@ -100,12 +46,14 @@ export async function crear(req, res) {
     console.log("📦 Datos recibidos:", JSON.stringify(data, null, 2));
 
     if (req.file && req.file.filename) {
+      // Archivo subido vía multipart - usar el nombre original del archivo
       data.imagen_url = `/uploads/${req.file.filename}`;
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
+      // Base64 image - necesitamos el nombre original del archivo
       try {
-        // Pasar el nombre del producto para generar el nombre del archivo
-        const nombreProducto = data.nombre_producto || "producto";
-        data.imagen_url = await saveBase64Image(data.imagen_url, nombreProducto);
+        // Si viene un nombre de archivo original en algún campo, usarlo
+        const originalFilename = data.imagen_nombre || data.imagen_filename || "image.jpg";
+        data.imagen_url = await saveBase64Image(data.imagen_url, originalFilename);
       } catch (err) {
         console.error("Error saving base64 image:", err.message);
         return res.status(400).json({ error: "Imagen en formato base64 inválida", detalle: err.message });
@@ -124,28 +72,21 @@ export async function actualizar(req, res) {
   try {
     const data = { ...req.body };
 
-    // Obtener el producto existente para usar su nombre si no viene en data
+    // Obtener el producto existente
     const idProducto = Number(req.params.id);
     const existing = await model.obtenerProductoPorId(idProducto);
     if (!existing) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
 
-    // Determinar el nombre del producto para el archivo
-    const nombreProducto = data.nombre_producto || existing.nombre_producto || "producto";
-
     if (req.file && req.file.filename) {
-      // Archivo subido vía multipart - renombrar con el nombre del producto
-      try {
-        data.imagen_url = await saveUploadedFile(req.file, nombreProducto);
-      } catch (err) {
-        console.error("Error saving uploaded file:", err.message);
-        return res.status(400).json({ error: "Error al guardar archivo", detalle: err.message });
-      }
+      // Archivo subido vía multipart - usar el nombre original del archivo
+      data.imagen_url = `/uploads/${req.file.filename}`;
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
-      // Base64 image
+      // Base64 image - necesitamos el nombre original del archivo
       try {
-        data.imagen_url = await saveBase64Image(data.imagen_url, nombreProducto);
+        const originalFilename = data.imagen_nombre || data.imagen_filename || "image.jpg";
+        data.imagen_url = await saveBase64Image(data.imagen_url, originalFilename);
       } catch (err) {
         console.error("Error saving base64 image (update):", err.message);
         return res.status(400).json({ error: "Imagen en formato base64 inválida" });
