@@ -45,13 +45,20 @@ export async function crear(req, res) {
     
     console.log("📦 Datos recibidos:", JSON.stringify(data, null, 2));
 
-    if (req.file && req.file.filename) {
-      // Archivo subido vía multipart - usar el nombre original del archivo
-      data.imagen_url = `/uploads/${req.file.filename}`;
+    if (req.file) {
+      // Archivo subido vía multipart - USAR EL NOMBRE ORIGINAL
+      const originalName = req.file.originalname;
+      const uploadsDir = path.join(process.cwd(), "uploads");
+      const oldPath = req.file.path;
+      const newPath = path.join(uploadsDir, originalName);
+      
+      // Renombrar el archivo temporal al nombre original
+      await fs.promises.rename(oldPath, newPath);
+      
+      data.imagen_url = `/uploads/${originalName}`;
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
       // Base64 image - necesitamos el nombre original del archivo
       try {
-        // Si viene un nombre de archivo original en algún campo, usarlo
         const originalFilename = data.imagen_nombre || data.imagen_filename || "image.jpg";
         data.imagen_url = await saveBase64Image(data.imagen_url, originalFilename);
       } catch (err) {
@@ -79,9 +86,17 @@ export async function actualizar(req, res) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
 
-    if (req.file && req.file.filename) {
-      // Archivo subido vía multipart - usar el nombre original del archivo
-      data.imagen_url = `/uploads/${req.file.filename}`;
+    if (req.file) {
+      // Archivo subido vía multipart - USAR EL NOMBRE ORIGINAL
+      const originalName = req.file.originalname;
+      const uploadsDir = path.join(process.cwd(), "uploads");
+      const oldPath = req.file.path;
+      const newPath = path.join(uploadsDir, originalName);
+      
+      // Renombrar el archivo temporal al nombre original
+      await fs.promises.rename(oldPath, newPath);
+      
+      data.imagen_url = `/uploads/${originalName}`;
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
       // Base64 image - necesitamos el nombre original del archivo
       try {
