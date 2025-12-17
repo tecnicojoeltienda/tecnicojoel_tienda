@@ -57,9 +57,24 @@ export async function crear(req, res) {
       
       data.imagen_url = `/uploads/${originalName}`;
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
-      // Base64 image - necesitamos el nombre original del archivo
+      // Base64 image - generar nombre desde el mime type si no viene nombre
       try {
-        const originalFilename = data.imagen_nombre || data.imagen_filename;
+        let originalFilename = data.imagen_nombre || data.imagen_filename;
+        
+        // Si no viene nombre, generar uno basado en el mime type
+        if (!originalFilename) {
+          const matches = data.imagen_url.match(/^data:(image\/[a-zA-Z]+);base64,/);
+          const ext = matches ? (matches[1].split("/")[1] === "jpeg" ? "jpg" : matches[1].split("/")[1]) : "jpg";
+          // Usar el nombre del producto como nombre de archivo
+          const slug = (data.nombre_producto || "producto").toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^\w\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-');
+          originalFilename = `${slug}.${ext}`;
+        }
+        
         data.imagen_url = await saveBase64Image(data.imagen_url, originalFilename);
       } catch (err) {
         console.error("Error saving base64 image:", err.message);
