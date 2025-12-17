@@ -109,9 +109,6 @@ export default function ProductCreatePage() {
     setLoading(true);
 
     try {
-      let imagenData = form.imagen_url;
-      if (imagenFile && preview) imagenData = preview;
-
       const featuresList = (form.caracteristicas || "")
         .split(/\r?\n/)
         .map(s => s.trim())
@@ -134,28 +131,32 @@ export default function ProductCreatePage() {
         }
       }
 
-      const payload = {
-        nombre_producto: form.nombre_producto,
-        descripcion: form.descripcion,
-        id_categoria: form.id_categoria || null,
-        precio_venta: parseFloat(form.precio_venta) || 0,
-        imagen_url: imagenData || null,
-        stock: parseInt(form.stock, 10) || 0,
-        stock_minimo: parseInt(form.stock_minimo, 10) || 0,
-        en_promocion: form.en_promocion,
-        estado: form.estado,
-        caracteristicas: featuresList,
-        especificaciones: specsObj
-      };
+      // USAR FORMDATA PARA ENVIAR ARCHIVO
+      const formData = new FormData();
+      formData.append("nombre_producto", form.nombre_producto);
+      formData.append("descripcion", form.descripcion);
+      formData.append("id_categoria", form.id_categoria || "");
+      formData.append("precio_venta", parseFloat(form.precio_venta) || 0);
+      formData.append("stock", parseInt(form.stock, 10) || 0);
+      formData.append("stock_minimo", parseInt(form.stock_minimo, 10) || 0);
+      formData.append("en_promocion", form.en_promocion);
+      formData.append("estado", form.estado);
+      formData.append("caracteristicas", JSON.stringify(featuresList));
+      formData.append("especificaciones", JSON.stringify(specsObj));
+      
+      // AGREGAR EL ARCHIVO DE IMAGEN
+      if (imagenFile) {
+        formData.append("imagen", imagenFile);
+      }
 
       const token = localStorage.getItem("token");
       const res = await fetch(`${API}/apij/productos`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          // NO enviar Content-Type, fetch lo hace automáticamente con FormData
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = await res.json().catch(() => ({}));
@@ -405,14 +406,9 @@ O JSON: {"Tamaño":"24 pulgadas","Peso":"3.5 kg"}`;
                       <img src={preview} alt="Preview del producto" className="max-h-64 object-contain" />
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setForm((s) => ({ ...s, imagen_url: preview }))}
-                      className="absolute bottom-4 right-4 z-20 flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all duration-300"
-                    >
-                      <FiSave className="w-4 h-4" />
-                      Usar imagen
-                    </button>
+                    <div className="absolute bottom-4 right-4 z-20 text-sm text-gray-600 bg-white px-3 py-1 rounded-lg shadow">
+                      {imagenFile?.name}
+                    </div>
                   </>
                 )}
 
