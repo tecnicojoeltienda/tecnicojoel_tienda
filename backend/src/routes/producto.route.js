@@ -1,4 +1,3 @@
-// ...existing code...
 import { Router } from "express";
 import express from "express";
 import multer from "multer";
@@ -8,10 +7,11 @@ import * as ctrl from "../controllers/producto.controller.js";
 const router = Router();
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, path.join(process.cwd(), "uploads/")),  // Carpeta de destino
+    destination: (req, file, cb) => cb(null, path.join(process.cwd(), "uploads/")),
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname.replace(/\s+/g, '_'))); // Nombre del archivo
+        // USAR EL NOMBRE ORIGINAL DEL ARCHIVO (con espacios reemplazados por guiones bajos)
+        const originalName = file.originalname.replace(/\s+/g, '_');
+        cb(null, originalName);
     }
 });
 
@@ -33,4 +33,3 @@ router.put("/:id", upload.single("imagen"), ctrl.actualizar);
 router.delete("/:id", ctrl.eliminar);
 
 export default router;
-// ...existing code...
