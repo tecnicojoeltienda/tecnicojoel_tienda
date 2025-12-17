@@ -59,7 +59,7 @@ export async function crear(req, res) {
     } else if (data.imagen_url && typeof data.imagen_url === "string" && data.imagen_url.startsWith("data:")) {
       // Base64 image - necesitamos el nombre original del archivo
       try {
-        const originalFilename = data.imagen_nombre || data.imagen_filename || "image.jpg";
+        const originalFilename = data.imagen_nombre || data.imagen_filename;
         data.imagen_url = await saveBase64Image(data.imagen_url, originalFilename);
       } catch (err) {
         console.error("Error saving base64 image:", err.message);
