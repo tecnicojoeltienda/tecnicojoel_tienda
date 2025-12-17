@@ -9,7 +9,7 @@ const router = Router();
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, path.join(process.cwd(), "uploads/")),
     filename: (req, file, cb) => {
-        // USAR EL NOMBRE ORIGINAL DEL ARCHIVO (con espacios reemplazados por guiones bajos)
+    
         const originalName = file.originalname.replace(/\s+/g, '_');
         cb(null, originalName);
     }
@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
     if (/^image\/(jpe?g|png|webp|gif)$/.test(file.mimetype)) cb(null, true);
     else cb(new Error("Tipo de archivo no soportado"), false);
