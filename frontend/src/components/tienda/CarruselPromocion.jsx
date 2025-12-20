@@ -241,14 +241,14 @@ export default function CarruselPromocion() {
                         </div>
 
                         <div className="mt-3">
-                          <div className="text-sm font-semibold leading-tight text-white truncate">{p.nombre_producto || p.nombre}</div>
+                          <div className="text-sm font-semibold leading-tight text-black truncate">{p.nombre_producto || p.nombre}</div>
                           <div className="mt-1 flex items-center justify-between">
-                            <div className="text-lg font-bold text-white">{formatCurrency(p.precio_venta)}</div>
-                            <div className="text-xs text-white/80">{p.stock != null ? `Stock: ${p.stock}` : ""}</div>
+                            <div className="text-lg font-bold text-black">{formatCurrency(p.precio_venta)}</div>
+                            <div className="text-xs text-black/80">{p.stock != null ? `Stock: ${p.stock}` : ""}</div>
                           </div>
 
                           {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
-                            <div className="mt-2 text-xs text-white/70 line-through">
+                            <div className="mt-2 text-xs text-black/70 line-through">
                               S/. {Number(p.precio_lista).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           )}
