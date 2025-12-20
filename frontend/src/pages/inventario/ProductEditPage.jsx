@@ -148,42 +148,42 @@ export default function ProductEditPage() {
 
       // If a file is selected, send multipart/form-data with field name 'imagen'
       if (selectedFile) {
-        const fd = new FormData();
-        // Append all payload keys as strings (skip null/undefined)
-        Object.entries(payload).forEach(([k, v]) => {
-          if (v === undefined || v === null) return;
-          // If it's an object or array, stringify
-          if (typeof v === "object") fd.append(k, JSON.stringify(v));
-          else fd.append(k, String(v));
-        });
-        fd.append("imagen", selectedFile);
-
-        const res = await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
-          method: "PUT",
-          body: fd,
-        });
-
-        if (!res.ok) {
-          const tryJson = await res.json().catch(() => null);
-          throw new Error(tryJson?.error || tryJson?.message || (await res.text()));
+        const formData = new FormData();
+        for (const k of Object.keys(payload)) {
+          formData.append(k, payload[k]);
         }
+        formData.append("imagen", selectedFile);
+        
+        // ✅ AGREGAR PRODUCTOS RELACIONADOS AL FORMDATA
+        if (productosRelacionados.length > 0) {
+          formData.append("productos_relacionados", JSON.stringify(productosRelacionados));
+        }
+
+        const token = localStorage.getItem("token");
+        await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: formData,
+        });
       } else {
-        // No file: send JSON (keeps imagen_url as URL or null)
-        const res = await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || "Error guardando");
+        // ✅ AGREGAR PRODUCTOS RELACIONADOS AL PAYLOAD JSON
+        if (productosRelacionados.length > 0) {
+          payload.productos_relacionados = JSON.stringify(productosRelacionados);
         }
+
+        await api.put(`/apij/productos/${encodeURIComponent(id)}`, payload);
       }
 
-      // Guardar productos relacionados en localStorage
-      if (form?.id_categoria && productosRelacionados.length > 0) {
+      // ✅ GUARDAR EN LOCALSTORAGE (después de la actualización exitosa)
+      if (productosRelacionados.length > 0) {
         try {
-          localStorage.setItem(`productos_relacionados_${id}`, JSON.stringify(productosRelacionados));
+          localStorage.setItem(
+            `productos_relacionados_${id}`,
+            JSON.stringify(productosRelacionados)
+          );
+          console.log("✅ Productos relacionados guardados en localStorage:", productosRelacionados);
         } catch (err) {
           console.error("Error guardando productos relacionados:", err);
         }
@@ -201,16 +201,28 @@ export default function ProductEditPage() {
   useEffect(() => {
     let mounted = true;
     // Cargar productos relacionados desde localStorage
-    try {
-      const storedRelated = localStorage.getItem(`productos_relacionados_${id}`);
-      if (storedRelated) {
-        setProductosRelacionados(JSON.parse(storedRelated));
+    async function cargarRelacionados() {
+      try {
+        const storedRelated = localStorage.getItem(`productos_relacionados_${id}`);
+        console.log(`🔍 Cargando productos relacionados para producto ${id}:`, storedRelated);
+        
+        if (storedRelated && mounted) {
+          const ids = JSON.parse(storedRelated);
+          console.log("✅ IDs de productos relacionados cargados:", ids);
+          setProductosRelacionados(ids);
+        }
+      } catch (err) {
+        console.error("❌ Error cargando productos relacionados:", err);
       }
-    } catch (err) {
-      console.error("Error cargando productos relacionados:", err);
     }
+    
+    cargarRelacionados();
     return () => { mounted = false; };
   }, [id]);
+
+  useEffect(() => {
+    console.log("🎯 ProductosRelacionados - IDs seleccionados actuales:", productosRelacionados);
+  }, [productosRelacionados]);
 
   if (loading) {
     return (

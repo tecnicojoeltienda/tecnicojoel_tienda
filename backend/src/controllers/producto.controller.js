@@ -170,6 +170,23 @@ export async function actualizar(req, res) {
       }
     }
 
+    // ✅ Procesar productos relacionados si vienen en el request
+    if (data.productos_relacionados) {
+      try {
+        const relacionados = typeof data.productos_relacionados === 'string' 
+          ? JSON.parse(data.productos_relacionados) 
+          : data.productos_relacionados;
+        
+        console.log("📦 Productos relacionados recibidos para actualizar:", relacionados);
+        
+        // Aquí podrías guardar en una tabla si la tienes
+        // Por ahora solo logueamos que se recibieron correctamente
+        
+      } catch (e) {
+        console.log("⚠️ No se pudieron procesar productos relacionados en actualización:", e.message);
+      }
+    }
+
     return res.json({ ok: true, affected });
   } catch (e) {
     console.error("ERROR actualizar producto:", e && (e.stack || e.message || e));
