@@ -246,7 +246,7 @@ function HeaderTienda() {
       <header className="fixed top-0 left-0 right-0 z-50 w-screen bg-gray-900 shadow-xl border-b border-gray-800">
         <nav className="w-full px-4 sm:px-6 lg:px-8">
           {/* Header principal */}
-          <div className="flex items-center justify-between h-20 lg:h-24 gap-2 lg:gap-4">
+          <div className="flex items-center justify-between h-14 lg:h-16 gap-2 lg:gap-3">
             {/* Logo y marca - siempre visible */}
             <div className="flex items-center gap-2 lg:gap-3">
               <button
@@ -266,7 +266,7 @@ function HeaderTienda() {
               {/* Botón categorías - desktop */}
               <button
                 onClick={() => setIsCategoryMenuOpen(true)}
-                className="hidden lg:flex px-3 lg:px-5 py-2 lg:py-3 rounded-lg text-base lg:text-lg font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 items-center gap-2"
+                className="hidden lg:flex px-2 lg:px-4 py-1 lg:py-2 rounded-lg text-base lg:text-lg font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 items-center gap-2"
                 aria-label="Abrir categorías"
               >
                 <FiMenu className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -287,7 +287,7 @@ function HeaderTienda() {
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); }}
                     onFocus={() => { if (searchResults.length) setShowSearchDropdown(true); }}
-                    className="w-full pl-10 lg:pl-12 pr-4 py-2 lg:py-3 rounded-xl text-base lg:text-lg bg-white text-gray-900 placeholder-gray-500 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-md"
+                    className="w-full pl-10 lg:pl-12 pr-4 py-1 lg:py-2 rounded-xl text-base lg:text-lg bg-white text-gray-900 placeholder-gray-500 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-md"
                   />
 
                   {/* Dropdown de resultados */}
@@ -343,7 +343,7 @@ function HeaderTienda() {
               {/* Botón menú móvil */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 lg:p-3 rounded-lg text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
+                className="md:hidden p-1 lg:p-2 rounded-lg text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
                 aria-label="Menú móvil"
               >
                 {isMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
@@ -352,7 +352,7 @@ function HeaderTienda() {
               {/* Mis pedidos - desktop */}
               <button
                 onClick={() => (user ? navigate("/pedidos") : navigate("/login"))}
-                className="hidden lg:flex px-3 lg:px-5 py-2 lg:py-3 rounded-lg text-base lg:text-lg font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 items-center gap-2"
+                className="hidden lg:flex px-2 lg:px-4 py-1 lg:py-2 rounded-lg text-base lg:text-lg font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 items-center gap-2"
                 title={user ? "Mis pedidos" : "Debes iniciar sesión para ver tus pedidos"}
                 aria-label="Historial de pedidos"
               >
@@ -366,7 +366,7 @@ function HeaderTienda() {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen((s) => !s)}
-                    className="px-2 lg:px-5 py-2 lg:py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center gap-1 lg:gap-2 transition-all duration-200 shadow-lg"
+                    className="px-2 lg:px-4 py-1 lg:py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center gap-1 lg:gap-2 transition-all duration-200 shadow-lg"
                     aria-haspopup="true"
                     aria-expanded={isUserMenuOpen}
                     title="Mi cuenta"
@@ -408,7 +408,7 @@ function HeaderTienda() {
               ) : (
                 <button
                   onClick={() => navigate("/login")}
-                  className="px-2 lg:px-5 py-2 lg:py-3 rounded-lg font-semibold text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 lg:gap-2"
+                  className="px-2 lg:px-4 py-1 lg:py-2 rounded-lg font-semibold text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 lg:gap-2"
                   aria-label="Iniciar sesión"
                 >
                   <FiUser className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -418,7 +418,7 @@ function HeaderTienda() {
 
               {/* Carrito */}
               <button
-                className="relative inline-flex items-center gap-1 lg:gap-2 px-2 lg:px-5 py-2 lg:py-3 rounded-lg text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
+                className="relative inline-flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-1 lg:py-2 rounded-lg text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
                 aria-label="Carrito"
                 onClick={() => navigate("/carrito")}
               >
@@ -438,12 +438,12 @@ function HeaderTienda() {
 
           {/* Navegación secundaria - solo desktop */}
           <div className="hidden lg:flex justify-center">
-            <nav className="flex gap-4 xl:gap-8 py-3">
+            <nav className="flex gap-4 xl:gap-8 py-2">
               {["Computadoras", "Laptops", "Monitores", "Impresoras"].map((c) => (
                 <button
                   key={c}
                   onClick={() => navigate(getRoute(c))}
-                  className="text-gray-200 hover:text-white text-sm lg:text-base xl:text-base font-bold uppercase tracking-tight px-2 lg:px-3 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
+                  className="text-gray-200 hover:text-white text-sm lg:text-base xl:text-base font-bold uppercase tracking-tight px-2 lg:px-3 py-1 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
                 >
                   {c}
                 </button>
@@ -466,7 +466,7 @@ function HeaderTienda() {
                   placeholder="Buscar productos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 text-base rounded-lg bg-white text-gray-900 placeholder-gray-500 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="block w-full pl-10 pr-4 py-2 text-base rounded-lg bg-white text-gray-900 placeholder-gray-500 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                 />
               </div>
 
@@ -506,14 +506,14 @@ function HeaderTienda() {
                     setIsMenuOpen(false);
                     user ? navigate("/pedidos") : navigate("/login");
                   }}
-                  className="flex-1 px-3 py-3 bg-blue-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
+                  className="flex-1 px-2 py-2 bg-blue-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
                   <FiPackage className="w-4 h-4" />
                   Pedidos
                 </button>
                 <button
                   onClick={() => setIsCategoryMenuOpen(true)}
-                  className="flex-1 px-3 py-3 bg-gray-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
+                  className="flex-1 px-2 py-2 bg-gray-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
                   <FiMenu className="w-4 h-4" />
                   Categorías
@@ -544,7 +544,7 @@ function HeaderTienda() {
       </header>
 
       {/* Espaciado para el header fijo */}
-      <div className="h-20 lg:h-28" />
+      <div className="h-14 lg:h-16" />
 
       {/* Panel lateral de categorías */}
       <div
@@ -653,7 +653,7 @@ function HeaderTienda() {
         </div>
       )}
 
-      <div className="h-10" />
+      <div className="h-6" />
     </>
   );
 }
