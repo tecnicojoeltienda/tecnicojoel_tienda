@@ -8,7 +8,7 @@ import { useCart } from "../../context/CartContext";
 import TwoCarrusel from "../../components/tienda/TwoCarrusel";
 import { FiPackage, FiAlertCircle, FiChevronLeft, FiChevronRight, FiStar, FiShoppingCart } from "react-icons/fi";
 
-const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const slugify = (s = "") =>
   s
@@ -210,13 +210,13 @@ export default function ProductosDetallesPage() {
         
         {/* Sección de productos relacionados */}
         <div className="mt-16">
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
               <FiPackage className="w-6 h-6 text-blue-600" />
               Productos relacionados
             </h2>
             <p className="text-gray-600">Descubre otros productos que podrían interesarte</p>
-          </div>
+          </div> */}
 
           {/* Mostrar productos relacionados personalizados */}
           {loadingRelacionados ? (
