@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiUpload, FiX, FiImage, FiSave, FiArrowLeft } from "react-icons/fi";
+import { FiUpload, FiX, FiImage, FiSave, FiArrowLeft, FiLink } from "react-icons/fi";
+import ProductosRelacionadosSelector from "../../components/inventario/ProductosRelacionadosSelector";
 
 const API = import.meta.env.VITE_API_BASE_URL 
 //|| "http://localhost:4000";
@@ -30,6 +31,7 @@ export default function ProductCreatePage() {
   const [imagenFile, setImagenFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [touched, setTouched] = useState({});
+  const [productosRelacionados, setProductosRelacionados] = useState([]);
 
   useEffect(() => {
     async function cargarCategorias() {
@@ -147,6 +149,11 @@ export default function ProductCreatePage() {
       // AGREGAR EL ARCHIVO DE IMAGEN
       if (imagenFile) {
         formData.append("imagen", imagenFile);
+      }
+
+      // Guardar productos relacionados en localStorage temporalmente
+      if (form.id_categoria && productosRelacionados.length > 0) {
+        formData.append("productos_relacionados", JSON.stringify(productosRelacionados));
       }
 
       const token = localStorage.getItem("token");
@@ -439,6 +446,19 @@ O JSON: {"Tamaño":"24 pulgadas","Peso":"3.5 kg"}`;
                   placeholder={especificacionesPlaceholder}
                 />
               </div>
+            </div>
+
+            {/* Productos Relacionados */}
+            <div className="lg:col-span-2">
+              <label className="block text-lg font-bold text-gray-800 mb-3">
+                <FiLink className="inline w-5 h-5 mr-2 text-blue-600" />
+                Productos Relacionados
+              </label>
+              <ProductosRelacionadosSelector
+                idCategoria={form.id_categoria}
+                productosSeleccionados={productosRelacionados}
+                onSelectionChange={setProductosRelacionados}
+              />
             </div>
 
             {/* Submit Buttons */}
