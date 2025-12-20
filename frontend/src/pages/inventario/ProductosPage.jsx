@@ -10,7 +10,6 @@ export default function ProductosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // filtros
   const [q, setQ] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
   const [estado, setEstado] = useState("");
@@ -42,14 +41,14 @@ export default function ProductosPage() {
       const data = await res.json();
       setCategorias(data || []);
     } catch (err) {
-      // ignore
+      console.error("Error al cargar categorías", err);
     }
   }
 
   useEffect(() => {
     cargarCategorias();
     cargarProductos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   // filtrado cliente

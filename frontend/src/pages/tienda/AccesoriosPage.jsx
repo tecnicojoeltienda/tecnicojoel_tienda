@@ -9,8 +9,6 @@ import { useCart } from "../../context/CartContext";
 export default function AccesoriosPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // add cart
   const { addToCart } = useCart();
 
   const [filters, setFilters] = useState({

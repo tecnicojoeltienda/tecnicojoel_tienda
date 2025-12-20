@@ -12,7 +12,7 @@ function formatMoney(v) {
   return `S/. ${Number(v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-/* Reusable Modal (responsive) */
+
 function Modal({ open, onClose, title, children, footer, maxW = "max-w-4xl" }) {
   if (!open) return null;
   return (
@@ -315,7 +315,6 @@ export default function VentasPage() {
         </div>
       </div>
 
-      {/* Detail Modal */}
       <Modal open={detailOpen} onClose={() => { setDetailOpen(false); setSelectedVenta(null); setVentaPedidoItems([]); }} title={`Detalle de Venta #${selectedVenta?.id_venta ?? ""}`} maxW="max-w-lg"
         footer={<button onClick={() => { setDetailOpen(false); setSelectedVenta(null); setVentaPedidoItems([]); }} className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg">Cerrar</button>}>
         {selectedVenta ? (
@@ -355,7 +354,6 @@ export default function VentasPage() {
         ) : <div className="text-base text-gray-500 text-center py-6">Cargando...</div>}
       </Modal>
 
-      {/* Edit Metodo Modal */}
       <Modal open={editOpen} onClose={() => { setEditOpen(false); setEditingVenta(null); }} title={`Editar Método - Venta #${editingVenta?.id_venta ?? ""}`} maxW="max-w-lg"
         footer={
           <>

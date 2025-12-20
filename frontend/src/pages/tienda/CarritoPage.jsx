@@ -57,13 +57,11 @@ export default function CarritoPage() {
       return; 
     }
 
-    // Validar productos en promoción
     if (hasPromoItems) {
       setCodeError("Códigos no válidos para productos en oferta.");
       return;
     }
     
-    // VALIDAR CONTRA EL SERVIDOR (contador global real)
     try {
       const res = await api.get(`/apij/codigos-descuento/validar/${code}`);
       const data = res?.data;
@@ -73,7 +71,6 @@ export default function CarritoPage() {
         return;
       }
 
-      // Código válido - aplicar localmente (NO consumir aún, se consume al crear pedido)
       const newDiscount = { 
         code: data.codigo, 
         percent: Number(data.porcentaje) / 100, 
@@ -101,11 +98,8 @@ export default function CarritoPage() {
     setDiscount(null);
     setCodeSuccess("");
     setCodeError("");
-    // NO decrementar el contador al remover - los usos ya están contabilizados
-    // Solo se decrementa si el pedido no se completó
   }
 
-  // helper para leer el carrito desde las fuentes posibles
   function refreshItems() {
     try {
       if (cart.items) {
@@ -124,7 +118,6 @@ export default function CarritoPage() {
     }
   }
 
-  // sincroniza con el contexto y con localStorage
   useEffect(() => {
     refreshItems();
 
@@ -135,7 +128,6 @@ export default function CarritoPage() {
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getQty = (it) => it.quantity ?? it.cantidad ?? it.qty ?? 1;
@@ -151,7 +143,6 @@ export default function CarritoPage() {
     return Number((total * (1 - appliedPercent)).toFixed(2));
   }, [total, appliedPercent]);
 
-  // helper para persistir también en localStorage
   function persistLocal(updatedItems) {
     try {
       localStorage.setItem("cart", JSON.stringify(updatedItems));
@@ -269,20 +260,19 @@ export default function CarritoPage() {
     }
   };
 
-  // helper para leer usuario (misma lógica que Historial)
+
   function getUser() {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (!raw) return null;
     try { return JSON.parse(raw); } catch { return null; }
   }
 
-  // crear pedido en backend + detalle_pedido y abrir WhatsApp
   const generarPedidoWhatsapp = async () => {
     if (!items || items.length === 0) return;
 
     const user = getUser();
     if (!user) {
-      // Mostrar modal en lugar de confirm()
+      
       setShowLoginRequiredModal(true);
       return;
     }
@@ -293,40 +283,38 @@ export default function CarritoPage() {
       return;
     }
 
-    // construir cuerpo para WhatsApp (resumen)
-    const header = "🛒 *Nuevo Pedido - Tienda TécnicoJoel*\n\n";
+    const header = " *Nuevo Pedido - Tienda TécnicoJoel*\n\n";
     const lines = items.map((it, idx) => {
       const qty = it.quantity ?? it.cantidad ?? it.qty ?? 1;
       const precio = Number(it.precio_venta ?? it.price ?? it.precio ?? 0) || 0;
       const lineTotal = (precio * qty).toFixed(2);
-      return `${idx + 1}. *${it.nombre_producto ?? it.nombre ?? it.title ?? "Producto"}*\n   📦 Cantidad: ${qty} | 💰 Precio: S/. ${precio.toFixed(2)} | 📊 Subtotal: S/. ${lineTotal}`;
+      return `${idx + 1}. *${it.nombre_producto ?? it.nombre ?? it.title ?? "Producto"}*\n   Cantidad: ${qty} | Precio: S/. ${precio.toFixed(2)} | Subtotal: S/. ${lineTotal}`;
     });
 
     const summary = [
       header,
       ...lines,
       "",
-      `💵 *Subtotal: S/. ${total.toFixed(2)}*`,
+      ` *Subtotal: S/. ${total.toFixed(2)}*`,
     ];
 
     if (discount) {
-      summary.push(`🎟️ Código: ${discount.code} | 🎯 Descuento: ${Math.round(discount.percent * 100)}%`);
-      summary.push(`💎 *Total con descuento: S/. ${discountedTotal.toFixed(2)}*`);
+      summary.push(` Código: ${discount.code} |  Descuento: ${Math.round(discount.percent * 100)}%`);
+      summary.push(` *Total con descuento: S/. ${discountedTotal.toFixed(2)}*`);
     } else {
-      summary.push(`💎 *Total: S/. ${total.toFixed(2)}*`);
+      summary.push(` *Total: S/. ${total.toFixed(2)}*`);
     }
 
     summary.push("");
-    summary.push("🚚 *Envío:* Por coordinar");
+    summary.push(" *Envío:* Por coordinar");
     summary.push("");
-    summary.push("📝 *Datos para coordinar:*");
-    summary.push("👤 Nombre:");
-    summary.push("📍 Dirección:");
-    summary.push("📱 Teléfono:");
+    summary.push(" *Datos para coordinar:*");
+    summary.push(" Nombre:");
+    summary.push(" Dirección:");
+    summary.push(" Teléfono:");
 
     const body = summary.join("\n");
 
-    // 1) Si hay descuento, consumir el código primero (validación final + incremento)
     let codigoConsumido = false;
     if (discount && discount.code) {
       try {
@@ -350,7 +338,7 @@ export default function CarritoPage() {
       }
     }
 
-    // 2) crear pedido en backend
+  
     try {
       const payload = {
         id_cliente: clienteId,
@@ -364,7 +352,7 @@ export default function CarritoPage() {
       const created = res?.data ?? {};
       const nuevoId = created.id_pedido ?? created.id ?? created.insertId ?? created.insert_id ?? null;
 
-      // 3) crear detalle_pedido para cada item (si se obtuvo id)
+    
       if (nuevoId) {
         const detallePromises = items.map((it) => {
           const id_producto = it.id_producto ?? it.id ?? null;
@@ -543,7 +531,7 @@ export default function CarritoPage() {
               </div>
             </section>
 
-            {/* Right: resumen mejorado */}
+            
             <aside className="order-2 lg:order-2 w-full lg:w-96 self-start">
               <div className="lg:sticky lg:top-6">
                 <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100">
@@ -682,7 +670,7 @@ export default function CarritoPage() {
 
       <FooterTienda />
 
-      {/* Modal de éxito */}
+      
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSuccessModal(false)}></div>
@@ -724,7 +712,7 @@ export default function CarritoPage() {
         </div>
       )}
 
-      {/* Modal: Login requerido (pastel naranja) */}
+      
       {showLoginRequiredModal && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowLoginRequiredModal(false)}></div>
