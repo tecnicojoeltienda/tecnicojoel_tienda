@@ -124,7 +124,7 @@ function ProductCardSimple({ p, onClick }) {
   );
 }
 
-export default function TwoCarrusel({ currentProductId = null }) {
+export default function TwoCarrusel({ currentProductId = null, useRelated = false }) {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const nav = useNavigate();
@@ -135,11 +135,42 @@ export default function TwoCarrusel({ currentProductId = null }) {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`${API}/apij/productos`);
-        if (!res.ok) throw new Error("fetch error");
-        const data = await res.json();
+        let data = [];
+        
+      
+        if (useRelated && currentProductId) {
+          try {
+            const storedRelated = localStorage.getItem(`productos_relacionados_${currentProductId}`);
+            if (storedRelated) {
+              const relatedIds = JSON.parse(storedRelated);
+              if (relatedIds && relatedIds.length > 0) {
+               
+                const resAll = await fetch(`${API}/apij/productos`);
+                if (resAll.ok) {
+                  const allData = await resAll.json();
+                  const allProducts = Array.isArray(allData) ? allData : [];
+                  data = allProducts.filter(p => relatedIds.includes(p.id_producto));
+                }
+              }
+            }
+          } catch (err) {
+            console.error("Error cargando productos relacionados:", err);
+          }
+        }
+        
+       
+        if (data.length === 0) {
+          const res = await fetch(`${API}/apij/productos`);
+          if (!res.ok) throw new Error("fetch error");
+          const allData = await res.json();
+          data = Array.isArray(allData) ? allData : [];
+          
+          // Filtrar el producto actual
+          data = data.filter(p => (p.id_producto || p.id) !== currentProductId);
+        }
+        
         if (!mounted) return;
-        setProductos(Array.isArray(data) ? data : []);
+        setProductos(data);
       } catch (e) {
         console.error("TwoCarrusel load:", e);
         setProductos([]);
@@ -149,9 +180,9 @@ export default function TwoCarrusel({ currentProductId = null }) {
     }
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [currentProductId, useRelated]);
 
-  // helper para generar slug igual que en ProductDetail/Pages
+  
   const slugify = (s = "") =>
     s
       .toString()
@@ -162,9 +193,9 @@ export default function TwoCarrusel({ currentProductId = null }) {
       .trim()
       .replace(/\s+/g, "-");
 
-  // obtiene el slug de la categoría soportando varios formatos
+  
   const getCategorySlug = (prod = {}) => {
-    // Mapa id_categoria -> slug según tu dump SQL
+   
     const idToSlug = {
       1: "pcs",
       2: "laptops",
@@ -181,7 +212,7 @@ export default function TwoCarrusel({ currentProductId = null }) {
       13: "estabilizadores"
     };
 
-    // intentos directos solo sobre campos que representen la categoría explícita
+    
     const tryValues = [
       prod.categoria,
       prod.categoria_nombre,
@@ -219,18 +250,18 @@ export default function TwoCarrusel({ currentProductId = null }) {
 
     catRaw = String(catRaw || "").trim();
 
-    // Si no hay categoría explícita en texto, intentar mapear por id_categoria
+    
     if (!catRaw || /^(productos?|producto)s?$/i.test(catRaw)) {
       const id = Number(prod.id_categoria ?? prod.idCategoria ?? prod.categoryId ?? prod.id_categoria);
       if (!Number.isNaN(id) && idToSlug[id]) return idToSlug[id];
-      // Si no se puede determinar explícitamente, devolvemos null para indicar ausencia de categoría
+      
       return null;
     }
 
     return slugify(catRaw);
   };
 
-  // Excluir el producto actual y aquellos sin categoría explícita
+
   const pool = productos
     .filter(p => String(p.id_producto) !== String(currentProductId))
     .filter(p => {
