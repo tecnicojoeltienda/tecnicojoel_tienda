@@ -151,17 +151,11 @@ export default function ProductCreatePage() {
         formData.append("imagen", imagenFile);
       }
 
-      // Guardar productos relacionados en localStorage temporalmente
-      if (form.id_categoria && productosRelacionados.length > 0) {
-        formData.append("productos_relacionados", JSON.stringify(productosRelacionados));
-      }
-
       const token = localStorage.getItem("token");
       const res = await fetch(`${API}/apij/productos`, {
         method: "POST",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          // NO enviar Content-Type, fetch lo hace automáticamente con FormData
         },
         body: formData,
       });
@@ -170,7 +164,22 @@ export default function ProductCreatePage() {
       if (!res.ok) throw new Error(data?.error || "Error creando producto");
 
       alert("Producto creado correctamente");
-      navigate("/inventario/dashboard");
+
+      const nuevoProductoId = data?.id;
+
+      
+      if (nuevoProductoId && productosRelacionados.length > 0) {
+        try {
+          localStorage.setItem(
+            `productos_relacionados_${nuevoProductoId}`, 
+            JSON.stringify(productosRelacionados)
+          );
+        } catch (err) {
+          console.error("Error guardando productos relacionados:", err);
+        }
+      }
+
+      navigate("/inventario/productos");
     } catch (err) {
       console.error(err);
       setError(err.message || "Error al crear producto");
@@ -450,12 +459,7 @@ O JSON: {"Tamaño":"24 pulgadas","Peso":"3.5 kg"}`;
 
             {/* Productos Relacionados */}
             <div className="lg:col-span-2">
-              <label className="block text-lg font-bold text-gray-800 mb-3">
-                <FiLink className="inline w-5 h-5 mr-2 text-blue-600" />
-                Productos Relacionados
-              </label>
               <ProductosRelacionados
-                idCategoria={form.id_categoria}
                 productosSeleccionados={productosRelacionados}
                 onSelectionChange={setProductosRelacionados}
               />

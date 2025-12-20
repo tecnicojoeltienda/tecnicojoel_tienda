@@ -556,20 +556,13 @@ export default function ProductEditPage() {
               </div>
 
               {/* Productos Relacionados */}
-              {form?.id_categoria && (
-                <div className="mt-6">
-                  <label className="block text-lg font-bold text-gray-800 mb-3">
-                    <FiLink className="inline w-5 h-5 mr-2 text-blue-600" />
-                    Productos Relacionados
-                  </label>
-                  <ProductosRelacionados
-                    idCategoria={form.id_categoria}
-                    productosSeleccionados={productosRelacionados}
-                    onSelectionChange={setProductosRelacionados}
-                    productoActualId={parseInt(id)}
-                  />
-                </div>
-              )}
+              <div className="mt-6">
+                <ProductosRelacionados
+                  productosSeleccionados={productosRelacionados}
+                  onSelectionChange={setProductosRelacionados}
+                  productoActualId={parseInt(id)}
+                />
+              </div>
 
               <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
                 <div className="flex items-start gap-3">
