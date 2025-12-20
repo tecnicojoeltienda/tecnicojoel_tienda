@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FiSave, FiArrowLeft, FiEdit3, FiPackage, FiCamera } from "react-icons/fi";
+import { FiSave, FiArrowLeft, FiEdit3, FiPackage, FiCamera, FiLink } from "react-icons/fi";
+import ProductosRelacionadosSelector from "../../components/inventario/ProductosRelacionadosSelector";
 
 const API = import.meta.env.VITE_API_BASE_URL 
 //|| "http://localhost:4000";
@@ -17,6 +18,7 @@ export default function ProductEditPage() {
   
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [productosRelacionados, setProductosRelacionados] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -178,6 +180,15 @@ export default function ProductEditPage() {
         }
       }
 
+      // Guardar productos relacionados en localStorage
+      if (form?.id_categoria && productosRelacionados.length > 0) {
+        try {
+          localStorage.setItem(`productos_relacionados_${id}`, JSON.stringify(productosRelacionados));
+        } catch (err) {
+          console.error("Error guardando productos relacionados:", err);
+        }
+      }
+
       navigate("/inventario/dashboard");
     } catch (err) {
       console.error("Error guardando producto:", err);
@@ -186,6 +197,20 @@ export default function ProductEditPage() {
       setSaving(false);
     }
   }
+
+  useEffect(() => {
+    let mounted = true;
+    // Cargar productos relacionados desde localStorage
+    try {
+      const storedRelated = localStorage.getItem(`productos_relacionados_${id}`);
+      if (storedRelated) {
+        setProductosRelacionados(JSON.parse(storedRelated));
+      }
+    } catch (err) {
+      console.error("Error cargando productos relacionados:", err);
+    }
+    return () => { mounted = false; };
+  }, [id]);
 
   if (loading) {
     return (
@@ -529,6 +554,22 @@ export default function ProductEditPage() {
                   );
                 })}
               </div>
+
+              {/* Productos Relacionados */}
+              {form?.id_categoria && (
+                <div className="mt-6">
+                  <label className="block text-lg font-bold text-gray-800 mb-3">
+                    <FiLink className="inline w-5 h-5 mr-2 text-blue-600" />
+                    Productos Relacionados
+                  </label>
+                  <ProductosRelacionadosSelector
+                    idCategoria={form.id_categoria}
+                    productosSeleccionados={productosRelacionados}
+                    onSelectionChange={setProductosRelacionados}
+                    productoActualId={parseInt(id)}
+                  />
+                </div>
+              )}
 
               <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
                 <div className="flex items-start gap-3">
