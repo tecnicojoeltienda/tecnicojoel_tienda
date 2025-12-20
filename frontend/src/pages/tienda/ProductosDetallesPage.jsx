@@ -84,40 +84,14 @@ export default function ProductosDetallesPage() {
   async function cargarProductosRelacionados(productoId) {
     setLoadingRelacionados(true);
     try {
-      const storedRelated = localStorage.getItem(`productos_relacionados_${productoId}`);
       console.log("🔍 Buscando productos relacionados para ID:", productoId);
-      console.log("🔍 LocalStorage value:", storedRelated);
-
-      if (storedRelated) {
-        let relatedIdsRaw;
-        try {
-          relatedIdsRaw = JSON.parse(storedRelated);
-        } catch {
-          relatedIdsRaw = [];
-        }
-
-        const relatedIds = Array.isArray(relatedIdsRaw) ? relatedIdsRaw.map(String) : [];
-        console.log("✅ IDs normalizados encontrados:", relatedIds);
-
-        if (relatedIds.length > 0) {
-          const res = await api.get("/apij/productos");
-          // ✅ MANEJAR NUEVA RESPUESTA DEL BACKEND
-          const todosLosProductos = res.data?.success 
-            ? (res.data.data || []) 
-            : (Array.isArray(res.data) ? res.data : []);
-          
-          const relacionados = todosLosProductos.filter(p =>
-            relatedIds.includes(String(p.id_producto ?? p.id))
-          );
-
-          console.log("✅ Productos relacionados cargados:", relacionados.length);
-          setProductosRelacionados(relacionados);
-          return;
-        }
-      }
-
-      console.log("⚠️ No hay productos relacionados guardados");
-      setProductosRelacionados([]);
+      
+      // ✅ LLAMAR A LA API
+      const res = await api.get(`/apij/productos/${productoId}/relacionados`);
+      const relacionados = Array.isArray(res.data) ? res.data : [];
+      
+      console.log("✅ Productos relacionados cargados desde API:", relacionados.length);
+      setProductosRelacionados(relacionados);
     } catch (err) {
       console.error("❌ Error cargando productos relacionados:", err);
       setProductosRelacionados([]);
@@ -337,10 +311,8 @@ export default function ProductosDetallesPage() {
             </div>
           ) : null}
 
-          {/* TwoCarrusel original (se muestra siempre) */}
           <TwoCarrusel 
             currentProductId={product?.id_producto || product?.id}
-            useRelated={true}
           />
         </div>
       </main>

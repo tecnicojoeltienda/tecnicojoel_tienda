@@ -180,20 +180,7 @@ export default function ProductEditPage() {
         await api.put(`/apij/productos/${encodeURIComponent(id)}`, payload);
       }
 
-      // ✅ GUARDAR EN LOCALSTORAGE (después de la actualización exitosa)
-      if (productosRelacionados.length > 0) {
-        try {
-          localStorage.setItem(
-            `productos_relacionados_${id}`,
-            JSON.stringify(productosRelacionados)
-          );
-          console.log("✅ Productos relacionados guardados en localStorage:", productosRelacionados);
-        } catch (err) {
-          console.error("Error guardando productos relacionados:", err);
-        }
-      }
-
-      navigate("/inventario/dashboard");
+      navigate("/inventario/productos");
     } catch (err) {
       console.error("Error guardando producto:", err);
       setError("Error guardando producto: " + (err.message || ""));
@@ -204,19 +191,24 @@ export default function ProductEditPage() {
 
   useEffect(() => {
     let mounted = true;
-    // Cargar productos relacionados desde localStorage
+    // Cargar productos relacionados desde la API
     async function cargarRelacionados() {
+      if (!id) return;
+      
       try {
-        const storedRelated = localStorage.getItem(`productos_relacionados_${id}`);
-        console.log(`🔍 Cargando productos relacionados para producto ${id}:`, storedRelated);
+        const res = await api.get(`/apij/productos/${id}/relacionados`);
+        const relacionados = Array.isArray(res.data) ? res.data : [];
         
-        if (storedRelated && mounted) {
-          const ids = JSON.parse(storedRelated);
-          console.log("✅ IDs de productos relacionados cargados:", ids);
+        // Extraer solo los IDs
+        const ids = relacionados.map(r => r.id_producto);
+        
+        if (mounted) {
           setProductosRelacionados(ids);
+          console.log("✅ Productos relacionados cargados desde API:", ids);
         }
       } catch (err) {
         console.error("❌ Error cargando productos relacionados:", err);
+        if (mounted) setProductosRelacionados([]);
       }
     }
     

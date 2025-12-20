@@ -145,7 +145,13 @@ export default function ProductCreatePage() {
       formData.append("estado", form.estado);
       formData.append("caracteristicas", JSON.stringify(featuresList));
       formData.append("especificaciones", JSON.stringify(specsObj));
-      
+
+      // Añadir productos relacionados (IDs) para que el backend los guarde en BD
+      const relacionadosToSend = Array.isArray(productosRelacionados)
+        ? productosRelacionados.map(id => Number(id)).filter(Boolean)
+        : [];
+      formData.append("productos_relacionados", JSON.stringify(relacionadosToSend));
+
       // AGREGAR EL ARCHIVO DE IMAGEN
       if (imagenFile) {
         formData.append("imagen", imagenFile);
@@ -166,18 +172,6 @@ export default function ProductCreatePage() {
       alert("Producto creado correctamente");
 
       const nuevoProductoId = data?.id;
-
-      
-      if (nuevoProductoId && productosRelacionados.length > 0) {
-        try {
-          localStorage.setItem(
-            `productos_relacionados_${nuevoProductoId}`, 
-            JSON.stringify(productosRelacionados)
-          );
-        } catch (err) {
-          console.error("Error guardando productos relacionados:", err);
-        }
-      }
 
       navigate("/inventario/productos");
     } catch (err) {

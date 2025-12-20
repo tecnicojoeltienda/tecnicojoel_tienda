@@ -31,5 +31,6 @@ router.get("/categoria/nombre/:name", ctrl.ListarPorCategoriaNombre);
 router.post("/", upload.single("imagen"), ctrl.crear);
 router.put("/:id", upload.single("imagen"), ctrl.actualizar);
 router.delete("/:id", ctrl.eliminar);
+router.get("/:id/relacionados", ctrl.obtenerRelacionados);
 
 export default router;

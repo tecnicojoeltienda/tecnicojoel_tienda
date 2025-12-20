@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import * as model from "../models/producto.model.js";
 import * as Movimiento from "../models/movimiento_stock.model.js";
+import * as ProductoRelacionado from "../models/producto_relacionado.model.js";
 
 export async function listar(req, res) {
   try {
@@ -77,21 +78,33 @@ export async function crear(req, res) {
       }
     }
 
+    // Extraer productos relacionados antes de crear
+    let productosRelacionados = [];
+    if (data.productos_relacionados) {
+      try {
+        productosRelacionados = typeof data.productos_relacionados === 'string' 
+          ? JSON.parse(data.productos_relacionados) 
+          : data.productos_relacionados;
+        delete data.productos_relacionados; // No enviar a la tabla producto
+      } catch (e) {
+        console.log("⚠️ No se pudieron procesar productos relacionados:", e.message);
+      }
+    }
+
     // Crear producto
     const result = await model.crearProducto(data);
     const nuevoId = result.insertId || result.id;
 
     console.log("✅ Producto creado con ID:", nuevoId);
 
-    // Procesar productos relacionados (solo log, se guarda en localStorage del frontend)
-    if (data.productos_relacionados) {
+    // Guardar productos relacionados en la base de datos
+    if (productosRelacionados.length > 0) {
       try {
-        const relacionados = typeof data.productos_relacionados === 'string' 
-          ? JSON.parse(data.productos_relacionados) 
-          : data.productos_relacionados;
-        console.log("📦 Productos relacionados recibidos:", relacionados);
-      } catch (e) {
-        console.log("⚠️ No se pudieron procesar productos relacionados:", e.message);
+        await ProductoRelacionado.guardarProductosRelacionados(nuevoId, productosRelacionados);
+        console.log(`✅ ${productosRelacionados.length} productos relacionados guardados para producto ${nuevoId}`);
+      } catch (err) {
+        console.error("❌ Error guardando productos relacionados:", err);
+        // No fallar la operación completa si falla esto
       }
     }
 
@@ -136,6 +149,19 @@ export async function actualizar(req, res) {
       }
     }
 
+    // Extraer productos relacionados antes de actualizar
+    let productosRelacionados = [];
+    if (data.productos_relacionados) {
+      try {
+        productosRelacionados = typeof data.productos_relacionados === 'string' 
+          ? JSON.parse(data.productos_relacionados) 
+          : data.productos_relacionados;
+        delete data.productos_relacionados; // No enviar a la tabla producto
+      } catch (e) {
+        console.log("⚠️ No se pudieron procesar productos relacionados:", e.message);
+      }
+    }
+
     // Manejo de stock con movimientos
     let stockProvided = false;
     let newStock = null;
@@ -173,17 +199,13 @@ export async function actualizar(req, res) {
       }
     }
 
-    // Procesar productos relacionados
-    if (data.productos_relacionados) {
-      try {
-        const relacionados = typeof data.productos_relacionados === 'string' 
-          ? JSON.parse(data.productos_relacionados) 
-          : data.productos_relacionados;
-        
-        console.log("📦 Productos relacionados recibidos para actualizar:", relacionados);
-      } catch (e) {
-        console.log("⚠️ No se pudieron procesar productos relacionados:", e.message);
-      }
+    // Actualizar productos relacionados en la base de datos
+    try {
+      await ProductoRelacionado.guardarProductosRelacionados(idProducto, productosRelacionados);
+      console.log(`✅ Productos relacionados actualizados para producto ${idProducto}`);
+    } catch (err) {
+      console.error("❌ Error actualizando productos relacionados:", err);
+      // No fallar la operación completa si falla esto
     }
 
     console.log("✅ Producto actualizado exitosamente");
@@ -226,5 +248,17 @@ export async function ListarPorCategoriaNombre(req, res) {
   } catch (err) {
     console.error("ERROR listar por nombre de categoría:", err);
     return res.status(500).json({ error: "Error al obtener productos por nombre de categoría" });
+  }
+}
+
+// ✅ NUEVA FUNCIÓN: Obtener productos relacionados de un producto
+export async function obtenerRelacionados(req, res) {
+  try {
+    const idProducto = req.params.id;
+    const relacionados = await ProductoRelacionado.obtenerProductosRelacionados(idProducto);
+    return res.status(200).json(relacionados);
+  } catch (err) {
+    console.error("ERROR obtener productos relacionados:", err);
+    return res.status(500).json({ error: "Error al obtener productos relacionados" });
   }
 }
