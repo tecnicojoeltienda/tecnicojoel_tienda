@@ -156,7 +156,10 @@ export default function ProductosDetallesPage() {
             </h2>
             <p className="text-gray-600">Descubre otros productos que podrían interesarte</p>
           </div>
-          <TwoCarrusel currentProductId={product?.id_producto || product?.id} />
+          <TwoCarrusel 
+            currentProductId={product?.id_producto || product?.id}
+            useRelated={true}
+          />
         </div>
       </main>
       <FooterTienda />
