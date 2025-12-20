@@ -9,7 +9,6 @@ import { FiTrash2, FiPlus, FiMinus, FiShoppingCart, FiTag, FiPercent, FiCheck, F
 export default function CarritoPage() {
   const cart = useCart();
 
-  // state local para forzar re-render y manejar UI inmediatamente
   const [items, setItems] = useState(() => {
     try {
       return cart.items ?? (typeof cart.getItems === "function" ? cart.getItems() : JSON.parse(localStorage.getItem("cart") || "[]"));
@@ -30,12 +29,12 @@ export default function CarritoPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastPedidoId, setLastPedidoId] = useState(null);
 
-  // Nuevo estado para modal de login requerido
+  
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
 
   const appliedPercent = discount?.percent || 0;
 
-  // Verificar si hay productos en promoción
+  
   const hasPromoItems = useMemo(() => {
     return items.some(it => {
       const enPromo = it.en_promocion || it.en_oferta || it.promocion || it.oferta;
