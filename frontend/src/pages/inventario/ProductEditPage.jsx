@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiSave, FiArrowLeft, FiEdit3, FiPackage, FiCamera, FiLink } from "react-icons/fi";
-import ProductosRelacionadosSelector from "../../components/inventario/ProductosRelacionadosSelector";
+import ProductosRelacionados from "../../components/inventario/ProductosRelacionados";
 
 const API = import.meta.env.VITE_API_BASE_URL 
 //|| "http://localhost:4000";
