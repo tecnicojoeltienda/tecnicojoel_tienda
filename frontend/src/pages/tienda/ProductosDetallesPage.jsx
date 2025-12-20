@@ -85,26 +85,39 @@ export default function ProductosDetallesPage() {
     setLoadingRelacionados(true);
     try {
       const storedRelated = localStorage.getItem(`productos_relacionados_${productoId}`);
-      
       console.log("🔍 Buscando productos relacionados para ID:", productoId);
       console.log("🔍 LocalStorage value:", storedRelated);
-      
+
       if (storedRelated) {
-        const relatedIds = JSON.parse(storedRelated);
-        console.log("✅ IDs encontrados:", relatedIds);
-        
-        if (relatedIds && relatedIds.length > 0) {
+        let relatedIdsRaw;
+        try {
+          relatedIdsRaw = JSON.parse(storedRelated);
+        } catch {
+          relatedIdsRaw = [];
+        }
+
+        const relatedIds = Array.isArray(relatedIdsRaw) ? relatedIdsRaw.map(String) : [];
+        console.log("✅ IDs normalizados encontrados:", relatedIds);
+
+        if (relatedIds.length > 0) {
           const res = await api.get("/apij/productos");
-          const todosLosProductos = Array.isArray(res.data) ? res.data : [];
-          const relacionados = todosLosProductos.filter(p => relatedIds.includes(p.id_producto));
+          // ✅ MANEJAR NUEVA RESPUESTA DEL BACKEND
+          const todosLosProductos = res.data?.success 
+            ? (res.data.data || []) 
+            : (Array.isArray(res.data) ? res.data : []);
           
+          const relacionados = todosLosProductos.filter(p =>
+            relatedIds.includes(String(p.id_producto ?? p.id))
+          );
+
           console.log("✅ Productos relacionados cargados:", relacionados.length);
           setProductosRelacionados(relacionados);
+          return;
         }
-      } else {
-        console.log("⚠️ No hay productos relacionados guardados");
-        setProductosRelacionados([]);
       }
+
+      console.log("⚠️ No hay productos relacionados guardados");
+      setProductosRelacionados([]);
     } catch (err) {
       console.error("❌ Error cargando productos relacionados:", err);
       setProductosRelacionados([]);
