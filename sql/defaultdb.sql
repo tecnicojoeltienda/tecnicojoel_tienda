@@ -227,10 +227,29 @@ CREATE TABLE `pedido` (
 -- Dumping data for table `pedido`
 --
 
+
+
 LOCK TABLES `pedido` WRITE;
 /*!40000 ALTER TABLE `pedido` DISABLE KEYS */;
 /*!40000 ALTER TABLE `pedido` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- Tabla para productos relacionados
+CREATE TABLE IF NOT EXISTS `producto_relacionado` (
+  `id_relacion` int NOT NULL AUTO_INCREMENT,
+  `id_producto` int NOT NULL,
+  `id_producto_relacionado` int NOT NULL,
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_relacion`),
+  KEY `idx_producto` (`id_producto`),
+  KEY `idx_producto_relacionado` (`id_producto_relacionado`),
+  UNIQUE KEY `unique_relacion` (`id_producto`, `id_producto_relacionado`),
+  CONSTRAINT `fk_producto_principal` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`) ON DELETE CASCADE,
+  CONSTRAINT `fk_producto_relacionado` FOREIGN KEY (`id_producto_relacionado`) REFERENCES `producto` (`id_producto`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Índices para mejorar el rendimiento
+CREATE INDEX idx_producto_relacionado_lookup ON producto_relacionado(id_producto, id_producto_relacionado);
 
 --
 -- Table structure for table `producto`
@@ -268,6 +287,34 @@ INSERT INTO `producto` VALUES (1,'Laptop Lenovo LOQ 15IRX9 ','Pantalla15.6\" FHD
 UNLOCK TABLES;
 SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+--
+-- Table structure for table `venta`
+--
+
+DROP TABLE IF EXISTS `venta`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `venta` (
+  `id_venta` int NOT NULL AUTO_INCREMENT,
+  `id_pedido` int DEFAULT NULL,
+  `fecha_venta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `total` decimal(10,2) NOT NULL,
+  `metodo_pago` enum('efectivo','transferencia','tarjeta','otro') COLLATE utf8mb4_general_ci DEFAULT 'efectivo',
+  PRIMARY KEY (`id_venta`),
+  KEY `id_pedido` (`id_pedido`),
+  CONSTRAINT `venta_ibfk_1` FOREIGN KEY (`id_pedido`) REFERENCES `pedido` (`id_pedido`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `venta`
+--
+
+LOCK TABLES `venta` WRITE;
+/*!40000 ALTER TABLE `venta` DISABLE KEYS */;
+/*!40000 ALTER TABLE `venta` ENABLE KEYS */;
+UNLOCK TABLES;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
