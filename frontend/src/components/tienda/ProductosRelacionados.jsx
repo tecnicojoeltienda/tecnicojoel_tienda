@@ -31,10 +31,8 @@ export default function ProductosRelacionados({
     try {
       const res = await fetch(`${API}/apij/categorias`);
       if (res.ok) {
-        const json = await res.json();
-        // ✅ MANEJAR RESPUESTA
-        const data = json.success ? (json.data || []) : (Array.isArray(json) ? json : []);
-        setCategorias(data);
+        const data = await res.json();
+        setCategorias(Array.isArray(data) ? data : []);
       }
     } catch (err) {
       console.error("Error cargando categorías:", err);
@@ -46,11 +44,10 @@ export default function ProductosRelacionados({
     try {
       const res = await fetch(`${API}/apij/productos/categoria/${categoriaSeleccionada}`);
       if (res.ok) {
-        const json = await res.json();
-        // ✅ MANEJAR RESPUESTA
-        const data = json.success ? (json.data || []) : (Array.isArray(json) ? json : (json.rows || []));
+        const data = await res.json();
+        const lista = Array.isArray(data) ? data : (data.rows || []);
         // Filtrar el producto actual si existe
-        const filtrados = data.filter(p => p.id_producto !== productoActualId);
+        const filtrados = lista.filter(p => p.id_producto !== productoActualId);
         setProductos(filtrados);
       }
     } catch (err) {
@@ -85,9 +82,8 @@ export default function ProductosRelacionados({
       try {
         const res = await fetch(`${API}/apij/productos`);
         if (res.ok) {
-          const json = await res.json();
-          // ✅ MANEJAR RESPUESTA
-          const allProducts = json.success ? (json.data || []) : (Array.isArray(json) ? json : []);
+          const allData = await res.json();
+          const allProducts = Array.isArray(allData) ? allData : [];
           const seleccionados = allProducts.filter(p => 
             productosSeleccionados.includes(p.id_producto)
           );

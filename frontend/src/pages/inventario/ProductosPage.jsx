@@ -26,11 +26,8 @@ export default function ProductosPage() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error("Error al obtener productos");
-      const json = await res.json();
-      
-      // ✅ MANEJAR NUEVA RESPUESTA DEL BACKEND { success, data, message }
-      const data = json.success ? (json.data || []) : (Array.isArray(json) ? json : []);
-      setProductos(data);
+      const data = await res.json();
+      setProductos(data || []);
     } catch (err) {
       setError("No se pudieron cargar los productos");
     } finally {
@@ -42,11 +39,8 @@ export default function ProductosPage() {
     try {
       const res = await fetch(`${API}/apij/categorias`);
       if (!res.ok) return;
-      const json = await res.json();
-      
-      // ✅ MANEJAR RESPUESTA (podría ser array o { success, data })
-      const data = json.success ? (json.data || []) : (Array.isArray(json) ? json : []);
-      setCategorias(data);
+      const data = await res.json();
+      setCategorias(data || []);
     } catch (err) {
       // ignore
     }

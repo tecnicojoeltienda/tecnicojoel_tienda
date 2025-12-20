@@ -3,22 +3,13 @@ import path from "path";
 import * as model from "../models/producto.model.js";
 import * as Movimiento from "../models/movimiento_stock.model.js";
 
-
-function sendResponse(res, statusCode, success, data = null, message = "") {
-  return res.status(statusCode).json({
-    success,
-    data: data || (success ? [] : null),
-    message: message || (success ? "Operación exitosa" : "Error en la operación")
-  });
-}
-
 export async function listar(req, res) {
   try {
     const rows = await model.obtenerProductos();
-    return sendResponse(res, 200, true, rows, "Productos obtenidos exitosamente");
+    return res.status(200).json(rows);
   } catch (e) {
     console.error("ERROR listar productos:", e);
-    return sendResponse(res, 500, false, null, e.message || "Error al listar productos");
+    return res.status(500).json({ error: e.message || "Error al listar productos" });
   }
 }
 
@@ -26,12 +17,12 @@ export async function ver(req, res) {
   try {
     const row = await model.obtenerProductoPorId(req.params.id);
     if (!row) {
-      return sendResponse(res, 404, false, null, "Producto no encontrado");
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
-    return sendResponse(res, 200, true, row, "Producto encontrado");
+    return res.status(200).json(row);
   } catch (e) {
     console.error("ERROR ver producto:", e);
-    return sendResponse(res, 500, false, null, "Error al obtener producto");
+    return res.status(500).json({ error: "Error al obtener producto" });
   }
 }
 
@@ -82,7 +73,7 @@ export async function crear(req, res) {
         data.imagen_url = await saveBase64Image(data.imagen_url, originalFilename);
       } catch (err) {
         console.error("Error saving base64 image:", err.message);
-        return sendResponse(res, 400, false, null, `Error en imagen base64: ${err.message}`);
+        return res.status(400).json({ error: `Error en imagen base64: ${err.message}` });
       }
     }
 
@@ -104,10 +95,10 @@ export async function crear(req, res) {
       }
     }
 
-    return sendResponse(res, 201, true, { id: nuevoId }, "Producto creado exitosamente");
+    return res.status(201).json({ id: nuevoId, message: "Producto creado exitosamente" });
   } catch (e) {
     console.error("ERROR crear producto:", e.stack || e.message || e);
-    return sendResponse(res, 500, false, null, `Error al crear producto: ${e.message}`);
+    return res.status(500).json({ error: `Error al crear producto: ${e.message}` });
   }
 }
 
@@ -122,7 +113,7 @@ export async function actualizar(req, res) {
     // Verificar que el producto existe
     const existing = await model.obtenerProductoPorId(idProducto);
     if (!existing) {
-      return sendResponse(res, 404, false, null, "Producto no encontrado");
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
 
     // Procesar imagen de archivo
@@ -141,7 +132,7 @@ export async function actualizar(req, res) {
         data.imagen_url = await saveBase64Image(data.imagen_url, originalFilename);
       } catch (err) {
         console.error("Error saving base64 image (update):", err.message);
-        return sendResponse(res, 400, false, null, "Error en imagen base64");
+        return res.status(400).json({ error: "Error en imagen base64" });
       }
     }
 
@@ -196,10 +187,10 @@ export async function actualizar(req, res) {
     }
 
     console.log("✅ Producto actualizado exitosamente");
-    return sendResponse(res, 200, true, { affected, id: idProducto }, "Producto actualizado exitosamente");
+    return res.status(200).json({ affected, id: idProducto, message: "Producto actualizado exitosamente" });
   } catch (e) {
     console.error("ERROR actualizar producto:", e.stack || e.message || e);
-    return sendResponse(res, 500, false, null, `Error al actualizar producto: ${e.message}`);
+    return res.status(500).json({ error: `Error al actualizar producto: ${e.message}` });
   }
 }
 
@@ -207,12 +198,12 @@ export async function eliminar(req, res) {
   try {
     const affected = await model.eliminarProducto(req.params.id);
     if (affected === 0) {
-      return sendResponse(res, 404, false, null, "Producto no encontrado");
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
-    return sendResponse(res, 200, true, { affected }, "Producto eliminado exitosamente");
+    return res.status(200).json({ affected, message: "Producto eliminado exitosamente" });
   } catch (e) {
     console.error("ERROR eliminar producto:", e);
-    return sendResponse(res, 500, false, null, "Error al eliminar producto");
+    return res.status(500).json({ error: "Error al eliminar producto" });
   }
 }
 
@@ -220,10 +211,10 @@ export async function ListarPorCategoria(req, res) {
   try {
     const id_categoria = req.params.id;
     const productos = await model.obtenerProductosPorCategoria(id_categoria);
-    return sendResponse(res, 200, true, productos, `Productos de categoría ${id_categoria} obtenidos`);
+    return res.status(200).json(productos);
   } catch (err) {
     console.error("ERROR listar por categoría:", err);
-    return sendResponse(res, 500, false, null, "Error al obtener productos por categoría");
+    return res.status(500).json({ error: "Error al obtener productos por categoría" });
   }
 }
 
@@ -231,9 +222,9 @@ export async function ListarPorCategoriaNombre(req, res) {
   try {
     const nombre = req.params.name;
     const productos = await model.obtenerProductosPorNombreCategoria(nombre);
-    return sendResponse(res, 200, true, productos, `Productos de categoría "${nombre}" obtenidos`);
+    return res.status(200).json(productos);
   } catch (err) {
     console.error("ERROR listar por nombre de categoría:", err);
-    return sendResponse(res, 500, false, null, "Error al obtener productos por nombre de categoría");
+    return res.status(500).json({ error: "Error al obtener productos por nombre de categoría" });
   }
 }
