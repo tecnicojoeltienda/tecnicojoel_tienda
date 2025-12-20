@@ -562,7 +562,7 @@ export default function ProductEditPage() {
                     <FiLink className="inline w-5 h-5 mr-2 text-blue-600" />
                     Productos Relacionados
                   </label>
-                  <ProductosRelacionadosSelector
+                  <ProductosRelacionados
                     idCategoria={form.id_categoria}
                     productosSeleccionados={productosRelacionados}
                     onSelectionChange={setProductosRelacionados}
