@@ -251,7 +251,7 @@ function HeaderTienda() {
             <div className="flex items-center gap-2 lg:gap-3">
               <button
                 onClick={() => navigate("/")}
-                className="flex items-center gap-2 lg:gap-3 p-1 lg:p-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex items-center gap-2 lg:gap-3 p-1 lg:p-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transform translate-y-1"
                 aria-label="Ir a inicio - TecnicoJoel"
                 title="Ir a inicio"
               >
