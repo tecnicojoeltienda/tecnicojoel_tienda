@@ -153,31 +153,40 @@ export default function ProductEditPage() {
       // If a file is selected, send multipart/form-data with field name 'imagen'
       if (selectedFile) {
         const formData = new FormData();
-        for (const k of Object.keys(payload)) {
-          formData.append(k, payload[k]);
+        for (const key of Object.keys(payload)) {
+          const v = payload[key];
+          if (v !== undefined && v !== null) {
+            formData.append(key, typeof v === "object" ? JSON.stringify(v) : String(v));
+          }
         }
         formData.append("imagen", selectedFile);
         
-        // ✅ AGREGAR PRODUCTOS RELACIONADOS AL FORMDATA
-        if (productosRelacionados.length > 0) {
-          formData.append("productos_relacionados", JSON.stringify(productosRelacionados));
-        }
+        // Añadir productos relacionados
+        const relacionadosToSend = Array.isArray(productosRelacionados)
+          ? productosRelacionados.map(id => Number(id)).filter(Boolean)
+          : [];
+        formData.append("productos_relacionados", JSON.stringify(relacionadosToSend));
 
-        const token = localStorage.getItem("token");
         await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
           method: "PUT",
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
+          headers: { ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) },
           body: formData,
         });
       } else {
-        // ✅ AGREGAR PRODUCTOS RELACIONADOS AL PAYLOAD JSON
-        if (productosRelacionados.length > 0) {
-          payload.productos_relacionados = JSON.stringify(productosRelacionados);
-        }
+        // Añadir productos relacionados al payload JSON
+        const relacionadosToSend = Array.isArray(productosRelacionados)
+          ? productosRelacionados.map(id => Number(id)).filter(Boolean)
+          : [];
+        payload.productos_relacionados = relacionadosToSend;
 
-        await api.put(`/apij/productos/${encodeURIComponent(id)}`, payload);
+        await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {})
+          },
+          body: JSON.stringify(payload),
+        });
       }
 
       navigate("/inventario/productos");

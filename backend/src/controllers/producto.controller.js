@@ -85,9 +85,18 @@ export async function crear(req, res) {
         productosRelacionados = typeof data.productos_relacionados === 'string' 
           ? JSON.parse(data.productos_relacionados) 
           : data.productos_relacionados;
+        
+        // Normalizar a números y filtrar valores inválidos
+        productosRelacionados = productosRelacionados
+          .map(id => Number(id))
+          .filter(id => !isNaN(id) && id > 0);
+        
         delete data.productos_relacionados; // No enviar a la tabla producto
+        
+        console.log("✅ Productos relacionados procesados:", productosRelacionados);
       } catch (e) {
         console.log("⚠️ No se pudieron procesar productos relacionados:", e.message);
+        productosRelacionados = [];
       }
     }
 
@@ -100,12 +109,14 @@ export async function crear(req, res) {
     // Guardar productos relacionados en la base de datos
     if (productosRelacionados.length > 0) {
       try {
-        await ProductoRelacionado.guardarProductosRelacionados(nuevoId, productosRelacionados);
-        console.log(`✅ ${productosRelacionados.length} productos relacionados guardados para producto ${nuevoId}`);
+        const resultRel = await ProductoRelacionado.guardarProductosRelacionados(nuevoId, productosRelacionados);
+        console.log(`✅ ${resultRel.count} productos relacionados guardados para producto ${nuevoId}`);
       } catch (err) {
         console.error("❌ Error guardando productos relacionados:", err);
         // No fallar la operación completa si falla esto
       }
+    } else {
+      console.log("ℹ️ No hay productos relacionados para guardar");
     }
 
     return res.status(201).json({ id: nuevoId, message: "Producto creado exitosamente" });
@@ -156,9 +167,18 @@ export async function actualizar(req, res) {
         productosRelacionados = typeof data.productos_relacionados === 'string' 
           ? JSON.parse(data.productos_relacionados) 
           : data.productos_relacionados;
+        
+        // Normalizar a números y filtrar valores inválidos
+        productosRelacionados = productosRelacionados
+          .map(id => Number(id))
+          .filter(id => !isNaN(id) && id > 0);
+        
         delete data.productos_relacionados; // No enviar a la tabla producto
+        
+        console.log("✅ Productos relacionados procesados para actualizar:", productosRelacionados);
       } catch (e) {
         console.log("⚠️ No se pudieron procesar productos relacionados:", e.message);
+        productosRelacionados = [];
       }
     }
 
@@ -199,10 +219,10 @@ export async function actualizar(req, res) {
       }
     }
 
-    // Actualizar productos relacionados en la base de datos
+    // Actualizar productos relacionados en la base de datos (siempre, incluso si está vacío)
     try {
-      await ProductoRelacionado.guardarProductosRelacionados(idProducto, productosRelacionados);
-      console.log(`✅ Productos relacionados actualizados para producto ${idProducto}`);
+      const resultRel = await ProductoRelacionado.guardarProductosRelacionados(idProducto, productosRelacionados);
+      console.log(`✅ Productos relacionados actualizados para producto ${idProducto}: ${resultRel.count} relaciones`);
     } catch (err) {
       console.error("❌ Error actualizando productos relacionados:", err);
       // No fallar la operación completa si falla esto

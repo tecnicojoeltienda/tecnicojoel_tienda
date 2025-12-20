@@ -28,9 +28,10 @@ router.get("/", ctrl.listar);
 router.get("/:id", ctrl.ver);
 router.get("/categoria/:id", ctrl.ListarPorCategoria);
 router.get("/categoria/nombre/:name", ctrl.ListarPorCategoriaNombre);
+router.get("/:id/relacionados", ctrl.obtenerRelacionados);
 router.post("/", upload.single("imagen"), ctrl.crear);
 router.put("/:id", upload.single("imagen"), ctrl.actualizar);
 router.delete("/:id", ctrl.eliminar);
-router.get("/:id/relacionados", ctrl.obtenerRelacionados);
+
 
 export default router;
