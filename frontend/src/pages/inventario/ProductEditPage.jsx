@@ -29,7 +29,10 @@ export default function ProductEditPage() {
         const res = await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`);
         if (!res.ok) throw new Error("No se pudo cargar");
         const data = await res.json();
-        const p = Array.isArray(data) ? data[0] : (data.rows ? data.rows[0] : data);
+        
+        // ✅ MANEJAR NUEVA RESPUESTA DEL BACKEND
+        const dataObj = data.success ? data.data : (Array.isArray(data) ? data[0] : (data.rows ? data.rows[0] : data));
+        const p = dataObj;
 
         const types = {};
         const formObj = {};
