@@ -76,6 +76,8 @@ function App() {
               <Route path="movimientos" element={<MovimientosPage />} />
               <Route path="productos/nuevo" element={<ProductCreatePage />} />
               <Route path="productos/:id/editar" element={<ProductEditPage />} />
+              <Route path="categorias" element={<CategoriasPage />} />
+              <Route path="categorias/nuevo" element={<CrearCategoriaPage />} />
 
               <Route
                 path="clientes"
@@ -101,9 +103,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="inventario/categorias" element={
-                <ProtectedRoute allowedRoles={['super_admin']}><CategoriasPage /></ProtectedRoute>} />
-              <Route path="inventario/categorias/nuevo" element={<ProtectedRoute allowedRoles={['super_admin']}><CrearCategoriaPage /></ProtectedRoute>} />
             </Route>
 
             <Route path="/" element={<PrincipalTienda />} />
