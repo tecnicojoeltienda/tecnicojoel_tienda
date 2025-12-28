@@ -101,9 +101,9 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="categorias" element={
+              <Route path="inventario/categorias" element={
                 <ProtectedRoute allowedRoles={['super_admin']}><CategoriasPage /></ProtectedRoute>} />
-              <Route path="categorias/nuevo" element={<ProtectedRoute allowedRoles={['super_admin']}><CrearCategoriaPage /></ProtectedRoute>} />
+              <Route path="inventario/categorias/nuevo" element={<ProtectedRoute allowedRoles={['super_admin']}><CrearCategoriaPage /></ProtectedRoute>} />
             </Route>
 
             <Route path="/" element={<PrincipalTienda />} />
