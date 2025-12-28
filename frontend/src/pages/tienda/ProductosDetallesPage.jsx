@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api, { resolveImageUrl } from "../../service/api";
 import ProductDetail from "../../components/tienda/ProductDetail";
@@ -6,7 +6,9 @@ import HeaderTienda from "../../layouts/tienda/HeaderTienda";
 import FooterTienda from "../../layouts/tienda/FooterTienda";
 import { useCart } from "../../context/CartContext";
 import TwoCarrusel from "../../components/tienda/TwoCarrusel";
-import { FiPackage, FiAlertCircle } from "react-icons/fi";
+import { FiPackage, FiAlertCircle, FiChevronLeft, FiChevronRight, FiStar, FiShoppingCart } from "react-icons/fi";
+
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const slugify = (s = "") =>
   s
@@ -28,6 +30,9 @@ export default function ProductosDetallesPage() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [productosRelacionados, setProductosRelacionados] = useState([]);
+  const [loadingRelacionados, setLoadingRelacionados] = useState(false);
+  const carruselRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -57,7 +62,14 @@ export default function ProductosDetallesPage() {
           data = Array.isArray(res.data) ? res.data[0] : (res.data.rows ? res.data.rows[0] : res.data);
         }
 
-        if (mounted) setProduct(data || null);
+        if (mounted) {
+          setProduct(data || null);
+          
+          // Cargar productos relacionados
+          if (data?.id_producto) {
+            cargarProductosRelacionados(data.id_producto);
+          }
+        }
       } catch (err) {
         console.error("Error cargando producto:", err);
         if (mounted) setError("No se encontró el producto");
@@ -68,6 +80,55 @@ export default function ProductosDetallesPage() {
     load();
     return () => { mounted = false; };
   }, [id, category, slug]);
+
+  async function cargarProductosRelacionados(productoId) {
+    setLoadingRelacionados(true);
+    try {
+      console.log("🔍 Buscando productos relacionados para ID:", productoId);
+      
+      // ✅ LLAMAR A LA API
+      const res = await api.get(`/apij/productos/${productoId}/relacionados`);
+      const relacionados = Array.isArray(res.data) ? res.data : [];
+      
+      console.log("✅ Productos relacionados cargados desde API:", relacionados.length);
+      setProductosRelacionados(relacionados);
+    } catch (err) {
+      console.error("❌ Error cargando productos relacionados:", err);
+      setProductosRelacionados([]);
+    } finally {
+      setLoadingRelacionados(false);
+    }
+  }
+
+  function scrollCarrusel(direction) {
+    if (carruselRef.current) {
+      const scrollAmount = 300;
+      carruselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  }
+
+  function handleProductoRelacionadoClick(productoRelacionado) {
+    const categorySlug = getCategorySlug(productoRelacionado);
+    const productSlug = slugify(productoRelacionado.nombre_producto);
+    navigate(`/${categorySlug}/${productSlug}`);
+  }
+
+  function getCategorySlug(prod) {
+    const idToSlug = {
+      1: "pcs", 2: "laptops", 3: "monitores", 4: "mouse", 5: "accesorios",
+      6: "sonido", 7: "tintas", 8: "licencia", 9: "reacondicionados",
+      10: "redes", 11: "impresoras", 12: "componentes", 13: "estabilizadores"
+    };
+    
+    if (prod.id_categoria && idToSlug[prod.id_categoria]) {
+      return idToSlug[prod.id_categoria];
+    }
+    
+    return "productos";
+  }
 
   if (loading) {
     return (
@@ -149,14 +210,110 @@ export default function ProductosDetallesPage() {
         
         {/* Sección de productos relacionados */}
         <div className="mt-16">
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
               <FiPackage className="w-6 h-6 text-blue-600" />
               Productos relacionados
             </h2>
             <p className="text-gray-600">Descubre otros productos que podrían interesarte</p>
-          </div>
-          <TwoCarrusel currentProductId={product?.id_producto || product?.id} />
+          </div> */}
+
+          {/* Mostrar productos relacionados personalizados */}
+          {loadingRelacionados ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+            </div>
+          ) : productosRelacionados.length > 0 ? (
+            <div className="relative mb-12">
+              {/* Botones de navegación */}
+              {productosRelacionados.length > 3 && (
+                <>
+                  <button
+                    onClick={() => scrollCarrusel('left')}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+                  >
+                    <FiChevronLeft className="w-6 h-6 text-gray-700" />
+                  </button>
+                  <button
+                    onClick={() => scrollCarrusel('right')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+                  >
+                    <FiChevronRight className="w-6 h-6 text-gray-700" />
+                  </button>
+                </>
+              )}
+
+              <div
+                ref={carruselRef}
+                className="flex gap-6 overflow-x-auto scrollbar-hide py-4 px-2"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {productosRelacionados.map((p) => {
+                  const imgUrl = p.imagen_url?.startsWith('/') ? `${API}${p.imagen_url}` : p.imagen_url;
+                  
+                  return (
+                    <div
+                      key={p.id_producto}
+                      onClick={() => handleProductoRelacionadoClick(p)}
+                      className="group w-64 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    >
+                      <div className="relative w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+                        {imgUrl ? (
+                          <img 
+                            src={imgUrl} 
+                            alt={p.nombre_producto} 
+                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" 
+                          />
+                        ) : (
+                          <FiPackage className="w-16 h-16 text-gray-400" />
+                        )}
+                        
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center gap-2 text-sm font-medium text-gray-800">
+                            <FiPackage className="w-4 h-4" />
+                            Ver producto
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem] leading-tight">
+                          {p.nombre_producto}
+                        </h3>
+
+                        <div className="flex items-center gap-1 mb-3">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <FiStar key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">(0)</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="text-lg font-bold text-blue-600">
+                            S/. {Number(p.precio_venta || 0).toFixed(2)}
+                          </div>
+                          <div className="flex items-center">
+                            <div className={`w-2 h-2 ${p.stock > 0 ? 'bg-green-500' : 'bg-red-500'} rounded-full`}></div>
+                          </div>
+                        </div>
+
+                        <button className="w-full mt-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-700 flex items-center justify-center gap-2">
+                          <FiShoppingCart className="w-4 h-4" />
+                          Ver detalles
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          <TwoCarrusel 
+            currentProductId={product?.id_producto || product?.id}
+          />
         </div>
       </main>
       <FooterTienda />

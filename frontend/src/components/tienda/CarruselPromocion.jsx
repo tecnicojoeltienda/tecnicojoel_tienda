@@ -63,10 +63,85 @@ export default function CarruselPromocion() {
     setIndex((i) => Math.min(maxIndex, i + 1));
   }
 
+  // Helper para generar slug (igual que en otros componentes)
+  const slugify = (s = "") =>
+    s
+      .toString()
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+
+  // Obtener slug de categoría tratando varios campos y mapeando por id_categoria
+  const getCategorySlug = (prod = {}) => {
+    const idToSlug = {
+      1: "pcs",
+      2: "laptops",
+      3: "monitores",
+      4: "mouse",
+      5: "accesorios",
+      6: "sonido",
+      7: "tintas",
+      8: "licencia",
+      9: "reacondicionados",
+      10: "redes",
+      11: "impresoras",
+      12: "componentes",
+      13: "estabilizadores"
+    };
+
+    const tryValues = [
+      prod.categoria,
+      prod.categoria_nombre,
+      prod.categoria_slug,
+      prod.category,
+      prod.category_name,
+      prod.categoriaName,
+      prod.tipo,
+      prod.categoria?.nombre,
+      prod.categoria?.slug,
+      prod.category?.name,
+      prod.category?.slug
+    ];
+
+    let catRaw = "";
+    for (const v of tryValues) {
+      if (v === 0 || v === "0") continue;
+      if (v && typeof v === "string" && v.trim() !== "") {
+        catRaw = v;
+        break;
+      }
+      if (v && typeof v === "object") {
+        catRaw = v.slug || v.nombre || v.name || v.title || "";
+        if (catRaw) break;
+      }
+    }
+
+    catRaw = String(catRaw || "").trim();
+
+    if (!catRaw || /^(productos?|producto)s?$/i.test(catRaw)) {
+      const id = Number(prod.id_categoria ?? prod.idCategoria ?? prod.categoryId);
+      if (!Number.isNaN(id) && idToSlug[id]) return idToSlug[id];
+      return null;
+    }
+
+    return slugify(catRaw);
+  };
+
+  // Navegar al detalle usando /{categorySlug}/{productSlug}
   function goTo(product) {
     if (!product) return;
-    const id = product.id_producto || product.id;
-    navigate(`/tienda/producto/${id}`);
+    const categorySlug = getCategorySlug(product);
+    const productSlug = slugify(product.nombre_producto || product.nombre || product.title || String(product.id_producto || product.id || ""));
+    if (categorySlug) {
+      navigate(`/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}`);
+    } else {
+      // Fallback: navegar por id si no se encuentra categoría
+      const id = product.id_producto || product.id;
+      if (id) navigate(`/tienda/producto/${id}`);
+    }
   }
 
   const formatCurrency = (v) =>
@@ -74,9 +149,7 @@ export default function CarruselPromocion() {
 
   return (
     <section className="w-full py-6">
-      {/* estira el contenedor a los costados: menos margen lateral */}
       <div className="w-full mx-0 px-2 sm:px-4 lg:px-6">
-        {/* contenedor blanco / degradado más ancho, shadow más notorio y font-family forzada */}
         <div
           className="rounded-2xl bg-gradient-to-r from-black via-gray-800 to-black/90 text-white overflow-hidden"
           style={{
@@ -129,6 +202,15 @@ export default function CarruselPromocion() {
                 items.map((p) => {
                   const key = p.id_producto || p.id || JSON.stringify(p);
                   const src = resolveImageUrl(p.imagen_url || p.imagen) || "/assets/placeholder.png";
+
+                  // Calcular porcentaje de descuento si aplica
+                  let descuento = 0;
+                  if (p.precio_lista && p.precio_venta && Number(p.precio_lista) > Number(p.precio_venta)) {
+                    const lista = Number(p.precio_lista);
+                    const venta = Number(p.precio_venta);
+                    descuento = Math.round(((lista - venta) / lista) * 100);
+                  }
+
                   return (
                     <div
                       key={key}
@@ -150,14 +232,26 @@ export default function CarruselPromocion() {
                           <span className="absolute left-3 top-3 bg-red-600 text-xs font-semibold px-2 py-1 rounded-md shadow">
                             PROMO
                           </span>
+
+                          {descuento > 0 && (
+                            <span className="absolute left-3 top-12 bg-green-600 text-xs font-semibold px-2 py-1 rounded-md shadow">
+                              -{descuento}%
+                            </span>
+                          )}
                         </div>
 
                         <div className="mt-3">
-                          <div className="text-sm font-semibold leading-tight text-gray-900 truncate">{p.nombre_producto || p.nombre}</div>
+                          <div className="text-sm font-semibold leading-tight text-black truncate">{p.nombre_producto || p.nombre}</div>
                           <div className="mt-1 flex items-center justify-between">
-                            <div className="text-lg font-bold text-gray-900">{formatCurrency(p.precio_venta)}</div>
-                            <div className="text-xs text-gray-600">{p.stock != null ? `Stock: ${p.stock}` : ""}</div>
+                            <div className="text-lg font-bold text-black">{formatCurrency(p.precio_venta)}</div>
+                            <div className="text-xs text-black/80">{p.stock != null ? `Stock: ${p.stock}` : ""}</div>
                           </div>
+
+                          {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
+                            <div className="mt-2 text-xs text-black/70 line-through">
+                              S/. {Number(p.precio_lista).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

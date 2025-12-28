@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FiSave, FiArrowLeft, FiEdit3, FiPackage, FiCamera } from "react-icons/fi";
+import { FiSave, FiArrowLeft, FiEdit3, FiPackage, FiCamera, FiLink } from "react-icons/fi";
+import ProductosRelacionados from "../../components/tienda/ProductosRelacionados";
+import api from "../../service/api";
 
 const API = import.meta.env.VITE_API_BASE_URL 
 //|| "http://localhost:4000";
@@ -17,6 +19,7 @@ export default function ProductEditPage() {
   
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [productosRelacionados, setProductosRelacionados] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -26,7 +29,10 @@ export default function ProductEditPage() {
         const res = await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`);
         if (!res.ok) throw new Error("No se pudo cargar");
         const data = await res.json();
-        const p = Array.isArray(data) ? data[0] : (data.rows ? data.rows[0] : data);
+        
+        // ✅ MANEJAR NUEVA RESPUESTA DEL BACKEND
+        const dataObj = data.success ? data.data : (Array.isArray(data) ? data[0] : (data.rows ? data.rows[0] : data));
+        const p = dataObj;
 
         const types = {};
         const formObj = {};
@@ -146,39 +152,44 @@ export default function ProductEditPage() {
 
       // If a file is selected, send multipart/form-data with field name 'imagen'
       if (selectedFile) {
-        const fd = new FormData();
-        // Append all payload keys as strings (skip null/undefined)
-        Object.entries(payload).forEach(([k, v]) => {
-          if (v === undefined || v === null) return;
-          // If it's an object or array, stringify
-          if (typeof v === "object") fd.append(k, JSON.stringify(v));
-          else fd.append(k, String(v));
-        });
-        fd.append("imagen", selectedFile);
-
-        const res = await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
-          method: "PUT",
-          body: fd,
-        });
-
-        if (!res.ok) {
-          const tryJson = await res.json().catch(() => null);
-          throw new Error(tryJson?.error || tryJson?.message || (await res.text()));
+        const formData = new FormData();
+        for (const key of Object.keys(payload)) {
+          const v = payload[key];
+          if (v !== undefined && v !== null) {
+            formData.append(key, typeof v === "object" ? JSON.stringify(v) : String(v));
+          }
         }
+        formData.append("imagen", selectedFile);
+        
+        // Añadir productos relacionados
+        const relacionadosToSend = Array.isArray(productosRelacionados)
+          ? productosRelacionados.map(id => Number(id)).filter(Boolean)
+          : [];
+        formData.append("productos_relacionados", JSON.stringify(relacionadosToSend));
+
+        await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          headers: { ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) },
+          body: formData,
+        });
       } else {
-        // No file: send JSON (keeps imagen_url as URL or null)
-        const res = await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
+        // Añadir productos relacionados al payload JSON
+        const relacionadosToSend = Array.isArray(productosRelacionados)
+          ? productosRelacionados.map(id => Number(id)).filter(Boolean)
+          : [];
+        payload.productos_relacionados = relacionadosToSend;
+
+        await fetch(`${API}/apij/productos/${encodeURIComponent(id)}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          headers: {
+            "Content-Type": "application/json",
+            ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {})
+          },
+          body: JSON.stringify(payload),
         });
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || "Error guardando");
-        }
       }
 
-      navigate("/inventario/dashboard");
+      navigate("/inventario/productos");
     } catch (err) {
       console.error("Error guardando producto:", err);
       setError("Error guardando producto: " + (err.message || ""));
@@ -186,6 +197,37 @@ export default function ProductEditPage() {
       setSaving(false);
     }
   }
+
+  useEffect(() => {
+    let mounted = true;
+    // Cargar productos relacionados desde la API
+    async function cargarRelacionados() {
+      if (!id) return;
+      
+      try {
+        const res = await api.get(`/apij/productos/${id}/relacionados`);
+        const relacionados = Array.isArray(res.data) ? res.data : [];
+        
+        // Extraer solo los IDs
+        const ids = relacionados.map(r => r.id_producto);
+        
+        if (mounted) {
+          setProductosRelacionados(ids);
+          console.log("✅ Productos relacionados cargados desde API:", ids);
+        }
+      } catch (err) {
+        console.error("❌ Error cargando productos relacionados:", err);
+        if (mounted) setProductosRelacionados([]);
+      }
+    }
+    
+    cargarRelacionados();
+    return () => { mounted = false; };
+  }, [id]);
+
+  useEffect(() => {
+    console.log("🎯 ProductosRelacionados - IDs seleccionados actuales:", productosRelacionados);
+  }, [productosRelacionados]);
 
   if (loading) {
     return (
@@ -528,6 +570,15 @@ export default function ProductEditPage() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Productos Relacionados */}
+              <div className="mt-6">
+                <ProductosRelacionados
+                  productosSeleccionados={productosRelacionados}
+                  onSelectionChange={setProductosRelacionados}
+                  productoActualId={parseInt(id)}
+                />
               </div>
 
               <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">

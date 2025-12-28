@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiUpload, FiX, FiImage, FiSave, FiArrowLeft } from "react-icons/fi";
+import { FiUpload, FiX, FiImage, FiSave, FiArrowLeft, FiLink } from "react-icons/fi";
+import ProductosRelacionados from "../../components/tienda/ProductosRelacionados";
 
 const API = import.meta.env.VITE_API_BASE_URL 
 //|| "http://localhost:4000";
@@ -30,6 +31,7 @@ export default function ProductCreatePage() {
   const [imagenFile, setImagenFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [touched, setTouched] = useState({});
+  const [productosRelacionados, setProductosRelacionados] = useState([]);
 
   useEffect(() => {
     async function cargarCategorias() {
@@ -143,7 +145,13 @@ export default function ProductCreatePage() {
       formData.append("estado", form.estado);
       formData.append("caracteristicas", JSON.stringify(featuresList));
       formData.append("especificaciones", JSON.stringify(specsObj));
-      
+
+      // Añadir productos relacionados (IDs) para que el backend los guarde en BD
+      const relacionadosToSend = Array.isArray(productosRelacionados)
+        ? productosRelacionados.map(id => Number(id)).filter(Boolean)
+        : [];
+      formData.append("productos_relacionados", JSON.stringify(relacionadosToSend));
+
       // AGREGAR EL ARCHIVO DE IMAGEN
       if (imagenFile) {
         formData.append("imagen", imagenFile);
@@ -154,7 +162,6 @@ export default function ProductCreatePage() {
         method: "POST",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          // NO enviar Content-Type, fetch lo hace automáticamente con FormData
         },
         body: formData,
       });
@@ -163,7 +170,10 @@ export default function ProductCreatePage() {
       if (!res.ok) throw new Error(data?.error || "Error creando producto");
 
       alert("Producto creado correctamente");
-      navigate("/inventario/dashboard");
+
+      const nuevoProductoId = data?.id;
+
+      navigate("/inventario/productos");
     } catch (err) {
       console.error(err);
       setError(err.message || "Error al crear producto");
@@ -439,6 +449,14 @@ O JSON: {"Tamaño":"24 pulgadas","Peso":"3.5 kg"}`;
                   placeholder={especificacionesPlaceholder}
                 />
               </div>
+            </div>
+
+            {/* Productos Relacionados */}
+            <div className="lg:col-span-2">
+              <ProductosRelacionados
+                productosSeleccionados={productosRelacionados}
+                onSelectionChange={setProductosRelacionados}
+              />
             </div>
 
             {/* Submit Buttons */}
