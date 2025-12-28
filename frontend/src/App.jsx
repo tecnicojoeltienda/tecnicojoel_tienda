@@ -17,6 +17,8 @@ import VentasPage from "./pages/inventario/VentasPage.jsx";
 import MovimientosPage from "./pages/inventario/MovimientosPage.jsx";
 import AdministradoresPage from "./pages/inventario/AdministradoresPage.jsx";
 import CreateAdminPage from "./pages/inventario/CreateAdminPage.jsx";
+import CategoriasPage from "./pages/inventario/CategoriasPage.jsx";
+import CrearCategoriaPage from "./pages/inventario/CrearCategoriaPage.jsx";
 
 // IMPORTACIONES PARA REGISTRO E INICIO DE SESIÓN
 import LoginTiendaPage from "./pages/tienda/LoginTiendaPage.jsx";
@@ -99,6 +101,9 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="categorias" element={
+                <ProtectedRoute allowedRoles={['super_admin']}><CategoriasPage /></ProtectedRoute>} />
+              <Route path="categorias/nuevo" element={<ProtectedRoute allowedRoles={['super_admin']}><CrearCategoriaPage /></ProtectedRoute>} />
             </Route>
 
             <Route path="/" element={<PrincipalTienda />} />
