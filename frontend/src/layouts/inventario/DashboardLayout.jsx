@@ -8,6 +8,7 @@ import { hasAllowedRole } from '../../filters/roles';
 const Icon = {
   Dashboard: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z" stroke="currentColor" strokeWidth="1.5"/></svg>,
   Products: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="1.5"/></svg>,
+   Categories: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M3 3h7v7H3V3zM14 3h7v7h-7V3zM14 14h7v7h-7v-7zM3 14h7v7H3v-7z" stroke="currentColor" strokeWidth="1.5"/></svg>,
   Orders: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z" stroke="currentColor" strokeWidth="1.5"/></svg>,
   Sales: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
   Movements: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 1 1-3-6.5" stroke="currentColor" strokeWidth="1.5"/><path d="M12 7v6l4 2" stroke="currentColor" strokeWidth="1.5"/></svg>,
@@ -33,6 +34,7 @@ export default function DashboardLayout() {
 
   const [expandedMenus, setExpandedMenus] = useState({
     productos: false,
+    categorias: false,
     administradores: false
   });
 
@@ -152,6 +154,25 @@ export default function DashboardLayout() {
       icon: Icon.Dashboard,
       to: '/inventario/dashboard',
       type: 'link'
+    },
+    {
+      key: 'categorias',
+      label: 'Categorías',
+      icon: Icon.Categories,
+      type: 'expandable',
+      expanded: expandedMenus.categorias,
+      subItems: [
+        {
+          label: 'Crear Categoría',
+          icon: Icon.Add,
+          to: '/inventario/categorias/nuevo'
+        },
+        {
+          label: 'Ver Categorías',
+          icon: Icon.View,
+          to: '/inventario/categorias'
+        }
+      ]
     },
     {
       key: 'productos',
