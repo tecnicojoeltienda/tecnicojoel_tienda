@@ -19,13 +19,24 @@ export default function LaptopsPage() {
     sort: "relevance"
   });
 
+  // Función para aleatorizar array
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   useEffect(() => {
     async function cargar() {
       try {
         setLoading(true);
         const res = await api.get("/apij/productos/categoria/nombre/laptops");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
-        setProductos(rows);
+        // Aleatorizar productos al cargar
+        setProductos(shuffleArray(rows));
       } catch (err) {
         console.error("Error cargando laptops por categoría:", err);
         setProductos([]);
@@ -62,6 +73,7 @@ export default function LaptopsPage() {
       if (filters.sort === "price_asc") return (Number(a.precio_venta) || 0) - (Number(b.precio_venta) || 0);
       if (filters.sort === "price_desc") return (Number(b.precio_venta) || 0) - (Number(a.precio_venta) || 0);
       if (filters.sort === "sales_desc") return (Number(b.ventas || b.sales || 0) || 0) - (Number(a.ventas || a.sales || 0) || 0);
+      // Si es "relevance" (orden por defecto), mantener el orden aleatorio
       return 0;
     });
 
