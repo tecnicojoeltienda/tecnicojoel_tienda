@@ -17,13 +17,23 @@ export default function AccesoriosPage() {
     sort: "relevance"
   });
 
+   // Función para aleatorizar array
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   useEffect(() => {
     async function cargar() {
       try {
         setLoading(true);
         const res = await api.get("/apij/productos/categoria/nombre/accesorios");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
-        setProductos(rows);
+        setProductos(shuffleArray(rows));
       } catch (err) {
         console.error("Error cargando accesorios por categoría:", err);
         setProductos([]);
