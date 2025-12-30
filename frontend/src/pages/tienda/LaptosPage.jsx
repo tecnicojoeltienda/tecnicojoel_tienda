@@ -64,16 +64,28 @@ export default function LaptopsPage() {
 
   const filteredProducts = useMemo(() => {
     let res = productos.slice();
+    
+    // Filtro de disponibilidad
     if (filters.availability === "in") res = res.filter(isInStock);
     if (filters.availability === "out") res = res.filter(p => !isInStock(p));
 
+    // Filtro de precio
+    if (filters.min || filters.max) {
+      res = res.filter(p => {
+        const precio = Number(p.precio_venta) || 0;
+        const min = filters.min ? Number(filters.min) : 0;
+        const max = filters.max ? Number(filters.max) : Infinity;
+        return precio >= min && precio <= max;
+      });
+    }
+
+    // Ordenamiento
     res.sort((a, b) => {
       if (filters.sort === "name_asc") return String(a.nombre_producto || "").localeCompare(String(b.nombre_producto || ""));
       if (filters.sort === "name_desc") return String(b.nombre_producto || "").localeCompare(String(a.nombre_producto || ""));
       if (filters.sort === "price_asc") return (Number(a.precio_venta) || 0) - (Number(b.precio_venta) || 0);
       if (filters.sort === "price_desc") return (Number(b.precio_venta) || 0) - (Number(a.precio_venta) || 0);
       if (filters.sort === "sales_desc") return (Number(b.ventas || b.sales || 0) || 0) - (Number(a.ventas || a.sales || 0) || 0);
-      // Si es "relevance" (orden por defecto), mantener el orden aleatorio
       return 0;
     });
 

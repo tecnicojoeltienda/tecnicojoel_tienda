@@ -7,15 +7,20 @@ export default function FiltersPanel({
   className = "",
   productCount = 0
 }) {
+  const handleApplyPrice = () => {
+    
+    onChange("applyPrice", true);
+  };
+
   return (
     <div className={`space-y-6 ${className}`}> 
-      <div className="bg-white rounded-lg shadow-sm p-6"> 
+      <div className="bg-white rounded-lg shadow-sm p-6 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto"> 
         <div className="flex items-center justify-between mb-4"> 
           <h3 className="text-sm font-semibold text-gray-900 tracking-wide leading-6">Filtros</h3>
           <span className="text-sm font-medium text-gray-600 ml-2">{productCount} productos</span>
         </div>
 
-        
+        {/* Vista */}
         <div className="mb-5">
           <h4 className="text-sm font-medium text-gray-700 mb-3 uppercase tracking-wide leading-6">Vista</h4>
 
@@ -107,7 +112,7 @@ export default function FiltersPanel({
 
           <div className="mt-4 flex items-center gap-3">
             <button
-              onClick={() => onChange("applyPrice", true)}
+              onClick={handleApplyPrice}
               className="px-4 py-3 text-sm rounded-md bg-gray-900 text-white hover:bg-yellow-600 transition"
             >
               Aplicar
