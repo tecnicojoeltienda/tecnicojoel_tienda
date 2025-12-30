@@ -264,14 +264,12 @@ export default function LaptopsPage() {
       <main className="w-full mx-0 px-4 sm:px-4 lg:px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-72 order-1 ml-4 self-start">
-            <div className="sticky top-20 max-h-[calc(100vh-5rem)] overflow-auto">
-              <FiltersPanel
-                values={filters}
-                onChange={(key, value) => setFilters(f => ({ ...f, [key]: value }))}
-                onReset={resetFilters}
-                productCount={filteredProducts.length}
-              />
-            </div>
+            <FiltersPanel
+              values={filters}
+              onChange={(key, value) => setFilters(f => ({ ...f, [key]: value }))}
+              onReset={resetFilters}
+              productCount={filteredProducts.length}
+            />
           </aside>
 
           <section className="flex-1 order-2">
