@@ -5,6 +5,7 @@ import FooterTienda from "../../layouts/tienda/FooterTienda";
 import FiltersPanel from "../../layouts/tienda/FiltersPanel";
 import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
+import { toast } from 'sonner';
 
 export default function ComponentesPage() {
   const [productos, setProductos] = useState([]);
