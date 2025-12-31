@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { resolveImageUrl } from "../../service/api";
 import { FiPlus, FiMinus, FiArrowLeft, FiShoppingCart, FiPackage, FiStar, FiInfo, FiSettings } from "react-icons/fi";
+import { toast } from 'sonner';
 
 export default function ProductDetail({
   product = {},
@@ -19,6 +20,13 @@ export default function ProductDetail({
   const handleAdd = () => {
     onAdd(product, qty);
     setAddedToCart(true);
+    
+    
+    toast.success('Producto agregado al carrito', {
+      description: `${product.nombre_producto || 'Producto'} (${qty} ${qty > 1 ? 'unidades' : 'unidad'})`,
+      icon: '🛒',
+    });
+    
     setTimeout(() => setAddedToCart(false), 2000);
   };
 
