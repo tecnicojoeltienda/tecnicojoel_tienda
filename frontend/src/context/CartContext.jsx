@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 const CartContext = createContext();
 
@@ -37,21 +38,46 @@ export function CartProvider({ children }) {
       );
 
       if (existingItem) {
+        // Producto ya existe, incrementar cantidad
+        toast.success('Cantidad actualizada', {
+          description: `${product.nombre_producto || product.title || 'Producto'} ahora tiene ${existingItem.quantity + 1} unidades`,
+          icon: '🛒',
+        });
+        
         return prevItems.map(item =>
           (item.id_producto ?? item.id ?? item._id) === (product.id_producto ?? product.id ?? product._id)
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
+        // Producto nuevo
+        toast.success('Producto agregado al carrito', {
+          description: `${product.nombre_producto || product.title || 'Producto'} agregado exitosamente`,
+          icon: '✅',
+        });
+        
         return [...prevItems, { ...product, quantity: 1 }];
       }
     });
   };
 
   const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => 
-      (item.id_producto ?? item.id ?? item._id) !== productId
-    ));
+    setCartItems(prevItems => {
+      const removedItem = prevItems.find(item => 
+        (item.id_producto ?? item.id ?? item._id) === productId
+      );
+      
+      if (removedItem) {
+        toast.error('Producto eliminado', {
+          description: `${removedItem.nombre_producto || removedItem.title || 'Producto'} eliminado del carrito`,
+          icon: '🗑️',
+        });
+      }
+      
+      return prevItems.filter(item => 
+        (item.id_producto ?? item.id ?? item._id) !== productId
+      );
+    });
   };
 
   const updateQuantity = (productId, newQuantity) => {
@@ -81,6 +107,12 @@ export function CartProvider({ children }) {
   };
 
   const clearCart = () => {
+    if (cartItems.length > 0) {
+      toast.info('Carrito vaciado', {
+        description: 'Todos los productos fueron eliminados del carrito',
+        icon: '🧹',
+      });
+    }
     setCartItems([]);
   };
 

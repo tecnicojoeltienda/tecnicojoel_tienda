@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from 'sonner';
+
 import HeaderTienda from "../../layouts/tienda/HeaderTienda";
 import FooterTienda from "../../layouts/tienda/FooterTienda";
 import FiltersPanel from "../../layouts/tienda/FiltersPanel";
@@ -210,6 +212,10 @@ export default function LaptopsPage() {
                     e.preventDefault();
                     e.stopPropagation();
                     addToCart(p);
+                    toast.success('Agregado al carrito', {
+                      description: p.nombre_producto,
+                      icon: '✅',
+                    });
                   }}
                   className="flex-1 sm:inline-block px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                   aria-label={`Añadir ${p.nombre_producto} al carrito`}
@@ -247,7 +253,15 @@ export default function LaptopsPage() {
             </div>
 
             <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p); }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                addToCart(p);
+                toast.success('Agregado al carrito', {
+                  description: p.nombre_producto,
+                  icon: '✅',
+                });
+              }}
               className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
             >
               Añadir

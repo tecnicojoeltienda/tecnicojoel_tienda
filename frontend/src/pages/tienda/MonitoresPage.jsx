@@ -16,7 +16,9 @@ export default function MonitoresPage() {
   const [filters, setFilters] = useState({
     availability: "all",
     view: "grid",
-    sort: "relevance"
+    sort: "relevance",
+    min: "",
+    max: ""
   });
 
    // Función para aleatorizar array
@@ -65,6 +67,20 @@ export default function MonitoresPage() {
     let res = productos.slice();
     if (filters.availability === "in") res = res.filter(isInStock);
     if (filters.availability === "out") res = res.filter(p => !isInStock(p));
+
+    // Filtro de disponibilidad
+    if (filters.availability === "in") res = res.filter(isInStock);
+    if (filters.availability === "out") res = res.filter(p => !isInStock(p));
+
+    // Filtro de precio
+    if (filters.min || filters.max) {
+      res = res.filter(p => {
+        const precio = Number(p.precio_venta) || 0;
+        const min = filters.min ? Number(filters.min) : 0;
+        const max = filters.max ? Number(filters.max) : Infinity;
+        return precio >= min && precio <= max;
+      });
+    }
 
     res.sort((a, b) => {
       if (filters.sort === "name_asc") return String(a.nombre_producto || "").localeCompare(String(b.nombre_producto || ""));
