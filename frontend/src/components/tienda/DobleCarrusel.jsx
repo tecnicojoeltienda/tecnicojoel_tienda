@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api, { resolveImageUrl } from "../../service/api";
 import { FiChevronLeft, FiChevronRight, FiShoppingCart, FiPackage, FiStar, FiHeart } from "react-icons/fi";
 import { useCart } from "../../context/CartContext";
+import { toast } from 'sonner';
 
 function useViewportVisible(defaultVisible = 3) {
   const [visible, setVisible] = useState(defaultVisible);
