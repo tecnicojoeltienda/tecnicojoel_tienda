@@ -28,7 +28,7 @@ function slugify(name = "") {
         .replace(/[^a-z0-9\-]/g, "")
         .replace(/\-+/g, "-");
 }
-// Componente principal
+
 export default function CategoriasCarrusel() {
     const navigate = useNavigate();
     const [visible, setVisible] = useState(7);
@@ -51,8 +51,7 @@ export default function CategoriasCarrusel() {
     }, []);
 
     function goToCategory(cat) {
-        const route = `/${slugify(cat)}`;
-        navigate(route);
+        navigate(`/${slugify(cat)}`);
     }
 
     const scrollByWidth = (direction = 1) => {
@@ -67,36 +66,36 @@ export default function CategoriasCarrusel() {
             <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
                 <div
                     className="bg-white rounded-2xl overflow-hidden shadow-2xl"
-                    style={{ 
+                    style={{
                         boxShadow: "0 18px 40px rgba(2,6,23,0.22)",
                         fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
                     }}
                 >
                     <div className="p-4 sm:p-5 md:p-6 lg:p-8">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
-                            <div> 
+                            <div>
                                 <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                                    <FiGrid className="w-8 h-8 text-blue-600" /> 
-                                    Nuestras Categorías 
-                                </h3> 
-                                <p className="text-sm sm:text-base text-gray-600 font-medium"> 
-                                    Explora nuestra amplia variedad de productos tecnológicos 
-                                </p> 
+                                    <FiGrid className="w-8 h-8 text-blue-600" />
+                                    Nuestras Categorías
+                                </h3>
+                                <p className="text-sm sm:text-base text-gray-600 font-medium">
+                                    Explora nuestra amplia variedad de productos tecnológicos
+                                </p>
                             </div>
 
-                            {/* Controles de navegación (usamos scroll horizontal) */}
-                            <div className="flex items-center gap-2 self-start sm:self-auto">
+                            {/* Flechas visibles en pantallas >= sm */}
+                            <div className="hidden sm:flex items-center gap-2 self-start sm:self-auto">
                                 <button
                                     onClick={() => scrollByWidth(-1)}
                                     aria-label="Anterior categorías"
-                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
+                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 hover:shadow-lg hover:scale-105 transition-all duration-200"
                                 >
                                     <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
                                 </button>
                                 <button
                                     onClick={() => scrollByWidth(1)}
                                     aria-label="Siguiente categorías"
-                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
+                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 hover:shadow-lg hover:scale-105 transition-all duration-200"
                                 >
                                     <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
                                 </button>
@@ -105,7 +104,7 @@ export default function CategoriasCarrusel() {
 
                         {/* Carrusel con scroll horizontal nativo */}
                         <div className="relative">
-                            {/* Fade edges */}
+                            {/* Fade edges (only desktop) */}
                             <div className="absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden lg:block" />
                             <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden lg:block" />
 
@@ -116,19 +115,18 @@ export default function CategoriasCarrusel() {
                                     scrollSnapType: "x mandatory",
                                     WebkitOverflowScrolling: "touch",
                                     paddingBottom: 6,
+                                    touchAction: "pan-x",
                                 }}
+                                role="list"
                             >
                                 {categories.map((c) => (
                                     <button
                                         key={c.id}
                                         onClick={() => goToCategory(c.label)}
-                                        className="group flex-shrink-0 flex flex-col items-center justify-start bg-transparent border-0 p-2 sm:p-3 md:p-4 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl"
-                                        style={{
-                                            width: Math.max(120, Math.round((100 / visible))) + '%',
-                                            minWidth: 130,
-                                            scrollSnapAlign: "start"
-                                        }}
+                                        className="group flex-shrink-0 flex flex-col items-center justify-start bg-transparent border-0 p-2 sm:p-3 md:p-4 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl min-w-[120px] sm:min-w-[140px] md:min-w-[160px]"
+                                        style={{ scrollSnapAlign: "start" }}
                                         aria-label={`Ver categoría ${c.label}`}
+                                        role="listitem"
                                     >
                                         <div
                                             className="w-20 h-20 xs:w-24 xs:h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full relative flex items-center justify-center overflow-hidden group-hover:shadow-2xl transition-all duration-300"
@@ -204,4 +202,3 @@ export default function CategoriasCarrusel() {
         </section>
     );
 }
-
