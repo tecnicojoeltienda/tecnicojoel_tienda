@@ -28,7 +28,7 @@ function slugify(name = "") {
         .replace(/[^a-z0-9\-]/g, "")
         .replace(/\-+/g, "-");
 }
-
+// Componente principal
 export default function CategoriasCarrusel() {
     const navigate = useNavigate();
     const [visible, setVisible] = useState(7);
