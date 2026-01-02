@@ -63,7 +63,6 @@ export default function CarruselPromocion() {
     setIndex((i) => Math.min(maxIndex, i + 1));
   }
 
-  // Helper para generar slug (igual que en otros componentes)
   const slugify = (s = "") =>
     s
       .toString()
@@ -74,7 +73,6 @@ export default function CarruselPromocion() {
       .trim()
       .replace(/\s+/g, "-");
 
-  // Obtener slug de categoría tratando varios campos y mapeando por id_categoria
   const getCategorySlug = (prod = {}) => {
     const idToSlug = {
       1: "pcs",
@@ -130,7 +128,6 @@ export default function CarruselPromocion() {
     return slugify(catRaw);
   };
 
-  // Navegar al detalle usando /{categorySlug}/{productSlug}
   function goTo(product) {
     if (!product) return;
     const categorySlug = getCategorySlug(product);
@@ -138,7 +135,6 @@ export default function CarruselPromocion() {
     if (categorySlug) {
       navigate(`/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}`);
     } else {
-      // Fallback: navegar por id si no se encuentra categoría
       const id = product.id_producto || product.id;
       if (id) navigate(`/tienda/producto/${id}`);
     }
@@ -203,7 +199,6 @@ export default function CarruselPromocion() {
                   const key = p.id_producto || p.id || JSON.stringify(p);
                   const src = resolveImageUrl(p.imagen_url || p.imagen) || "/assets/placeholder.png";
 
-                  // Calcular porcentaje de descuento si aplica
                   let descuento = 0;
                   if (p.precio_lista && p.precio_venta && Number(p.precio_lista) > Number(p.precio_venta)) {
                     const lista = Number(p.precio_lista);
@@ -229,12 +224,13 @@ export default function CarruselPromocion() {
                             className="max-w-full max-h-full object-contain"
                             loading="lazy"
                           />
+
                           <span className="absolute left-3 top-3 bg-red-600 text-xs font-semibold px-2 py-1 rounded-md shadow">
                             PROMO
                           </span>
 
                           {descuento > 0 && (
-                            <span className="absolute left-3 top-12 bg-green-600 text-xs font-semibold px-2 py-1 rounded-md shadow">
+                            <span className="absolute right-3 top-3 bg-green-600 text-xs font-semibold px-2 py-1 rounded-md shadow">
                               -{descuento}%
                             </span>
                           )}
@@ -242,16 +238,25 @@ export default function CarruselPromocion() {
 
                         <div className="mt-3">
                           <div className="text-sm font-semibold leading-tight text-black truncate">{p.nombre_producto || p.nombre}</div>
-                          <div className="mt-1 flex items-center justify-between">
-                            <div className="text-lg font-bold text-black">{formatCurrency(p.precio_venta)}</div>
-                            <div className="text-xs text-black/80">{p.stock != null ? `Stock: ${p.stock}` : ""}</div>
+
+                          <div className="mt-2 flex items-end justify-between gap-3">
+                            <div>
+                              <div className="text-lg font-extrabold text-black">{formatCurrency(p.precio_venta)}</div>
+                              {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
+                                <div className="mt-1 text-xs text-black/70 line-through">
+                                  S/. {Number(p.precio_lista).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="text-sm text-green-700 font-semibold">
+                              {descuento > 0 ? `-${descuento}%` : ""}
+                            </div>
                           </div>
 
-                          {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
-                            <div className="mt-2 text-xs text-black/70 line-through">
-                              S/. {Number(p.precio_lista).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </div>
-                          )}
+                          <div className="mt-2 text-xs text-black/80">
+                            {p.stock != null ? `Stock: ${p.stock}` : ""}
+                          </div>
                         </div>
                       </div>
                     </div>
