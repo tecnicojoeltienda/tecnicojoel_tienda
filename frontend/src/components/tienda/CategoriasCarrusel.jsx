@@ -31,47 +31,40 @@ function slugify(name = "") {
 
 export default function CategoriasCarrusel() {
     const navigate = useNavigate();
-    const [index, setIndex] = useState(0);
     const [visible, setVisible] = useState(7);
     const containerRef = useRef(null);
 
     useEffect(() => {
         function update() {
             const w = window.innerWidth;
-            if (w >= 1536) setVisible(8); // 2xl
-            else if (w >= 1280) setVisible(7); // xl
-            else if (w >= 1024) setVisible(6); // lg
-            else if (w >= 768) setVisible(5); // md
-            else if (w >= 640) setVisible(4); // sm
+            if (w >= 1536) setVisible(8);
+            else if (w >= 1280) setVisible(7);
+            else if (w >= 1024) setVisible(6);
+            else if (w >= 768) setVisible(5);
+            else if (w >= 640) setVisible(4);
             else if (w >= 480) setVisible(3);
-            else setVisible(2); // xs
+            else setVisible(2);
         }
         update();
         window.addEventListener("resize", update);
         return () => window.removeEventListener("resize", update);
     }, []);
 
-    const maxIndex = Math.max(0, categories.length - visible);
-    useEffect(() => {
-        setIndex((i) => Math.min(i, maxIndex));
-    }, [visible, maxIndex]);
-
-    function prev() {
-        setIndex((i) => Math.max(0, i - 1));
-    }
-    function next() {
-        setIndex((i) => Math.min(maxIndex, i + 1));
-    }
-
     function goToCategory(cat) {
         const route = `/${slugify(cat)}`;
         navigate(route);
     }
 
+    const scrollByWidth = (direction = 1) => {
+        const el = containerRef.current;
+        if (!el) return;
+        const amount = Math.round(el.clientWidth * 0.75);
+        el.scrollBy({ left: amount * direction, behavior: "smooth" });
+    };
+
     return (
         <section className="w-full py-4 md:py-6 lg:py-8">
             <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-               
                 <div
                     className="bg-white rounded-2xl overflow-hidden shadow-2xl"
                     style={{ 
@@ -80,75 +73,63 @@ export default function CategoriasCarrusel() {
                     }}
                 >
                     <div className="p-4 sm:p-5 md:p-6 lg:p-8">
-                        
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
                             <div> 
                                 <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
                                     <FiGrid className="w-8 h-8 text-blue-600" /> 
                                     Nuestras Categorías 
-                                 </h3> 
-                                 <p className="text-sm sm:text-base text-gray-600 font-medium"> 
+                                </h3> 
+                                <p className="text-sm sm:text-base text-gray-600 font-medium"> 
                                     Explora nuestra amplia variedad de productos tecnológicos 
                                 </p> 
                             </div>
 
-                            {/* Controles de navegación */}
+                            {/* Controles de navegación (usamos scroll horizontal) */}
                             <div className="flex items-center gap-2 self-start sm:self-auto">
                                 <button
-                                    onClick={prev}
+                                    onClick={() => scrollByWidth(-1)}
                                     aria-label="Anterior categorías"
-                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
-                                    disabled={index === 0}
+                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
                                 >
                                     <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
                                 </button>
                                 <button
-                                    onClick={next}
+                                    onClick={() => scrollByWidth(1)}
                                     aria-label="Siguiente categorías"
-                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
-                                    disabled={index >= maxIndex}
+                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 disabled:opacity-30 hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
                                 >
                                     <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Carrusel de categorías */}
-                        <div className="relative overflow-hidden">
-                            {/* Indicadores de posición */}
-                            {maxIndex > 0 && (
-                                <div className="flex justify-center gap-2 mb-4">
-                                    {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => setIndex(i)}
-                                            aria-label={`Ir a página ${i + 1}`}
-                                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                                                i === index 
-                                                    ? 'w-8 bg-gradient-to-r from-blue-600 to-blue-600' 
-                                                    : 'w-1.5 bg-gray-300 hover:bg-gray-400'
-                                            }`}
-                                        />
-                                    ))}
-                                </div>
-                            )}
+                        {/* Carrusel con scroll horizontal nativo */}
+                        <div className="relative">
+                            {/* Fade edges */}
+                            <div className="absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden lg:block" />
+                            <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden lg:block" />
 
                             <div
                                 ref={containerRef}
-                                className="flex transition-transform duration-500 ease-out items-stretch"
+                                className="flex gap-4 overflow-x-auto py-2 custom-scrollbar scroll-pl-4"
                                 style={{
-                                    transform: `translateX(-${(index * 100) / visible}%)`,
+                                    scrollSnapType: "x mandatory",
+                                    WebkitOverflowScrolling: "touch",
+                                    paddingBottom: 6,
                                 }}
                             >
-                                {categories.map((c, idx) => (
+                                {categories.map((c) => (
                                     <button
                                         key={c.id}
                                         onClick={() => goToCategory(c.label)}
                                         className="group flex-shrink-0 flex flex-col items-center justify-start bg-transparent border-0 p-2 sm:p-3 md:p-4 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl"
-                                        style={{ width: `${100 / visible}%` }}
+                                        style={{
+                                            width: Math.max(120, Math.round((100 / visible))) + '%',
+                                            minWidth: 130,
+                                            scrollSnapAlign: "start"
+                                        }}
                                         aria-label={`Ver categoría ${c.label}`}
                                     >
-                                        {/* Círculo con efecto vidrio mejorado */}
                                         <div
                                             className="w-20 h-20 xs:w-24 xs:h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full relative flex items-center justify-center overflow-hidden group-hover:shadow-2xl transition-all duration-300"
                                             style={{
@@ -159,7 +140,6 @@ export default function CategoriasCarrusel() {
                                                 boxShadow: "0 14px 30px rgba(2,6,23,0.18), inset 0 4px 10px rgba(255,255,255,0.06)",
                                             }}
                                         >
-                                            {/* Imagen del producto */}
                                             <img
                                                 src={c.img}
                                                 alt={c.label}
@@ -170,53 +150,13 @@ export default function CategoriasCarrusel() {
                                                     height: "82%",
                                                 }}
                                             />
-
-                                            {/* Reflejo superior mejorado */}
-                                            <div
-                                                className="absolute rounded-full pointer-events-none"
-                                                style={{
-                                                    top: "-10%",
-                                                    left: "-6%",
-                                                    width: "70%",
-                                                    height: "55%",
-                                                    background: "radial-gradient(ellipse at top left, rgba(255,255,255,0.7), rgba(255,255,255,0.08))",
-                                                    transform: "rotate(-12deg)",
-                                                    filter: "blur(18px)",
-                                                    opacity: 0.9,
-                                                }}
-                                            />
-
-                                            {/* Brillo inferior */}
-                                            <div
-                                                className="absolute rounded-full pointer-events-none"
-                                                style={{
-                                                    bottom: "-4%",
-                                                    right: "-4%",
-                                                    width: "50%",
-                                                    height: "38%",
-                                                    background: "radial-gradient(ellipse at bottom right, rgba(255,255,255,0.15), rgba(255,255,255,0.02))",
-                                                    filter: "blur(12px)",
-                                                    opacity: 0.8,
-                                                }}
-                                            />
-
-                                            {/* Sombra interior y borde */}
-                                            <div
-                                                className="absolute inset-0 rounded-full pointer-events-none"
-                                                style={{
-                                                    boxShadow: "inset 0 6px 16px rgba(255,255,255,0.05), 0 10px 25px rgba(2,6,23,0.1)",
-                                                }}
-                                            />
-
-                                            {/* Overlay hover */}
-                                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/10 group-hover:to-blue-500/10 transition-all duration-300" />
+                                            <div className="absolute inset-0 rounded-full pointer-events-none bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/10 group-hover:to-blue-500/10 transition-all duration-300" />
                                         </div>
 
-                                        {/* Etiqueta de categoría */}
                                         <span
                                             className="mt-3 sm:mt-4 md:mt-5 text-center font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 leading-tight px-2"
-                                            style={{ 
-                                                fontSize: "clamp(0.75rem, 2vw, 1.25rem)",
+                                            style={{
+                                                fontSize: "clamp(0.75rem, 2vw, 1.05rem)",
                                                 lineHeight: 1.2,
                                                 maxWidth: "100%",
                                                 wordWrap: "break-word"
@@ -224,15 +164,11 @@ export default function CategoriasCarrusel() {
                                         >
                                             {c.label}
                                         </span>
-
-                                        {/* Indicador visual al hover */}
-                                        <div className="w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-600 group-hover:w-12 transition-all duration-300 mt-2 rounded-full" />
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Contador de categorías */}
                         <div className="mt-6 text-center">
                             <p className="text-sm font-semibold text-gray-500">
                                 <span className="text-blue-600 font-bold text-base">{categories.length}</span> categorías disponibles
@@ -241,6 +177,30 @@ export default function CategoriasCarrusel() {
                     </div>
                 </div>
             </div>
+
+            <style jsx>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    height: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: #f1f5f9;
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #cbd5e1;
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #94a3b8;
+                }
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .no-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+            `}</style>
         </section>
     );
 }
