@@ -207,10 +207,10 @@ export default function CarruselPromocion() {
                   const key = p.id_producto || p.id || JSON.stringify(p);
                   const src = resolveImageUrl(p.imagen_url || p.imagen) || "/assets/placeholder.png";
 
-                  // precio_lista = precio en promoción (precio actual rebajado)
-                  // precio_venta = precio original (antes de la promoción)
-                  const precioPromocion = toNumber(p.precio_lista);
-                  const precioOriginal = toNumber(p.precio_venta);
+                  // precio_lista = precio original (antes de la promoción)
+                  // precio_venta = precio en promoción (precio actual rebajado)
+                  const precioOriginal = toNumber(p.precio_lista);
+                  const precioPromocion = toNumber(p.precio_venta);
 
                   let descuento = 0;
                   let ahorro = 0;
@@ -227,7 +227,7 @@ export default function CarruselPromocion() {
                       style={{ width: `${100 / visible}%` }}
                     >
                       <div
-                        className="h-80 rounded-xl bg-white p-4 flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-lg"
+                        className="h-96 rounded-xl bg-white p-4 flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-lg"
                         onClick={() => goTo(p)}
                         role="button"
                       >
@@ -237,7 +237,7 @@ export default function CarruselPromocion() {
                             src={src}
                             alt={p.nombre_producto || p.nombre || "Producto"}
                             className="w-full h-full object-contain"
-                            style={{ maxHeight: "200px" }}
+                            style={{ maxHeight: "250px" }}
                             loading="lazy"
                           />
 
