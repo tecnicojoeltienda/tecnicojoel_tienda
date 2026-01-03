@@ -301,7 +301,7 @@ export default function ProductDetail({
                 <FiInfo className="w-5 h-5 text-blue-600" />
                 Descripción
               </h3>
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line text-justify break-words">
                 {product.descripcion || product.detalle || "No hay descripción disponible."}
               </div>
             </div>
