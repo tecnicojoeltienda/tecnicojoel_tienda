@@ -241,13 +241,13 @@ export default function CarruselPromocion() {
                             loading="lazy"
                           />
 
-                          <span className="absolute left-3 top-3 bg-red-600 text-xs font-bold px-3 py-1 rounded-md shadow-md">
+                          <span className="absolute left-2 top-2 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
                             PROMO
                           </span>
 
                           {descuento > 0 && (
-                            <span className="absolute right-3 top-3 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md shadow-md">
-                              -{descuento}%
+                            <span className="absolute right-2 top-2 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md shadow-md">
+                              {descuento}%
                             </span>
                           )}
                         </div>
