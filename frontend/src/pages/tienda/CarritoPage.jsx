@@ -5,6 +5,7 @@ import { useCart } from "../../context/CartContext";
 import { resolveImageUrl } from "../../service/api";
 import api from "../../service/api";
 import { FiTrash2, FiPlus, FiMinus, FiShoppingCart, FiTag, FiPercent, FiCheck, FiX, FiAlertTriangle } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 
 export default function CarritoPage() {
   const cart = useCart();
@@ -147,37 +148,48 @@ export default function CarritoPage() {
     try {
       localStorage.setItem("cart", JSON.stringify(updatedItems));
     } catch (e) {
-      /* ignore */
+      console.error("Error guardando carrito en localStorage:", e);
     }
   }
 
   const increase = async (it) => {
-    const id = it.id_producto ?? it.id ?? it._id;
-    setItems((prev) => {
-      const next = prev.map((x) => {
-        const xId = x.id_producto ?? x.id ?? x._id;
-        if (xId === id) {
-          const q = getQty(x) + 1;
-          return { ...x, quantity: q, cantidad: q, qty: q };
-        }
-        return x;
-      });
-      persistLocal(next);
-      return next;
-    });
-
     try {
-      if (typeof cart.addToCart === "function") {
-        await cart.addToCart(it);
-      } else if (typeof cart.updateQuantity === "function") {
-        await cart.updateQuantity(id, getQty(it) + 1);
-      } else {
-        refreshItems();
+      
+      const response = await api.get(`/apij/productos/${it.id_producto || it.id}`);
+      const producto = response.data;
+      const stockDisponible = producto.stock || 0;
+      const cantidadActual = getQty(it);
+      
+      if (cantidadActual >= stockDisponible) {
+        toast.error('Stock insuficiente', {
+          description: `Solo hay ${stockDisponible} unidades disponibles`,
+          icon: '⚠️',
+        });
+        return;
       }
-    } catch (e) {
-      console.warn("increase action failed:", e);
-    } finally {
-      setTimeout(refreshItems, 50);
+      
+      const newQty = cantidadActual + 1;
+      const updatedItems = items.map(item => 
+        (item.id_producto || item.id) === (it.id_producto || it.id)
+          ? { ...item, quantity: newQty }
+          : item
+      );
+      setItems(updatedItems);
+      persistLocal(updatedItems);
+      
+      if (cart && typeof cart.updateQuantity === 'function') {
+        await cart.updateQuantity(it.id_producto || it.id, newQty);
+      }
+      
+      toast.success('Cantidad actualizada', {
+        description: `${it.nombre_producto || it.nombre || 'Producto'}: ${newQty} unidades`,
+        icon: '✅',
+      });
+    } catch (err) {
+      console.error("Error aumentando cantidad:", err);
+      toast.error('Error al actualizar cantidad', {
+        icon: '❌',
+      });
     }
   };
 

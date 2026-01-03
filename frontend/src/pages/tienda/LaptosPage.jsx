@@ -12,7 +12,7 @@ export default function LaptopsPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // add cart
+ 
   const { addToCart } = useCart();
 
   const [filters, setFilters] = useState({
@@ -21,7 +21,7 @@ export default function LaptopsPage() {
     sort: "relevance"
   });
 
-  // Función para aleatorizar array
+  
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -154,6 +154,20 @@ export default function LaptopsPage() {
     const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || "")))}`;
     const styles = getCardStyles();
 
+    const handleAddToCart = async (producto) => {
+      const stockDisponible = producto.stock || 0;
+      
+      if (stockDisponible <= 0 || producto.estado === 'agotado') {
+        toast.error('Producto agotado', {
+          description: 'Este producto no está disponible en este momento',
+          icon: '❌',
+        });
+        return;
+      }
+      
+      addToCart(producto);
+    };
+
     if (filters.view === "list") {
       return (
         <article
@@ -208,19 +222,19 @@ export default function LaptopsPage() {
                 </Link>
 
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    addToCart(p);
-                    toast.success('Agregado al carrito', {
-                      description: p.nombre_producto,
-                      icon: '✅',
-                    });
-                  }}
-                  className="flex-1 sm:inline-block px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={() => handleAddToCart(p)}
+                  disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'}
+                  className={`flex-1 sm:inline-block px-3 py-2 rounded-lg font-medium transition-colors ${
+                    !p.stock || p.stock <= 0 || p.estado === 'agotado'
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                   aria-label={`Añadir ${p.nombre_producto} al carrito`}
                 >
-                  Añadir
+                  {!p.stock || p.stock <= 0 || p.estado === 'agotado' 
+                    ? 'AGOTADO' 
+                    : 'AGREGAR AL CARRITO'
+                  }
                 </button>
               </div>
             </div>
@@ -253,18 +267,18 @@ export default function LaptopsPage() {
             </div>
 
             <button
-              onClick={(e) => { 
-                e.preventDefault(); 
-                e.stopPropagation(); 
-                addToCart(p);
-                toast.success('Agregado al carrito', {
-                  description: p.nombre_producto,
-                  icon: '✅',
-                });
-              }}
-              className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => handleAddToCart(p)}
+              disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'}
+              className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                !p.stock || p.stock <= 0 || p.estado === 'agotado'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
-              Añadir
+              {!p.stock || p.stock <= 0 || p.estado === 'agotado' 
+                ? 'AGOTADO' 
+                : 'AGREGAR AL CARRITO'
+              }
             </button>
           </div>
         </div>

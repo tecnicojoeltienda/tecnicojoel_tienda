@@ -199,13 +199,12 @@ export async function actualizar(req, res) {
     let delta = 0;
     if (stockProvided && existing) {
       delta = newStock - (Number(existing.stock) || 0);
-      delete data.stock; // No actualizar directamente, usar movimientos
+      delete data.stock; 
     }
 
-    // Actualizar producto
     const affected = await model.actualizarProducto(req.params.id, data);
 
-    // Crear movimiento de stock si hay cambios
+    
     if (stockProvided && existing && delta !== 0) {
       try {
         const tipo = delta > 0 ? "entrada" : "salida";
@@ -217,7 +216,16 @@ export async function actualizar(req, res) {
             cantidad,
             descripcion: `Ajuste manual (${tipo}) - producto ${idProducto}`
           });
-          console.log(`✅ Movimiento de stock creado: ${tipo} de ${cantidad} unidades`);
+          console.log(` Movimiento de stock creado: ${tipo} de ${cantidad} unidades`);
+          
+         
+          if (newStock <= 0) {
+            await model.actualizarProducto(idProducto, { estado: 'agotado' });
+            console.log(` Producto ${idProducto} marcado como agotado (stock: ${newStock})`);
+          } else if (existing.estado === 'agotado' && newStock > 0) {
+            await model.actualizarProducto(idProducto, { estado: 'disponible' });
+            console.log(` Producto ${idProducto} marcado como disponible (stock: ${newStock})`);
+          }
         }
       } catch (errMov) {
         console.error("Error creando movimiento de stock:", errMov);
@@ -227,13 +235,13 @@ export async function actualizar(req, res) {
     // Actualizar productos relacionados en la base de datos (siempre, incluso si está vacío)
     try {
       const resultRel = await ProductoRelacionado.guardarProductosRelacionados(idProducto, productosRelacionados);
-      console.log(`✅ Productos relacionados actualizados para producto ${idProducto}: ${resultRel.count} relaciones`);
+      console.log(` Productos relacionados actualizados para producto ${idProducto}: ${resultRel.count} relaciones`);
     } catch (err) {
-      console.error("❌ Error actualizando productos relacionados:", err);
+      console.error(" Error actualizando productos relacionados:", err);
       // No fallar la operación completa si falla esto
     }
 
-    console.log("✅ Producto actualizado exitosamente");
+    console.log(" Producto actualizado exitosamente");
     return res.status(200).json({ affected, id: idProducto, message: "Producto actualizado exitosamente" });
   } catch (e) {
     console.error("ERROR actualizar producto:", e.stack || e.message || e);
