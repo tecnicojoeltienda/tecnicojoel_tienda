@@ -29,6 +29,7 @@ export async function crearProducto(data) {
     descripcion,
     id_categoria = null,
     precio_venta,
+    precio_lista = null,
     imagen_url = null,
     stock = 0,
     stock_minimo = 5,
@@ -41,9 +42,9 @@ export async function crearProducto(data) {
 
   const [result] = await conn.query(
     `INSERT INTO producto 
-     (nombre_producto, descripcion, id_categoria, precio_venta, imagen_url, stock, stock_minimo, en_promocion, estado, especificaciones)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [nombre_producto, descripcion, id_categoria, precio_venta, imagen_url, stock, stock_minimo, en_promocion, estado, especificacionesVal]
+     (nombre_producto, descripcion, id_categoria, precio_venta, precio_lista, imagen_url, stock, stock_minimo, en_promocion, estado, especificaciones)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nombre_producto, descripcion, id_categoria, precio_venta, precio_lista, imagen_url, stock, stock_minimo, en_promocion, estado, especificacionesVal]
   );
   return { id: result.insertId };
 }
@@ -52,7 +53,7 @@ export async function actualizarProducto(id, data) {
   const conn = await conexion;
   const fields = [];
   const values = [];
-  for (const key of ["nombre_producto","descripcion","id_categoria","precio_venta","imagen_url","stock","stock_minimo","en_promocion","estado","especificaciones"]) {
+  for (const key of ["nombre_producto","descripcion","id_categoria","precio_venta","precio_lista","imagen_url","stock","stock_minimo","en_promocion","estado","especificaciones"]) {
     if (key in data) {
       fields.push(`${key} = ?`);
       let v = data[key];

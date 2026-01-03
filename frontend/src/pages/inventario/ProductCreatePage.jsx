@@ -25,7 +25,8 @@ export default function ProductCreatePage() {
     en_promocion: "no",
     estado: "disponible",
     caracteristicas: "",
-    especificaciones: ""
+    especificaciones: "",
+    precio_lista: "",
   });
 
   const [imagenFile, setImagenFile] = useState(null);
@@ -371,6 +372,23 @@ O JSON: {"Tamaño":"24 pulgadas","Peso":"3.5 kg"}`;
                   <option value="no"> No</option>
                   <option value="si"> Sí</option>
                 </select>
+              </div>
+
+              <div>
+                <label htmlFor="precio_lista" className="block text-lg font-bold text-gray-800 mb-2">
+                  Precio lista (S/.)
+                </label>
+                <input
+                  id="precio_lista"
+                  name="precio_lista"
+                  value={form.precio_lista}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="w-full rounded-xl px-4 py-4 text-lg border-2 focus:outline-none focus:ring-2 transition-all duration-300 border-gray-200 focus:ring-blue-200 focus:border-blue-300"
+                />
               </div>
             </div>
 

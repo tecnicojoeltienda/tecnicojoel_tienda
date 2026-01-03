@@ -264,6 +264,7 @@ export default function ProductEditPage() {
       nombre_producto: "Nombre del producto",
       descripcion: "Descripción",
       precio_venta: "Precio de venta (S/.)",
+      precio_lista: "Precio lista (S/.)",
       imagen_url: "Imagen del producto",
       stock: "Stock disponible",
       stock_minimo: "Stock mínimo",
@@ -529,7 +530,7 @@ export default function ProductEditPage() {
                           value={rawValue}
                           onChange={onChange}
                           type="number"
-                          step={key === "precio_venta" ? "0.01" : "1"}
+                          step={key === "precio_venta" || key === "precio_lista" ? "0.01" : "1"}
                           className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 transition-all duration-300"
                         />
                       </div>

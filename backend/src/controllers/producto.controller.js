@@ -100,6 +100,11 @@ export async function crear(req, res) {
       }
     }
 
+    // Si no envían precio_lista usar precio_venta como valor por defecto
+    if (data.precio_lista == null && data.precio_venta != null) {
+      data.precio_lista = data.precio_venta;
+    }
+
     // Crear producto
     const result = await model.crearProducto(data);
     const nuevoId = result.insertId || result.id;
