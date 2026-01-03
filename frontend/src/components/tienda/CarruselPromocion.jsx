@@ -246,7 +246,7 @@ export default function CarruselPromocion() {
                           </span>
 
                           {descuento > 0 && (
-                            <span className="absolute right-3 top-3 bg-green-600 text-white text-sm font-bold px-3 py-1.5 rounded-md shadow-md">
+                            <span className="absolute right-3 top-3 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md shadow-md">
                               -{descuento}%
                             </span>
                           )}
@@ -268,13 +268,13 @@ export default function CarruselPromocion() {
                             )}
 
                             {/* Precio promoción (actual) */}
-                            <div className="text-2xl font-extrabold text-red-600">
+                            <div className="text-2xl font-extrabold text-blue-600">
                               {formatCurrency(precioPromocion)}
                             </div>
 
                             {/* Ahorro */}
                             {ahorro > 0 && (
-                              <div className="text-xs font-semibold text-green-700">
+                              <div className="text-xs font-semibold text-red-700">
                                 Ahorras S/. {ahorro.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </div>
                             )}
