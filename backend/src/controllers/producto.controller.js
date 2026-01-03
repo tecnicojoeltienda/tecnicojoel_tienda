@@ -295,3 +295,25 @@ export async function obtenerRelacionados(req, res) {
     return res.status(500).json({ error: "Error al obtener productos relacionados" });
   }
 }
+
+// Añadir al final del archivo, antes del export
+export async function verificarStock(req, res) {
+  try {
+    const idProducto = req.params.id;
+    const producto = await model.obtenerProductoPorId(idProducto);
+    
+    if (!producto) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    return res.status(200).json({
+      id_producto: producto.id_producto,
+      stock: producto.stock || 0,
+      estado: producto.estado,
+      disponible: (producto.stock > 0 && producto.estado !== 'agotado')
+    });
+  } catch (err) {
+    console.error("ERROR verificar stock:", err);
+    return res.status(500).json({ error: "Error al verificar stock" });
+  }
+}

@@ -17,44 +17,64 @@ export default function ProductDetail({
 
   const inc = () => {
     const stockDisponible = product.stock || 0;
-    if (qty < stockDisponible) {
-      setQty(q => Math.min(stockDisponible, q + 1));
-    } else {
-      toast.warning('Stock máximo alcanzado', {
-        description: `Solo hay ${stockDisponible} unidades disponibles`,
-        icon: '⚠️',
+    if (qty >= stockDisponible) {
+      toast.warning('⚠️ Stock máximo alcanzado', {
+        description: `Solo hay ${stockDisponible} unidades disponibles.`,
+        duration: 3000,
       });
+      return;
     }
+    setQty(q => q + 1);
   };
   const dec = () => setQty(q => Math.max(1, q - 1));
-  const handleAdd = () => {
-    const stockDisponible = product.stock || 0;
-    
-    if (qty > stockDisponible) {
-      toast.error('Stock insuficiente', {
-        description: `Solo hay ${stockDisponible} unidades disponibles`,
-        icon: '⚠️',
+  const handleAdd = async () => {
+    try {
+      // Verificar stock actual en tiempo real
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/productos/${product.id_producto}/stock`);
+      const stockData = await response.json();
+      
+      if (!stockData.disponible || stockData.stock <= 0) {
+        toast.error('⚠️ Producto agotado', {
+          description: 'Este producto ya no está disponible en stock.',
+          duration: 3000,
+        });
+        return;
+      }
+
+      // Verificar cuántos hay ya en el carrito
+      const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+      const itemInCart = cartItems.find(item => 
+        (item.id_producto || item.id) === product.id_producto
+      );
+      const currentQtyInCart = itemInCart ? (itemInCart.quantity || itemInCart.cantidad || 0) : 0;
+      const newTotal = currentQtyInCart + qty;
+
+      if (newTotal > stockData.stock) {
+        toast.error('⚠️ Stock insuficiente', {
+          description: `Solo hay ${stockData.stock} unidades disponibles. Ya tienes ${currentQtyInCart} en el carrito.`,
+          duration: 4000,
+        });
+        return;
+      }
+
+      // Agregar al carrito
+      onAdd(product, qty);
+      setAddedToCart(true);
+      
+      const promoText = isPromo ? " ¡En promoción! 🎉" : "";
+      toast.success('✅ Agregado al carrito', {
+        description: `${product.nombre_producto || "Producto"}${promoText}`,
+        duration: 2000,
       });
-      return;
-    }
-    
-    if (stockDisponible <= 0) {
-      toast.error('Producto agotado', {
-        description: 'Este producto no está disponible en este momento',
-        icon: '❌',
+
+      setTimeout(() => setAddedToCart(false), 2000);
+    } catch (error) {
+      console.error('Error verificando stock:', error);
+      toast.error('Error al verificar disponibilidad', {
+        description: 'Por favor intenta nuevamente.',
+        duration: 3000,
       });
-      return;
     }
-    
-    onAdd(product, qty);
-    setAddedToCart(true);
-    
-    toast.success('Producto agregado al carrito', {
-      description: `${product.nombre_producto || 'Producto'} (${qty} ${qty > 1 ? 'unidades' : 'unidad'})`,
-      icon: '🛒',
-    });
-    
-    setTimeout(() => setAddedToCart(false), 2000);
   };
 
   const imgRef = useRef(null);
@@ -299,33 +319,24 @@ export default function ProductDetail({
               </div>
             )}
 
+            {/* Reemplaza el botón "Agregar al carrito" existente */}
             <button
               onClick={handleAdd}
               disabled={!product.stock || product.stock <= 0 || product.estado === 'agotado'}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-3 ${
-                addedToCart 
-                  ? "bg-green-600 text-white" 
-                  : (!product.stock || product.stock <= 0 || product.estado === 'agotado')
-                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white"
+              className={`w-full py-4 rounded-lg font-semibold transition-all ${
+                !product.stock || product.stock <= 0 || product.estado === 'agotado'
+                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                  : addedToCart
+                  ? 'bg-green-600 text-white'
+                  : 'bg-red-600 text-white hover:bg-red-700'
               }`}
             >
-              {!product.stock || product.stock <= 0 || product.estado === 'agotado' ? (
-                <>
-                  <FiPackage className="w-5 h-5" />
-                  PRODUCTO AGOTADO
-                </>
-              ) : addedToCart ? (
-                <>
-                  <FiPackage className="w-5 h-5" />
-                  ¡Agregado al carrito!
-                </>
-              ) : (
-                <>
-                  <FiShoppingCart className="w-5 h-5" />
-                  AGREGAR AL CARRITO
-                </>
-              )}
+              {!product.stock || product.stock <= 0 || product.estado === 'agotado'
+                ? '🚫 PRODUCTO AGOTADO'
+                : addedToCart
+                ? '✓ Agregado al carrito'
+                : 'Agregar al carrito'
+              }
             </button>
           </div>
 

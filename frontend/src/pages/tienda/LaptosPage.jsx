@@ -155,17 +155,48 @@ export default function LaptopsPage() {
     const styles = getCardStyles();
 
     const handleAddToCart = async (producto) => {
-      const stockDisponible = producto.stock || 0;
-      
-      if (stockDisponible <= 0 || producto.estado === 'agotado') {
-        toast.error('Producto agotado', {
-          description: 'Este producto no está disponible en este momento',
-          icon: '❌',
+      try {
+        // Verificar stock en tiempo real
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/productos/${producto.id_producto}/stock`);
+        const stockData = await response.json();
+        
+        if (!stockData.disponible || stockData.stock <= 0) {
+          toast.error('⚠️ Producto agotado', {
+            description: `${producto.nombre_producto} ya no está disponible.`,
+            duration: 3000,
+          });
+          return;
+        }
+
+        // Verificar si ya está en el carrito
+        const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+        const itemInCart = cartItems.find(item => 
+          (item.id_producto || item.id) === producto.id_producto
+        );
+        
+        if (itemInCart) {
+          const currentQty = itemInCart.quantity || itemInCart.cantidad || 0;
+          if (currentQty >= stockData.stock) {
+            toast.warning('⚠️ Stock máximo alcanzado', {
+              description: `Ya tienes el máximo disponible (${stockData.stock} unidades) en el carrito.`,
+              duration: 4000,
+            });
+            return;
+          }
+        }
+
+        addToCart(producto);
+        toast.success('✅ Agregado al carrito', {
+          description: producto.nombre_producto,
+          duration: 2000,
         });
-        return;
+      } catch (error) {
+        console.error('Error al agregar:', error);
+        toast.error('Error al agregar al carrito', {
+          description: 'Por favor intenta nuevamente.',
+          duration: 3000,
+        });
       }
-      
-      addToCart(producto);
     };
 
     if (filters.view === "list") {
@@ -206,6 +237,20 @@ export default function LaptopsPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">En stock</span>
             </div>
+
+            {/* Advertencia de stock bajo */}
+            {p.stock <= 5 && p.stock > 0 && (
+              <div className="text-xs text-orange-600 font-medium mb-1">
+                ⚠️ Solo quedan {p.stock} unidades
+              </div>
+            )}
+
+            {/* Estado de agotado */}
+            {(!p.stock || p.stock <= 0 || p.estado === 'agotado') && (
+              <div className="text-xs text-red-600 font-bold mb-1">
+                🚫 AGOTADO
+              </div>
+            )}
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="text-base sm:text-lg font-semibold text-gray-900">
@@ -260,6 +305,21 @@ export default function LaptopsPage() {
             <Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link>
           </h2>
           <p className={styles.descClass}>{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
+
+          {/* Advertencia de stock bajo */}
+          {p.stock <= 5 && p.stock > 0 && (
+            <div className="text-xs text-orange-600 font-medium mb-1">
+              ⚠️ Solo quedan {p.stock} unidades
+            </div>
+          )}
+
+          {/* Estado de agotado */}
+          {(!p.stock || p.stock <= 0 || p.estado === 'agotado') && (
+            <div className="text-xs text-red-600 font-bold mb-1">
+              🚫 AGOTADO
+            </div>
+          )}
+
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
               <div className={styles.priceClass}>S/. {Number(p.precio_venta || 0).toFixed(2)}</div>
