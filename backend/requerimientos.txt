@@ -6,3 +6,4 @@ npm install multer
 npm install multer --save
 npm install nodemon --save
 npm install cookie-parser
+npm install nodemailer

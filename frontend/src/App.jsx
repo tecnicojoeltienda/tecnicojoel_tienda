@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import RecoveryGuard from "./components/RecoveryGuard.jsx";
 
 // IMPORTACION GLOBAL
 import CarritoPage from "./pages/tienda/CarritoPage.jsx";
@@ -23,6 +24,9 @@ import CrearCategoriaPage from "./pages/inventario/CrearCategoriaPage.jsx";
 // IMPORTACIONES PARA REGISTRO E INICIO DE SESIÓN
 import LoginTiendaPage from "./pages/tienda/LoginTiendaPage.jsx";
 import RegisterTiendaPage from "./pages/tienda/RegisterTiendaPage.jsx";
+import RecuperarPage from "./pages/tienda/RecuperarPage.jsx";
+import ValidarCodigoPage from "./pages/tienda/ValidarCodigoPage.jsx";
+import CambiarContrasenaPage from "./pages/tienda/CambiarContrasenaPage.jsx";
 
 // IMPORTACIONES PARA EL INVENTARIO
 import Dashboard from "./pages/inventario/DashboardPage.jsx";
@@ -138,6 +142,23 @@ function App() {
                 <ProtectedRoute>
                   <PerfilTiendaPage />
                 </ProtectedRoute>
+              }
+            />
+            <Route path="/recuperar" element={<RecuperarPage />} />
+            <Route
+              path="/recuperar/validar"
+              element={
+                <RecoveryGuard>
+                  <ValidarCodigoPage />
+                </RecoveryGuard>
+              }
+            />
+            <Route
+              path="/recuperar/cambiar"
+              element={
+                <RecoveryGuard>
+                  <CambiarContrasenaPage />
+                </RecoveryGuard>
               }
             />
           </Routes>

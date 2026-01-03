@@ -17,6 +17,7 @@ import pedidoRouter from "./routes/pedido.route.js";
 import ventaRouter from "./routes/venta.route.js";
 import detallePedidoRouter from "./routes/detalle_pedido.route.js";
 import codigoDescuentoRoutes from "./routes/codigo_descuento.route.js";
+import recuperacionRoutes from "./routes/recuperacion.route.js";
 
 dotenv.config();
 const app = express();
@@ -46,6 +47,7 @@ app.use("/apij/pedidos", pedidoRouter);
 app.use("/apij/ventas", ventaRouter);
 app.use("/apij/detalle_pedidos", detallePedidoRouter);
 app.use("/apij/codigos-descuento", codigoDescuentoRoutes);
+app.use("/apij/recuperacion", recuperacionRoutes);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
