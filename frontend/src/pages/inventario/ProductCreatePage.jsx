@@ -376,7 +376,7 @@ O JSON: {"Tamaño":"24 pulgadas","Peso":"3.5 kg"}`;
 
               <div>
                 <label htmlFor="precio_lista" className="block text-lg font-bold text-gray-800 mb-2">
-                  Precio lista (S/.)
+                  Precio Antes (S/.)
                 </label>
                 <input
                   id="precio_lista"

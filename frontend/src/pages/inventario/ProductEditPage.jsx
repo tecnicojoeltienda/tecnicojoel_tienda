@@ -264,7 +264,7 @@ export default function ProductEditPage() {
       nombre_producto: "Nombre del producto",
       descripcion: "Descripción",
       precio_venta: "Precio de venta (S/.)",
-      precio_lista: "Precio lista (S/.)",
+      precio_lista: "Precio Antes (S/.)",
       imagen_url: "Imagen del producto",
       stock: "Stock disponible",
       stock_minimo: "Stock mínimo",
