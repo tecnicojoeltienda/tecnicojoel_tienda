@@ -140,8 +140,16 @@ export default function CarruselPromocion() {
     }
   }
 
-  const formatCurrency = (v) =>
-    v == null || v === "" ? "Consultar" : `S/. ${Number(v).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const toNumber = (v) => {
+    if (v == null || v === "") return 0;
+    const n = Number(String(v).replace(/[^0-9.-]/g, ""));
+    return isNaN(n) ? 0 : n;
+  };
+
+  const formatCurrency = (v) => {
+    const n = toNumber(v);
+    return n === 0 ? "Consultar" : `S/. ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   return (
     <section className="w-full py-6">
@@ -189,7 +197,7 @@ export default function CarruselPromocion() {
               {loading ? (
                 Array.from({ length: visible }).map((_, i) => (
                   <div key={i} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 px-2">
-                    <div className="h-44 bg-white/6 rounded-lg animate-pulse" />
+                    <div className="h-72 bg-white/6 rounded-lg animate-pulse" />
                   </div>
                 ))
               ) : items.length === 0 ? (
@@ -199,11 +207,17 @@ export default function CarruselPromocion() {
                   const key = p.id_producto || p.id || JSON.stringify(p);
                   const src = resolveImageUrl(p.imagen_url || p.imagen) || "/assets/placeholder.png";
 
+                  // precio_lista = precio en promoción (precio actual rebajado)
+                  // precio_venta = precio original (antes de la promoción)
+                  const precioPromocion = toNumber(p.precio_lista);
+                  const precioOriginal = toNumber(p.precio_venta);
+
                   let descuento = 0;
-                  if (p.precio_lista && p.precio_venta && Number(p.precio_lista) > Number(p.precio_venta)) {
-                    const lista = Number(p.precio_lista);
-                    const venta = Number(p.precio_venta);
-                    descuento = Math.round(((lista - venta) / lista) * 100);
+                  let ahorro = 0;
+
+                  if (precioOriginal > 0 && precioPromocion > 0 && precioOriginal > precioPromocion) {
+                    ahorro = precioOriginal - precioPromocion;
+                    descuento = Math.round((ahorro / precioOriginal) * 100);
                   }
 
                   return (
@@ -213,50 +227,65 @@ export default function CarruselPromocion() {
                       style={{ width: `${100 / visible}%` }}
                     >
                       <div
-                        className="h-56 rounded-xl bg-white p-3 flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer"
+                        className="h-80 rounded-xl bg-white p-4 flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-lg"
                         onClick={() => goTo(p)}
                         role="button"
                       >
-                        <div className="relative flex-1 flex items-center justify-center overflow-hidden rounded-lg bg-white">
+                        {/* Imagen más grande */}
+                        <div className="relative flex-1 flex items-center justify-center overflow-hidden rounded-lg bg-white mb-3">
                           <img
                             src={src}
                             alt={p.nombre_producto || p.nombre || "Producto"}
-                            className="max-w-full max-h-full object-contain"
+                            className="w-full h-full object-contain"
+                            style={{ maxHeight: "200px" }}
                             loading="lazy"
                           />
 
-                          <span className="absolute left-3 top-3 bg-red-600 text-xs font-semibold px-2 py-1 rounded-md shadow">
+                          <span className="absolute left-3 top-3 bg-red-600 text-xs font-bold px-3 py-1 rounded-md shadow-md">
                             PROMO
                           </span>
 
                           {descuento > 0 && (
-                            <span className="absolute right-3 top-3 bg-green-600 text-xs font-semibold px-2 py-1 rounded-md shadow">
+                            <span className="absolute right-3 top-3 bg-green-600 text-white text-sm font-bold px-3 py-1.5 rounded-md shadow-md">
                               -{descuento}%
                             </span>
                           )}
                         </div>
 
-                        <div className="mt-3">
-                          <div className="text-sm font-semibold leading-tight text-black truncate">{p.nombre_producto || p.nombre}</div>
-
-                          <div className="mt-2 flex items-end justify-between gap-3">
-                            <div>
-                              <div className="text-lg font-extrabold text-black">{formatCurrency(p.precio_venta)}</div>
-                              {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
-                                <div className="mt-1 text-xs text-black/70 line-through">
-                                  S/. {Number(p.precio_lista).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="text-sm text-green-700 font-semibold">
-                              {descuento > 0 ? `-${descuento}%` : ""}
-                            </div>
+                        {/* Información del producto */}
+                        <div className="space-y-2">
+                          <div className="text-sm font-semibold leading-tight text-black line-clamp-2 min-h-[2.5rem]">
+                            {p.nombre_producto || p.nombre}
                           </div>
 
-                          <div className="mt-2 text-xs text-black/80">
-                            {p.stock != null ? `Stock: ${p.stock}` : ""}
+                          {/* Precios */}
+                          <div className="space-y-1">
+                            {/* Precio original tachado */}
+                            {precioOriginal > 0 && descuento > 0 && (
+                              <div className="text-sm text-gray-500 line-through">
+                                Antes: S/. {precioOriginal.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </div>
+                            )}
+
+                            {/* Precio promoción (actual) */}
+                            <div className="text-2xl font-extrabold text-red-600">
+                              {formatCurrency(precioPromocion)}
+                            </div>
+
+                            {/* Ahorro */}
+                            {ahorro > 0 && (
+                              <div className="text-xs font-semibold text-green-700">
+                                Ahorras S/. {ahorro.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </div>
+                            )}
                           </div>
+
+                          {/* Stock */}
+                          {p.stock != null && (
+                            <div className="text-xs text-gray-600">
+                              Stock: {p.stock} {p.stock > 0 ? "disponibles" : "agotado"}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
