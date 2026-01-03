@@ -274,7 +274,7 @@ export default function CarruselPromocion() {
 
                             {/* Ahorro */}
                             {ahorro > 0 && (
-                              <div className="text-xs font-semibold text-red-700">
+                              <div className="text-xs font-semibold text-green-700">
                                 Ahorras S/. {ahorro.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </div>
                             )}
