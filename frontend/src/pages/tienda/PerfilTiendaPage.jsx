@@ -3,157 +3,17 @@ import { useNavigate } from "react-router-dom";
 import HeaderTienda from "../../layouts/tienda/HeaderTienda";
 import FooterTienda from "../../layouts/tienda/FooterTienda";
 import api from "../../service/api";
-import { FiUser, FiMail, FiPackage, FiLogOut, FiEdit3, FiShield, FiCalendar, FiClock, FiPhone, FiHome } from "react-icons/fi";
+import { FiUser, FiMail, FiPackage, FiHome, FiCalendar, FiPhone } from "react-icons/fi";
 
 export default function PerfilTiendaPage() {
   const [user, setUser] = useState(null);
-  const [stats, setStats] = useState({ pedidos: 0, totalGastado: 0 });
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
- 
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-  const [editError, setEditError] = useState("");
-  const [form, setForm] = useState({ nombre: "", apellido: "", email: "" });
 
   useEffect(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (!raw) { setUser(null); return; }
     try { setUser(JSON.parse(raw)); } catch { setUser(null); }
   }, []);
-
-  useEffect(() => {
-    if (isEditOpen && user) {
-      setForm({
-        nombre: user.nombre ?? "",
-        apellido: user.apellido ?? "",
-        email: user.email ?? user.correo ?? ""
-      });
-      setEditError("");
-    }
-  }, [isEditOpen, user]);
-
-  
-  useEffect(() => {
-    if (!user || (!user.id && !user.id_cliente && !user.idCliente)) return;
-
-    async function loadStats() {
-      setLoading(true);
-      try {
-        const res = await api.get("/apij/pedidos");
-        const all = res?.data ?? [];
-        const clienteId = user.id ?? user.id_cliente ?? user.idCliente;
-        
-       
-        const misPedidos = all.filter((p) => {
-          const idCliente = p.id_cliente ?? p.idCliente ?? p.cliente_id ?? p.cliente ?? null;
-          return Number(idCliente) === Number(clienteId);
-        });
-
-        
-        const totalGastado = misPedidos.reduce((sum, p) => {
-          return sum + (Number(p.total ?? p.monto ?? 0) || 0);
-        }, 0);
-
-        setStats({
-          pedidos: misPedidos.length,
-          totalGastado: totalGastado
-        });
-      } catch (err) {
-        console.error("Error cargar estadísticas:", err);
-        setStats({ pedidos: 0, totalGastado: 0 });
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadStats();
-  }, [user?.id, user?.id_cliente, user?.idCliente]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    setUser(null);
-    navigate("/");
-  };
-
-  const formatCurrency = (v) =>
-    v == null || v === "" ? "S/. 0.00" : `S/. ${Number(v).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-  // Helpers modal
-  const openEdit = () => setIsEditOpen(true);
-  const closeEdit = () => {
-    if (editLoading) return;
-    setIsEditOpen(false);
-    setEditError("");
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((s) => ({ ...s, [name]: value }));
-  };
-
-  const validateEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v).toLowerCase());
-
-  const handleSave = async () => {
-    setEditError("");
-    const { nombre, apellido, email } = form;
-    if (!nombre?.trim() || !apellido?.trim()) {
-      setEditError("Nombre y apellido son obligatorios.");
-      return;
-    }
-    if (!validateEmail(email)) {
-      setEditError("Ingresa un correo válido.");
-      return;
-    }
-
-    const clienteId = user.id ?? user.id_cliente ?? user.idCliente;
-    if (!clienteId) {
-      setEditError("No se pudo determinar el ID del usuario.");
-      return;
-    }
-
-    setEditLoading(true);
-    try {
-      const payload = { nombre: nombre.trim(), apellido: apellido.trim(), email: email.trim() };
-      const res = await api.put(`/apij/clientes/${clienteId}`, payload);
-
-      let updated = null;
-      if (res?.data?.success && res.data.data) {
-        updated = res.data.data;
-      } else if (res?.data && typeof res.data === "object") {
-       
-        updated = res.data;
-      } else {
-        updated = { ...user, ...payload };
-      }
-      updated = updated ?? { ...user, ...payload };
-
-      try {
-        if (localStorage.getItem("user")) {
-          localStorage.setItem("user", JSON.stringify(updated));
-        } else if (sessionStorage.getItem("user")) {
-          sessionStorage.setItem("user", JSON.stringify(updated));
-        } else {
-          localStorage.setItem("user", JSON.stringify(updated));
-        }
-      } catch (err) {
-        console.warn("No se pudo actualizar storage:", err);
-      }
-
-      setUser(updated);
-      setForm({ nombre: updated.nombre ?? "", apellido: updated.apellido ?? "", email: updated.email ?? updated.correo ?? "" });
-      setIsEditOpen(false);
-    } catch (err) {
-      console.error("Error actualizar usuario:", err);
-      setEditError(err?.response?.data?.message ?? "Error al actualizar. Intenta nuevamente.");
-    } finally {
-      setEditLoading(false);
-    }
-  };
 
   if (!user) {
     return (
@@ -340,83 +200,6 @@ export default function PerfilTiendaPage() {
       </main>
 
       <FooterTienda />
-
-      {/* Modal edición — bonito y profesional */}
-      {isEditOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center px-4 sm:px-6">
-          <div
-            className="absolute inset-0 bg-black/40 transition-opacity"
-            aria-hidden="true"
-            onClick={closeEdit}
-          />
-          <div className="relative max-w-xl w-full bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all">
-            <div className="flex items-center justify-between p-5 border-b">
-              <h3 className="text-lg font-semibold">Editar perfil</h3>
-              <button
-                onClick={closeEdit}
-                className="text-gray-500 hover:text-gray-700 p-2 rounded-md focus:outline-none"
-                aria-label="Cerrar diálogo"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600">Actualiza tu nombre y correo electrónico. Estos datos se usarán en tus pedidos y notificaciones.</p>
-
-              <div>
-                <label className="text-xs font-medium text-gray-600 uppercase">Nombre</label>
-                <input
-                  name="nombre"
-                  value={form.nombre}
-                  onChange={handleChange}
-                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-gray-600 uppercase">Apellido</label>
-                <input
-                  name="apellido"
-                  value={form.apellido}
-                  onChange={handleChange}
-                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-gray-600 uppercase">Correo electrónico</label>
-                <input
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  type="email"
-                  className="mt-2 block w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              {editError && <div className="text-sm text-red-600">{editError}</div>}
-
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  onClick={closeEdit}
-                  className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  disabled={editLoading}
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 inline-flex items-center gap-2"
-                  disabled={editLoading}
-                >
-                  {editLoading ? "Guardando..." : "Guardar cambios"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
