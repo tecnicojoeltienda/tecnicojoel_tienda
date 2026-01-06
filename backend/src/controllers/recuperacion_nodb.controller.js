@@ -115,20 +115,19 @@ export async function solicitar(req, res) {
       
     } catch (mailError) {
       console.error("❌ ERROR enviando email:", mailError);
-      console.error("Detalles del error:", {
-        code: mailError.code,
-        command: mailError.command,
-        response: mailError.response,
-        responseCode: mailError.responseCode
-      });
-      
-      // Limpiar el código generado ya que no se pudo enviar
+      console.error("❌ ERROR COMPLETO:", JSON.stringify(mailError, null, 2));
+
       codes.delete(email);
-      ipRec.count--; // Revertir el contador
-      
-      return res.status(500).json({ 
+      ipRec.count--;
+
+      return res.status(500).json({
         error: "Error enviando código. Verifica tu correo o intenta más tarde.",
-        details: process.env.NODE_ENV === 'development' ? mailError.message : undefined
+        mailError: {
+          message: mailError.message,
+          code: mailError.code,
+          response: mailError.response,
+          responseCode: mailError.responseCode
+        }
       });
     }
     
