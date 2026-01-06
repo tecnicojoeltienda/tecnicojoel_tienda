@@ -38,28 +38,43 @@ export async function solicitar(req, res) {
   try {
     const { email } = req.body;
     const ip = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    
+    console.log(`📥 Solicitud de recuperación desde IP: ${ip} para email: ${email}`);
+    
     if (!email) return res.status(400).json({ error: "Email requerido" });
+
+    // Verificar configuración SMTP
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error("❌ ERROR: Variables SMTP no configuradas");
+      return res.status(500).json({ error: "Servicio de correo no configurado" });
+    }
 
     // Verificar si el email existe en la BD
     const conn = await conexion;
     const [usuarios] = await conn.query("SELECT id_cliente FROM cliente WHERE email = ? LIMIT 1", [email]);
     if (!usuarios || usuarios.length === 0) {
+      console.log(`⚠️ Email no encontrado en BD: ${email}`);
       return res.status(404).json({ error: "No existe una cuenta con ese correo" });
     }
+
+    console.log(`✅ Email encontrado en BD: ${email}`);
 
     // IP rate limit
     const now = Date.now();
     const ipRec = ipCounts.get(ip) || { count: 0, resetAt: now + 15 * 60 * 1000 };
     if (ipRec.count >= MAX_ATT_IP && ipRec.resetAt > now) {
+      console.log(`⚠️ Rate limit IP alcanzado para: ${ip}`);
       return res.status(429).json({ error: "Demasiadas solicitudes desde esta IP. Intenta más tarde." });
     }
     ipRec.count++; ipCounts.set(ip, ipRec);
 
     const rec = codes.get(email) || { attempts: 0, lastSentAt: 0 };
     if (rec.lastSentAt && now - rec.lastSentAt < COOLDOWN) {
+      console.log(`⚠️ Cooldown activo para email: ${email}`);
       return res.status(429).json({ error: `Espera ${Math.ceil((COOLDOWN - (now - rec.lastSentAt))/1000)}s antes de reintentarlo.` });
     }
     if (rec.attempts >= MAX_ATT_EMAIL) {
+      console.log(`⚠️ Máximo de intentos alcanzado para: ${email}`);
       return res.status(429).json({ error: "Demasiados intentos para este email. Contacta soporte." });
     }
 
@@ -68,23 +83,59 @@ export async function solicitar(req, res) {
     const expiresAt = now + CODE_TTL;
     codes.set(email, { code, expiresAt, lastSentAt: now, attempts: (rec.attempts || 0) + 1 });
 
-    console.log(`📧 Código generado para ${email}: ${code}`); // LOG PARA VER EL CÓDIGO EN CONSOLA
+    console.log(`📧 Código generado para ${email}: ${code}`);
 
     // send mail
     const html = `
-      <div style="font-family:Arial, sans-serif;max-width:600px">
-        <h2>Recuperación de contraseña</h2>
-        <p>Tu código de verificación es:</p>
-        <div style="font-size:28px;font-weight:700;letter-spacing:6px;background:#f3f4f6;padding:12px;text-align:center">${code}</div>
-        <p>Expira en ${Math.round(CODE_TTL/60000)} minutos.</p>
+      <div style="font-family:Arial, sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f9fafb;border-radius:8px">
+        <div style="background:white;padding:30px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)">
+          <h2 style="color:#1f2937;margin-top:0">🔐 Recuperación de contraseña</h2>
+          <p style="color:#4b5563;font-size:16px">Hola,</p>
+          <p style="color:#4b5563;font-size:16px">Recibimos una solicitud para recuperar tu contraseña. Tu código de verificación es:</p>
+          <div style="font-size:32px;font-weight:700;letter-spacing:8px;background:#3b82f6;color:white;padding:20px;text-align:center;border-radius:8px;margin:20px 0">${code}</div>
+          <p style="color:#6b7280;font-size:14px">Este código expira en ${Math.round(CODE_TTL/60000)} minutos.</p>
+          <p style="color:#6b7280;font-size:14px">Si no solicitaste este código, ignora este mensaje.</p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
+          <p style="color:#9ca3af;font-size:12px;text-align:center">TecnicoJoel - Tienda de Tecnología</p>
+        </div>
       </div>`;
     
-    await transporter.sendMail({ from: SMTP_FROM, to: email, subject: "Código de recuperación - TecnicoJoel", html });
-
-    return res.json({ message: "Código enviado", email }); // Retornar también el email
+    console.log(`📤 Intentando enviar email a: ${email}`);
+    
+    try {
+      const info = await transporter.sendMail({ 
+        from: process.env.SMTP_FROM || process.env.SMTP_USER, 
+        to: email, 
+        subject: "🔐 Código de recuperación - TecnicoJoel", 
+        html 
+      });
+      
+      console.log(`✅ Email enviado exitosamente. MessageId: ${info.messageId}`);
+      return res.json({ message: "Código enviado", email });
+      
+    } catch (mailError) {
+      console.error("❌ ERROR enviando email:", mailError);
+      console.error("Detalles del error:", {
+        code: mailError.code,
+        command: mailError.command,
+        response: mailError.response,
+        responseCode: mailError.responseCode
+      });
+      
+      // Limpiar el código generado ya que no se pudo enviar
+      codes.delete(email);
+      ipRec.count--; // Revertir el contador
+      
+      return res.status(500).json({ 
+        error: "Error enviando código. Verifica tu correo o intenta más tarde.",
+        details: process.env.NODE_ENV === 'development' ? mailError.message : undefined
+      });
+    }
+    
   } catch (err) {
     console.error("❌ ERROR rec.solicitar:", err);
-    return res.status(500).json({ error: "Error enviando código" });
+    console.error("Stack trace:", err.stack);
+    return res.status(500).json({ error: "Error procesando solicitud" });
   }
 }
 
