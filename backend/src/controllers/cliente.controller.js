@@ -69,10 +69,13 @@ export async function buscar(req, res) {
 export async function actualizar(req, res) {
   try {
     const id = req.params.id;
-    const { nombre, apellido, email, telefono } = req.body;
+    const { nombre, apellido, email, telefono, currentPassword, newPassword } = req.body;
+    const foto = req.file; // Archivo subido
+
+    console.log("📝 Actualizando cliente:", { id, body: req.body, foto: foto?.filename });
 
     // Validación mínima: al menos un campo para actualizar
-    if (nombre === undefined && apellido === undefined && email === undefined && telefono === undefined) {
+    if (nombre === undefined && apellido === undefined && email === undefined && telefono === undefined && !newPassword && !foto) {
       return res.status(400).json({ success: false, data: null, message: "No hay campos para actualizar" });
     }
 
@@ -90,16 +93,47 @@ export async function actualizar(req, res) {
     if (email !== undefined) payload.email = email;
     if (telefono !== undefined) payload.telefono = telefono;
 
+    // Si hay foto, guardar la ruta
+    if (foto) {
+      payload.foto_perfil = `/uploads/${foto.filename}`;
+    }
+
+    // Si se quiere cambiar contraseña
+    if (newPassword && currentPassword) {
+      const cliente = await Cliente.buscarPorId(id);
+      if (!cliente) {
+        return res.status(404).json({ success: false, data: null, message: "Cliente no encontrado" });
+      }
+
+      // Verificar contraseña actual
+      const isMatch = await bcrypt.compare(currentPassword, cliente.clave);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, data: null, message: "Contraseña actual incorrecta" });
+      }
+
+      // Hashear nueva contraseña
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      payload.clave = hashedPassword;
+
+      console.log("🔐 Cambiando contraseña para cliente:", id);
+    }
+
     const result = await Cliente.actualizarCliente(id, payload);
+    console.log("✅ Resultado actualización:", result);
 
     if (result.affectedRows > 0) {
       const updated = await Cliente.buscarPorId(id);
+      // No enviar la contraseña en la respuesta
+      if (updated && updated.clave) {
+        delete updated.clave;
+      }
       return res.status(200).json({ success: true, data: updated });
     } else {
-      return res.status(200).json({ success: false, data: null });
+      return res.status(200).json({ success: false, data: null, message: "No se actualizó ningún registro" });
     }
   } catch (err) {
-    console.error("ERROR actualizar cliente:", err && (err.stack || err.message || err));
+    console.error("❌ ERROR actualizar cliente:", err && (err.stack || err.message || err));
     return res.status(500).json({ success: false, data: null, message: "Error al actualizar cliente" });
   }
 }

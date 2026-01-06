@@ -243,7 +243,7 @@ export default function PerfilTiendaPage() {
                        user.created_at ? new Date(user.created_at) : 
                        user.createdAt ? new Date(user.createdAt) : null;
 
-  const userPhoto = user.foto || photoPreview;
+  const userPhoto = user.foto_perfil || user.foto || photoPreview;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
@@ -255,7 +255,7 @@ export default function PerfilTiendaPage() {
           <div className="relative inline-block mb-4">
             {userPhoto ? (
               <img 
-                src={userPhoto} 
+                src={userPhoto ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${userPhoto}` : 'https://via.placeholder.com/150'}
                 alt="Foto de perfil" 
                 className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white"
               />

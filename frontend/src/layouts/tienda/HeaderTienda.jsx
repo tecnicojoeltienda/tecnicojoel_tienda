@@ -247,39 +247,36 @@ function HeaderTienda() {
         <nav className="w-full px-4 sm:px-6 lg:px-8">
           {/* Header principal */}
           <div className="flex items-center justify-between h-14 lg:h-16 gap-2 lg:gap-3">
-            {/* Logo y menú hamburguesa */}
-            <div className="flex items-center gap-3">
-              
+            {/* Logo y menú categorías */}
+            <div className="flex items-center gap-2">
+              {/* Logo */}
+              <Link 
+                to="/" 
+                className="flex items-center gap-3"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsCategoryMenuOpen(false);
+                }}
+              >
+                <img 
+                  src="/assets/logo.png" 
+                  alt="Logo TecnicoJoel" 
+                  className="h-12 sm:h-14 lg:h-16 w-auto object-contain"
+                />
+                {/* Nombre visible solo en pantallas grandes */}
+                <span className="hidden lg:block text-xl xl:text-2xl font-bold text-white">
+                  TecnicoJoel
+                </span>
+              </Link>
+
+              {/* Botón categorías al lado del logo - SOLO MÓVIL */}
               <button
                 onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
-                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="lg:hidden p-2 hover:bg-gray-800 rounded-lg transition-colors"
                 aria-label="Menú de categorías"
               >
-                <FiMenu className="w-6 h-6 text-gray-700" />
+                <FiMenu className="w-6 h-6 text-white" />
               </button>
-
-              {/* Logo y nombre */}
-              <div className="flex items-center gap-3">
-                <Link 
-                  to="/" 
-                  className="flex items-center gap-3"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    setIsCategoryMenuOpen(false);
-                  }}
-                >
-                  {/* Logo más grande */}
-                  <img 
-                    src="/assets/logo.png" 
-                    alt="Logo TecnicoJoel" 
-                    className="h-12 sm:h-14 lg:h-16 w-auto object-contain"
-                  />
-                  {/* Nombre visible solo en pantallas grandes */}
-                  <span className="hidden lg:block text-xl xl:text-2xl font-bold text-white">
-                    TecnicoJoel
-                  </span>
-                </Link>
-              </div>
             </div>
 
             {/* Buscador - desktop */}
