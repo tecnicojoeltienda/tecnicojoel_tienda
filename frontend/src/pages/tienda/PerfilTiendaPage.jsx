@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import HeaderTienda from "../../layouts/tienda/HeaderTienda";
 import FooterTienda from "../../layouts/tienda/FooterTienda";
 import api from "../../service/api";
-import { FiUser, FiMail, FiPackage, FiLogOut, FiEdit3, FiShield, FiCalendar, FiClock, FiPhone } from "react-icons/fi";
+import { FiUser, FiMail, FiPackage, FiLogOut, FiEdit3, FiShield, FiCalendar, FiClock, FiPhone, FiHome } from "react-icons/fi";
 
 export default function PerfilTiendaPage() {
   const [user, setUser] = useState(null);
