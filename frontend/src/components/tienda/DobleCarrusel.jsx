@@ -202,9 +202,24 @@ export default function DobleCarrusel() {
   const scrollOne = (ref, direction = 1) => {
     const el = ref.current;
     if (!el) return;
+    
     const first = el.querySelector("article");
     const gap = 24;
     const cardWidth = first ? first.offsetWidth + gap : Math.round(el.clientWidth / visible);
+    
+    // Si vamos hacia adelante y estamos al final, volver al inicio
+    if (direction === 1 && el.scrollLeft + el.clientWidth >= el.scrollWidth - 5) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+      return;
+    }
+    
+    // Si vamos hacia atrás y estamos al inicio, ir al final
+    if (direction === -1 && el.scrollLeft <= 5) {
+      el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+      return;
+    }
+    
+    // Scroll normal
     el.scrollBy({ left: cardWidth * direction, behavior: "smooth" });
   };
 
@@ -361,8 +376,7 @@ export default function DobleCarrusel() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => scrollOne(containerLeft, -1)}
-                  disabled={!canLeftPrev}
-                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 hover:scale-110 transition-all duration-200 disabled:hover:scale-100 disabled:hover:bg-white border border-gray-100"
+                  className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-blue-50 hover:scale-110 transition-all duration-200 border border-gray-100"
                   aria-label="Anterior accesorios"
                 >
                   <FiChevronLeft className="w-5 h-5 text-blue-600" />

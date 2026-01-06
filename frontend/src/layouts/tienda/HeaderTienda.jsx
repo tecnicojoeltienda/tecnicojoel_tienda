@@ -258,25 +258,28 @@ function HeaderTienda() {
                 <FiMenu className="w-6 h-6 text-gray-700" />
               </button>
 
-              {/* Logo */}
-              <Link 
-                to="/" 
-                className="flex items-center gap-3"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  setIsCategoryMenuOpen(false);
-                }}
-              >
-                <img 
-                  src="/assets/logo.png" 
-                  alt="Logo TecnicoJoel" 
-                  className="h-10 sm:h-12 w-auto object-contain"
-                />
-                {/* Nombre visible solo en pantallas grandes */}
-                <span className="hidden lg:block text-xl font-bold text-gray-900">
-                  TecnicoJoel
-                </span>
-              </Link>
+              {/* Logo y nombre */}
+              <div className="flex items-center gap-3">
+                <Link 
+                  to="/" 
+                  className="flex items-center gap-3"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsCategoryMenuOpen(false);
+                  }}
+                >
+                  {/* Logo más grande */}
+                  <img 
+                    src="/assets/logo.png" 
+                    alt="Logo TecnicoJoel" 
+                    className="h-12 sm:h-14 lg:h-16 w-auto object-contain"
+                  />
+                  {/* Nombre visible solo en pantallas grandes */}
+                  <span className="hidden lg:block text-xl xl:text-2xl font-bold text-white">
+                    TecnicoJoel
+                  </span>
+                </Link>
+              </div>
             </div>
 
             {/* Buscador - desktop */}

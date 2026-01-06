@@ -69,6 +69,10 @@ export async function actualizarCliente(id, data = {}) {
     fields.push("clave = ?");
     params.push(data.clave);
   }
+    if (Object.prototype.hasOwnProperty.call(data, "foto_perfil")) {
+    fields.push("foto_perfil = ?");
+    params.push(data.foto_perfil);
+  }
 
   if (fields.length === 0) {
     return { affectedRows: 0 };
