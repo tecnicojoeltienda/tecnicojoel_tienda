@@ -247,12 +247,21 @@ function HeaderTienda() {
         <nav className="w-full px-4 sm:px-6 lg:px-8">
           {/* Header principal */}
           <div className="flex items-center justify-between h-14 lg:h-16 gap-2 lg:gap-3">
-            {/* Logo y marca - siempre visible */}
-            <div className="flex items-center gap-2 lg:gap-3">
+            {/* Logo y menú hamburguesa */}
+            <div className="flex items-center gap-3">
+              
+              <button
+                onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Menú de categorías"
+              >
+                <FiMenu className="w-6 h-6 text-gray-700" />
+              </button>
+
               {/* Logo */}
               <Link 
                 to="/" 
-                className="flex items-center justify-center sm:justify-start"
+                className="flex items-center gap-3"
                 onClick={() => {
                   setIsMenuOpen(false);
                   setIsCategoryMenuOpen(false);
@@ -260,20 +269,14 @@ function HeaderTienda() {
               >
                 <img 
                   src="/assets/logo.png" 
-                  alt="Logo" 
+                  alt="Logo TecnicoJoel" 
                   className="h-10 sm:h-12 w-auto object-contain"
                 />
+                {/* Nombre visible solo en pantallas grandes */}
+                <span className="hidden lg:block text-xl font-bold text-gray-900">
+                  TecnicoJoel
+                </span>
               </Link>
-
-              {/* Botón categorías - desktop */}
-              <button
-                onClick={() => setIsCategoryMenuOpen(true)}
-                className="hidden lg:flex px-2 lg:px-4 py-1 lg:py-2 rounded-lg text-base lg:text-lg font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 items-center gap-2"
-                aria-label="Abrir categorías"
-              >
-                <FiMenu className="w-4 h-4 lg:w-5 lg:h-5" />
-                <span className="uppercase">Categorías</span>
-              </button>
             </div>
 
             {/* Buscador - desktop */}

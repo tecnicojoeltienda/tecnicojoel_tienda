@@ -163,6 +163,53 @@ export default function Novedades() {
     return () => (mounted = false);
   }, [category]);
 
+  // Nueva carga para accesorios y componentes
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+        let url = "/apij/productos";
+        if (category !== CATEGORY_KEYS.ALL) {
+          const slug = CATEGORY_API_SLUG[category];
+          if (!slug) {
+            setProducts([]);
+            return;
+          }
+          url = `/apij/productos/categoria/nombre/${slug}`;
+        }
+        const res = await api.get(url);
+        let data = Array.isArray(res.data) ? res.data : res.data.rows || [];
+        
+        // Filtrar productos con categoría válida
+        data = data.filter((p) => {
+          const catSlug = getCategorySlug(p);
+          return catSlug && catSlug !== null;
+        });
+
+        // Ordenar de menor a mayor precio
+        data.sort((a, b) => {
+          const precioA = Number(a.precio_venta) || 0;
+          const precioB = Number(b.precio_venta) || 0;
+          return precioA - precioB;
+        });
+
+        if (mounted) setProducts(data);
+      } catch (err) {
+        console.error("Error cargando productos:", err);
+        if (mounted) {
+          setError("Error al cargar productos");
+          setProducts([]);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, [category]);
+
   const scrollByWidth = (direction = 1) => {
     const el = containerRef.current;
     if (!el) return;

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import HeaderTienda from "../../layouts/tienda/HeaderTienda";
 import FooterTienda from "../../layouts/tienda/FooterTienda";
 import api from "../../service/api";
-import { FiUser, FiMail, FiPackage, FiLogOut, FiEdit3, FiShield, FiCalendar, FiClock } from "react-icons/fi";
+import { FiUser, FiMail, FiPackage, FiLogOut, FiEdit3, FiShield, FiCalendar, FiClock, FiPhone } from "react-icons/fi";
 
 export default function PerfilTiendaPage() {
   const [user, setUser] = useState(null);
@@ -190,195 +190,155 @@ export default function PerfilTiendaPage() {
   }
 
   const fullName = `${user.nombre ?? ""} ${user.apellido ?? ""}`.trim() || "Usuario";
+  const userId = user.id_cliente || user.id || "N/A";
   const fechaRegistro = user.fecha_registro ? new Date(user.fecha_registro) : 
                        user.created_at ? new Date(user.created_at) : 
                        user.createdAt ? new Date(user.createdAt) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
       <HeaderTienda />
-      <main className="w-full max-w-4xl mx-auto px-6 py-12">
-        {/* Header del perfil */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-600 rounded-2xl p-8 mb-8 text-white shadow-xl">
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <FiUser className="w-12 h-12 text-white" />
+      
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* Header del perfil - Solo móvil */}
+        <div className="mb-8 text-center lg:hidden">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-4xl font-bold shadow-lg mb-4">
+            {fullName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            ¡Hola, {user.nombre || "Usuario"}!
+          </h1>
+          <p className="text-gray-600 text-sm">ID de Cliente: {userId}</p>
+          {fechaRegistro && (
+            <p className="text-gray-500 text-sm mt-1">
+              Miembro desde {fechaRegistro.toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          )}
+        </div>
+
+        {/* Card de información - Móvil y desktop */}
+        <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+          {/* Header desktop */}
+          <div className="hidden lg:block bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl font-bold">
+                {fullName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold mb-1">¡Hola, {user.nombre || "Usuario"}!</h1>
+                <p className="text-blue-100">ID de Cliente: {userId}</p>
+                {fechaRegistro && (
+                  <p className="text-blue-100 text-sm mt-1">
+                    Miembro desde {fechaRegistro.toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">¡Hola, {user.nombre ?? "Usuario"}!</h1>
-              <p className="text-blue-100 text-lg">Bienvenido a tu perfil personal</p>
+          </div>
+
+          {/* Información de la cuenta */}
+          <div className="p-6 lg:p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <FiUser className="w-5 h-5 text-blue-600" />
+              </div>
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
+                Información de la cuenta
+              </h2>
+            </div>
+
+            <div className="space-y-6">
+              {/* ID de cliente - Solo desktop */}
+              <div className="hidden lg:block">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  ID de cliente
+                </label>
+                <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-900 font-medium">
+                  #{userId}
+                </div>
+              </div>
+
+              {/* Nombre */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Nombre
+                </label>
+                <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-900 font-medium">
+                  {user.nombre || "No especificado"}
+                </div>
+              </div>
+
+              {/* Apellido */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Apellido
+                </label>
+                <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-900 font-medium">
+                  {user.apellido || "No especificado"}
+                </div>
+              </div>
+
+              {/* Correo electrónico */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Correo electrónico
+                </label>
+                <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-900 font-medium flex items-center gap-2">
+                  <FiMail className="w-4 h-4 text-gray-500" />
+                  {user.email || "No especificado"}
+                </div>
+              </div>
+
+              {/* Teléfono */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Teléfono
+                </label>
+                <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-900 font-medium flex items-center gap-2">
+                  <FiPhone className="w-4 h-4 text-gray-500" />
+                  {user.telefono || "No especificado"}
+                </div>
+              </div>
+
+              {/* Fecha de registro - Solo desktop */}
               {fechaRegistro && (
-                <p className="text-blue-200 text-sm mt-1 flex items-center gap-2">
-                  <FiClock className="w-4 h-4" />
-                  Miembro desde {fechaRegistro.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
+                <div className="hidden lg:block">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Miembro desde
+                  </label>
+                  <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-900 font-medium flex items-center gap-2">
+                    <FiCalendar className="w-4 h-4 text-gray-500" />
+                    {fechaRegistro.toLocaleDateString("es-PE", { 
+                      day: "2-digit", 
+                      month: "2-digit", 
+                      year: "numeric" 
+                    })}
+                  </div>
+                </div>
               )}
             </div>
-            <button
-              onClick={openEdit}
-              className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium hover:bg-white/30 transition-colors inline-flex items-center gap-2"
-              aria-haspopup="dialog"
-            >
-              <FiEdit3 className="w-4 h-4" />
-              Editar
-            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Información personal */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FiUser className="w-4 h-4 text-blue-600" />
-                </div>
-                Información personal
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Nombre completo</label>
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="text-lg font-semibold text-gray-900">{fullName}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Nombre</label>
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="text-lg font-medium text-gray-900">{user.nombre ?? "-"}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Apellido</label>
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="text-lg font-medium text-gray-900">{user.apellido ?? "-"}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Correo electrónico</label>
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                      <FiMail className="w-4 h-4 text-gray-500" />
-                      {user.email ?? user.correo ?? "-"}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mostrar DNI y teléfono si existen */}
-                {user.dni && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">DNI</label>
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                      <div className="text-lg font-medium text-gray-900">{user.dni}</div>
-                    </div>
-                  </div>
-                )}
-
-                {user.telefono && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-500 uppercase tracking-wide">Teléfono</label>
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                      <div className="text-lg font-medium text-gray-900">{user.telefono}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Información adicional */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl border border-blue-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <FiShield className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-semibold text-blue-900">Información de la cuenta</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-700">ID de cliente:</span>
-                    <span className="font-medium text-blue-900">#{user.id ?? user.id_cliente ?? "N/A"}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FiCalendar className="w-4 h-4 text-blue-600" />
-                    <span className="text-blue-700">Miembro desde:</span>
-                    <span className="font-medium text-blue-900">
-                      {fechaRegistro ? fechaRegistro.toLocaleDateString('es-PE', { 
-                        day: '2-digit', 
-                        month: '2-digit', 
-                        year: 'numeric' 
-                      }) : "No disponible"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Panel de acciones */}
-          <div className="space-y-6">
-            {/* Acciones rápidas */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Acciones rápidas</h3>
-              <div className="space-y-3">
-                <button 
-                  onClick={() => navigate("/pedidos")} 
-                  className="w-full p-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-3 shadow-sm"
-                >
-                  <FiPackage className="w-5 h-5" />
-                  Ver mis pedidos
-                </button>
-                
-                <button 
-                  onClick={() => navigate("/carrito")} 
-                  className="w-full p-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-3"
-                >
-                  <FiPackage className="w-5 h-5" />
-                  Ir al carrito
-                </button>
-              </div>
-            </div>
-
-            {/* Estadísticas actualizadas */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Resumen de actividad</h3>
-              {loading ? (
-                <div className="space-y-4">
-                  <div className="animate-pulse p-3 bg-gray-100 rounded-lg">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  </div>
-                  <div className="animate-pulse p-3 bg-gray-100 rounded-lg">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                    <span className="text-green-700 font-medium">Pedidos realizados</span>
-                    <span className="text-2xl font-bold text-green-800">{stats.pedidos}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                    <span className="text-blue-700 font-medium">Total gastado</span>
-                    <span className="text-2xl font-bold text-blue-800">{formatCurrency(stats.totalGastado)}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Cerrar sesión */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Sesión</h3>
-              <button 
-                onClick={handleLogout} 
-                className="w-full p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-3"
-              >
-                <FiLogOut className="w-5 h-5" />
-                Cerrar sesión
-              </button>
-            </div>
-          </div>
+        {/* Botones de acción */}
+        <div className="mt-6 flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={() => navigate("/pedidos")}
+            className="flex-1 py-3 px-6 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <FiPackage className="w-5 h-5" />
+            Ver mis pedidos
+          </button>
+          <button
+            onClick={() => navigate("/")}
+            className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+          >
+            <FiHome className="w-5 h-5" />
+            Volver a la tienda
+          </button>
         </div>
       </main>
+
       <FooterTienda />
 
       {/* Modal edición — bonito y profesional */}

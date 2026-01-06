@@ -120,39 +120,44 @@ export default function DobleCarrusel() {
   useEffect(() => {
     let mounted = true;
     async function load() {
-      setLoading(true);
       try {
-        const [aRes, cRes] = await Promise.all([
-          api.get("/apij/productos/categoria/nombre/accesorios"),
-          api.get("/apij/productos/categoria/nombre/componentes"),
-        ]);
-        const aRows = Array.isArray(aRes.data) ? aRes.data : (aRes.data.rows || []);
-        const cRows = Array.isArray(cRes.data) ? cRes.data : (cRes.data.rows || []);
+        setLoading(true);
+        const res1 = await api.get("/apij/productos/categoria/nombre/accesorios");
+        const res2 = await api.get("/apij/productos/categoria/nombre/componentes");
         
-        if (!mounted) return;
+        let data1 = Array.isArray(res1.data) ? res1.data : res1.data.rows || [];
+        let data2 = Array.isArray(res2.data) ? res2.data : res2.data.rows || [];
 
-        // Filtrar solo productos con categoría válida
-        const validAccesorios = aRows.filter(p => {
-          try {
-            const slug = getCategorySlug(p);
-            return slug === "accesorios" || slug === "mouse"; // accesorios incluye mouse
-          } catch {
-            return false;
-          }
+        // Filtrar productos con categoría válida
+        data1 = data1.filter((p) => {
+          const catSlug = getCategorySlug(p);
+          return catSlug && catSlug !== null;
         });
 
-        const validComponentes = cRows.filter(p => {
-          try {
-            return getCategorySlug(p) === "componentes";
-          } catch {
-            return false;
-          }
+        data2 = data2.filter((p) => {
+          const catSlug = getCategorySlug(p);
+          return catSlug && catSlug !== null;
         });
 
-        setAccesorios(validAccesorios.slice(0, 10));
-        setComponentes(validComponentes.slice(0, 10));
-      } catch (e) {
-        console.error("Error cargando accesorios/componentes:", e);
+        // Ordenar de menor a mayor precio
+        data1.sort((a, b) => {
+          const precioA = Number(a.precio_venta) || 0;
+          const precioB = Number(b.precio_venta) || 0;
+          return precioA - precioB;
+        });
+
+        data2.sort((a, b) => {
+          const precioA = Number(a.precio_venta) || 0;
+          const precioB = Number(b.precio_venta) || 0;
+          return precioA - precioB;
+        });
+
+        if (mounted) {
+          setAccesorios(data1);
+          setComponentes(data2);
+        }
+      } catch (err) {
+        console.error("Error cargando productos:", err);
         if (mounted) {
           setAccesorios([]);
           setComponentes([]);
@@ -162,7 +167,7 @@ export default function DobleCarrusel() {
       }
     }
     load();
-    return () => (mounted = false);
+    return () => { mounted = false; };
   }, []);
 
   const updateControls = (ref, setPrev, setNext) => {
