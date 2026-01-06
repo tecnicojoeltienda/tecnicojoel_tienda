@@ -115,7 +115,7 @@ export default function PerfilTiendaPage() {
     setPhotoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPhotoPreview(reader.result);
+      setPhotoPreview(reader.result); // Base64 preview
     };
     reader.readAsDataURL(file);
   };
@@ -171,25 +171,17 @@ export default function PerfilTiendaPage() {
         payload.newPassword = newPassword;
       }
 
-      // Si hay foto nueva
-      if (photoFile) {
-        const formData = new FormData();
-        Object.keys(payload).forEach(key => formData.append(key, payload[key]));
-        formData.append('foto', photoFile);
-        
-        const res = await api.put(`/apij/clientes/${clienteId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        
-        let updated = res?.data?.data || res?.data || { ...user, ...payload };
-        localStorage.setItem("user", JSON.stringify(updated));
-        setUser(updated);
-      } else {
-        const res = await api.put(`/apij/clientes/${clienteId}`, payload);
-        let updated = res?.data?.data || res?.data || { ...user, ...payload };
-        localStorage.setItem("user", JSON.stringify(updated));
-        setUser(updated);
+      // Si hay foto nueva, enviarla como Base64
+      if (photoPreview && photoPreview.startsWith('data:image')) {
+        payload.foto_perfil = photoPreview; // Base64 string
       }
+
+      // Enviar todo como JSON (no FormData)
+      const res = await api.put(`/apij/clientes/${clienteId}`, payload);
+      
+      let updated = res?.data?.data || res?.data || { ...user, ...payload };
+      localStorage.setItem("user", JSON.stringify(updated));
+      setUser(updated);
 
       toast.success('Perfil actualizado correctamente.');
       setIsEditOpen(false);
@@ -243,7 +235,7 @@ export default function PerfilTiendaPage() {
                        user.created_at ? new Date(user.created_at) : 
                        user.createdAt ? new Date(user.createdAt) : null;
 
-  const userPhoto = user.foto_perfil || user.foto || photoPreview;
+  const userPhoto = user.foto_perfil || photoPreview;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
@@ -254,10 +246,14 @@ export default function PerfilTiendaPage() {
         <div className="mb-8 text-center lg:hidden">
           <div className="relative inline-block mb-4">
             {userPhoto ? (
-              <img 
-                src={userPhoto ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${userPhoto}` : 'https://via.placeholder.com/150'}
-                alt="Foto de perfil" 
-                className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white"
+              <img
+                src={userPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName) + '&size=200&background=3B82F6&color=fff'}
+                alt="Foto de perfil"
+                className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName) + '&size=200&background=3B82F6&color=fff';
+                }}
               />
             ) : (
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-4xl font-bold shadow-lg flex items-center justify-center">

@@ -69,13 +69,12 @@ export async function buscar(req, res) {
 export async function actualizar(req, res) {
   try {
     const id = req.params.id;
-    const { nombre, apellido, email, telefono, currentPassword, newPassword } = req.body;
-    const foto = req.file; // Archivo subido
+    const { nombre, apellido, email, telefono, currentPassword, newPassword, foto_perfil } = req.body;
 
-    console.log("📝 Actualizando cliente:", { id, body: req.body, foto: foto?.filename });
+    console.log("📝 Actualizando cliente:", { id, foto_perfil: foto_perfil ? 'SÍ' : 'NO' });
 
-    // Validación mínima: al menos un campo para actualizar
-    if (nombre === undefined && apellido === undefined && email === undefined && telefono === undefined && !newPassword && !foto) {
+    // Validación mínima
+    if (nombre === undefined && apellido === undefined && email === undefined && telefono === undefined && !newPassword && !foto_perfil) {
       return res.status(400).json({ success: false, data: null, message: "No hay campos para actualizar" });
     }
 
@@ -93,9 +92,9 @@ export async function actualizar(req, res) {
     if (email !== undefined) payload.email = email;
     if (telefono !== undefined) payload.telefono = telefono;
 
-    // Si hay foto, guardar la ruta
-    if (foto) {
-      payload.foto_perfil = `/uploads/${foto.filename}`;
+    // Si hay foto en Base64, guardarla
+    if (foto_perfil && foto_perfil.startsWith('data:image')) {
+      payload.foto_perfil = foto_perfil; // Guardar Base64 completo
     }
 
     // Si se quiere cambiar contraseña
