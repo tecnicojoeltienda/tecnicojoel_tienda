@@ -327,7 +327,7 @@ export default function ProductDetail({
                   ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                   : addedToCart
                   ? 'bg-green-600 text-white'
-                  : 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
               {!product.stock || product.stock <= 0 || product.estado === 'agotado'
