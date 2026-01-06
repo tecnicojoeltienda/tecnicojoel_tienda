@@ -197,6 +197,7 @@ export default function LaptopsPage() {
       }
     };
 
+    {/* Reemplaza la vista LIST completa (líneas ~201-295) */}
     if (filters.view === "list") {
       return (
         <article
@@ -232,30 +233,15 @@ export default function LaptopsPage() {
               {p.descripcion || p.resumen || "Sin descripción disponible"}
             </p>
 
-            <div className="flex items-center gap-2 mb-3">
-              {p.stock > 0 && p.estado !== 'agotado' ? (
-                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
-                  Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
-                </span>
-              ) : (
-                <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold">
-                  🚫 AGOTADO
-                </span>
-              )}
-            </div>
-
-            {/* Advertencia de stock bajo */}
-            {p.stock <= 5 && p.stock > 0 && (
-              <div className="text-xs text-orange-600 font-medium mb-1">
-                ⚠️ Solo quedan {p.stock} unidades
-              </div>
-            )}
-
-            {/* Estado de agotado */}
-            {(!p.stock || p.stock <= 0 || p.estado === 'agotado') && (
-              <div className="text-xs text-red-600 font-bold mb-1">
+            {/* Estado de stock con cantidad */}
+            {p.stock > 0 && p.estado !== 'agotado' ? (
+              <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium mb-3">
+                Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
+              </span>
+            ) : (
+              <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold mb-3">
                 🚫 AGOTADO
-              </div>
+              </span>
             )}
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -275,7 +261,7 @@ export default function LaptopsPage() {
                 <button
                   onClick={() => handleAddToCart(p)}
                   disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'}
-                  className={`flex-1 sm:inline-block px-3 py-2 rounded-lg font-medium transition-colors ${
+                  className={`flex-1 sm:inline-block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     !p.stock || p.stock <= 0 || p.estado === 'agotado'
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -283,8 +269,8 @@ export default function LaptopsPage() {
                   aria-label={`Añadir ${p.nombre_producto} al carrito`}
                 >
                   {!p.stock || p.stock <= 0 || p.estado === 'agotado' 
-                    ? 'AGOTADO' 
-                    : 'AGREGAR AL CARRITO'
+                    ? 'Agotado' 
+                    : 'Añadir'
                   }
                 </button>
               </div>

@@ -232,21 +232,21 @@ export default function CarruselPromocion() {
                         role="button"
                       >
                         {/* Imagen más grande */}
-                        <div className="relative flex-1 flex items-center justify-center overflow-hidden rounded-lg bg-white mb-3">
+                        <div className="relative flex-1 flex items-center justify-center overflow-hidden rounded-lg bg-white mb-3 p-2">
                           <img
                             src={src}
                             alt={p.nombre_producto || p.nombre || "Producto"}
                             className="w-full h-full object-contain"
-                            style={{ maxHeight: "250px" }}
+                            style={{ maxHeight: "230px" }}
                             loading="lazy"
                           />
 
-                          <span className="absolute left-2 top-2 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
+                          <span className="absolute left-1 top-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-md shadow-md">
                             PROMO
                           </span>
 
                           {descuento > 0 && (
-                            <span className="absolute right-2 top-2 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md shadow-md">
+                            <span className="absolute right-1 top-1 bg-red-600 text-white text-sm font-bold px-2 py-1 rounded-md shadow-md">
                               {descuento}%
                             </span>
                           )}

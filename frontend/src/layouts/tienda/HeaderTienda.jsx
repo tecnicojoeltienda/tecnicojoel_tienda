@@ -166,19 +166,19 @@ function HeaderTienda() {
   };
 
   const categorias = [
-    "Computadoras",
-    "Laptops", 
-    "Impresoras",
-    "Monitores",
-    "Mouse",
     "Accesorios",
     "Componentes",
-    "Sonido",
-    "Tintas",
+    "Computadoras",
+    "Estabilizadores",
+    "Impresoras",
+    "Laptops",
     "Licencia",
+    "Monitores",
+    "Mouse",
     "Reacondicionados",
     "Redes",
-    "Estabilizadores"
+    "Sonido",
+    "Tintas"
   ];
 
   const slugify = (str = "") =>
@@ -249,19 +249,21 @@ function HeaderTienda() {
           <div className="flex items-center justify-between h-14 lg:h-16 gap-2 lg:gap-3">
             {/* Logo y marca - siempre visible */}
             <div className="flex items-center gap-2 lg:gap-3">
-              <button
-                onClick={() => navigate("/")}
-                className="flex items-center gap-2 lg:gap-3 p-1 lg:p-2 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transform translate-y-2"
-                aria-label="Ir a inicio - TecnicoJoel"
-                title="Ir a inicio"
+              {/* Logo */}
+              <Link 
+                to="/" 
+                className="flex items-center justify-center sm:justify-start"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsCategoryMenuOpen(false);
+                }}
               >
-                <div className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 rounded-full flex items-center justify-center overflow-hidden shadow-lg bg-white p-0">
-                  <img src="/assets/logo-navidad.jfif" alt="Logo Tecnico Joel" className="w-full h-full object-contain bg-white rounded-lg" loading="lazy" />
-                </div>
-                <span className="hidden sm:inline-block text-lg lg:text-xl xl:text-2xl font-extrabold text-white">
-                  Tecnico Joel      
-                </span>
-              </button>
+                <img 
+                  src="/assets/logo.png" 
+                  alt="Logo" 
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </Link>
 
               {/* Botón categorías - desktop */}
               <button
