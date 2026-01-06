@@ -12,7 +12,7 @@ export default function RecuperarPage() {
     e.preventDefault();
     setError("");
     try {
-      await api.post("apij/recuperacion/solicitar", { email });
+      await api.post("/apij/recuperacion/solicitar", { email });
       setOk(true);
       sessionStorage.setItem("recovery_started", "1");
       sessionStorage.setItem("recovery_email", email); // opcional

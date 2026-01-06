@@ -12,7 +12,7 @@ export default function ValidarCodigoPage() {
   async function submit(e) {
     e.preventDefault();
     try {
-      const res = await api.post("apij/recuperacion/validar", { email, code });
+      const res = await api.post("/apij/recuperacion/validar", { email, code });
       sessionStorage.setItem("pw_reset_token", res.data.token);
       navigate("/cambiar-contrasena");
     } catch (err) {

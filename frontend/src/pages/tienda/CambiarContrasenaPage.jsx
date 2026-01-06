@@ -15,7 +15,7 @@ export default function CambiarContrasenaPage() {
     e.preventDefault();
     try {
       const token = sessionStorage.getItem("pw_reset_token");
-      await api.post("/recuperacion/cambiar", { token, nuevaContrasena: pass });
+      await api.post("/apij/recuperacion/cambiar", { token, nuevaContrasena: pass });
       sessionStorage.removeItem("pw_reset_token");
       sessionStorage.removeItem("recovery_started");
       sessionStorage.removeItem("recovery_email");
