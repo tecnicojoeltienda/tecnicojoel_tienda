@@ -29,11 +29,10 @@ export default function ProductDetail({
   const dec = () => setQty(q => Math.max(1, q - 1));
   const handleAdd = async () => {
     try {
-      // Verificar stock actual en tiempo real
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/productos/${product.id_producto}/stock`);
-      const stockData = await response.json();
+      const stockDisponible = product.stock || 0;
       
-      if (!stockData.disponible || stockData.stock <= 0) {
+      // Validación básica de stock
+      if (stockDisponible <= 0 || product.estado === 'agotado') {
         toast.error('⚠️ Producto agotado', {
           description: 'Este producto ya no está disponible en stock.',
           duration: 3000,
@@ -49,9 +48,9 @@ export default function ProductDetail({
       const currentQtyInCart = itemInCart ? (itemInCart.quantity || itemInCart.cantidad || 0) : 0;
       const newTotal = currentQtyInCart + qty;
 
-      if (newTotal > stockData.stock) {
+      if (newTotal > stockDisponible) {
         toast.error('⚠️ Stock insuficiente', {
-          description: `Solo hay ${stockData.stock} unidades disponibles. Ya tienes ${currentQtyInCart} en el carrito.`,
+          description: `Solo hay ${stockDisponible} unidades disponibles. Ya tienes ${currentQtyInCart} en el carrito.`,
           duration: 4000,
         });
         return;
@@ -69,8 +68,8 @@ export default function ProductDetail({
 
       setTimeout(() => setAddedToCart(false), 2000);
     } catch (error) {
-      console.error('Error verificando stock:', error);
-      toast.error('Error al verificar disponibilidad', {
+      console.error('Error al agregar:', error);
+      toast.error('Error al agregar al carrito', {
         description: 'Por favor intenta nuevamente.',
         duration: 3000,
       });

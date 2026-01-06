@@ -25,14 +25,14 @@ const upload = multer({
 });
 
 router.get("/", ctrl.listar);
-router.get("/:id/relacionados", ctrl.obtenerRelacionados); 
-router.get("/:id", ctrl.ver);
 router.get("/categoria/:id", ctrl.ListarPorCategoria);
 router.get("/categoria/nombre/:name", ctrl.ListarPorCategoriaNombre);
+router.get("/:id/stock", ctrl.verificarStock); 
+router.get("/:id/relacionados", ctrl.obtenerRelacionados); 
+router.get("/:id", ctrl.ver);
 router.post("/", upload.single("imagen"), ctrl.crear);
 router.put("/:id", upload.single("imagen"), ctrl.actualizar);
 router.delete("/:id", ctrl.eliminar);
-router.get("/:id/stock", ctrl.verificarStock);
 
 
 export default router;

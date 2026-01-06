@@ -155,47 +155,29 @@ export default function CarritoPage() {
   const increase = async (it) => {
     try {
       const id = it.id_producto || it.id;
-      
-      // Verificar stock actual en tiempo real
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/productos/${id}/stock`);
-      const stockData = await response.json();
-      
-      if (!stockData.disponible || stockData.stock <= 0) {
-        toast.error('⚠️ Producto agotado', {
-          description: 'Este producto ya no está disponible.',
-          duration: 3000,
-        });
-        
-        // Actualizar el item como agotado
-        const updated = items.map(x =>
-          (x.id_producto || x.id) === id
-            ? { ...x, stock: 0, estado: 'agotado' }
-            : x
-        );
-        setItems(updated);
-        persistLocal(updated);
-        return;
-      }
-
+      const stockDisponible = it.stock || 0;
       const currentQty = getQty(it);
       const newQty = currentQty + 1;
 
-      if (newQty > stockData.stock) {
+      // Validar contra el stock disponible
+      if (newQty > stockDisponible) {
         toast.warning('⚠️ Stock insuficiente', {
-          description: `Solo hay ${stockData.stock} unidades disponibles.`,
+          description: `Solo hay ${stockDisponible} unidades disponibles.`,
           duration: 4000,
         });
         return;
       }
 
+      // Actualizar items
       const updated = items.map(x =>
         (x.id_producto || x.id) === id
-          ? { ...x, quantity: newQty, cantidad: newQty, stock: stockData.stock }
+          ? { ...x, quantity: newQty, cantidad: newQty }
           : x
       );
       setItems(updated);
       persistLocal(updated);
 
+      // Sincronizar con el contexto si existe
       if (cart?.addToCart) {
         await cart.addToCart(it, 1);
       }

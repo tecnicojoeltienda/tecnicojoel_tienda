@@ -156,11 +156,9 @@ export default function LaptopsPage() {
 
     const handleAddToCart = async (producto) => {
       try {
-        // Verificar stock en tiempo real
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/productos/${producto.id_producto}/stock`);
-        const stockData = await response.json();
+        const stockDisponible = producto.stock || 0;
         
-        if (!stockData.disponible || stockData.stock <= 0) {
+        if (stockDisponible <= 0 || producto.estado === 'agotado') {
           toast.error('⚠️ Producto agotado', {
             description: `${producto.nombre_producto} ya no está disponible.`,
             duration: 3000,
@@ -176,9 +174,9 @@ export default function LaptopsPage() {
         
         if (itemInCart) {
           const currentQty = itemInCart.quantity || itemInCart.cantidad || 0;
-          if (currentQty >= stockData.stock) {
+          if (currentQty >= stockDisponible) {
             toast.warning('⚠️ Stock máximo alcanzado', {
-              description: `Ya tienes el máximo disponible (${stockData.stock} unidades) en el carrito.`,
+              description: `Ya tienes el máximo disponible (${stockDisponible} unidades) en el carrito.`,
               duration: 4000,
             });
             return;
