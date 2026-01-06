@@ -104,7 +104,7 @@ export async function solicitar(req, res) {
     
     try {
       const info = await transporter.sendMail({ 
-        from: `"TecnicoJoel" <${process.env.SMTP_USER}>`, 
+        from: `"TecnicoJoel" <${process.env.SMTP_FROM || SMTP_USER}>`, 
         to: email, 
         subject: "🔐 Código de recuperación - TecnicoJoel", 
         html 
