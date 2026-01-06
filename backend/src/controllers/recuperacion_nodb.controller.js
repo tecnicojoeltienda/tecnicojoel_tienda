@@ -40,6 +40,13 @@ export async function solicitar(req, res) {
     const ip = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     if (!email) return res.status(400).json({ error: "Email requerido" });
 
+    // Verificar si el email existe en la BD
+    const conn = await conexion;
+    const [usuarios] = await conn.query("SELECT id_cliente FROM cliente WHERE email = ? LIMIT 1", [email]);
+    if (!usuarios || usuarios.length === 0) {
+      return res.status(404).json({ error: "No existe una cuenta con ese correo" });
+    }
+
     // IP rate limit
     const now = Date.now();
     const ipRec = ipCounts.get(ip) || { count: 0, resetAt: now + 15 * 60 * 1000 };
@@ -61,6 +68,8 @@ export async function solicitar(req, res) {
     const expiresAt = now + CODE_TTL;
     codes.set(email, { code, expiresAt, lastSentAt: now, attempts: (rec.attempts || 0) + 1 });
 
+    console.log(`📧 Código generado para ${email}: ${code}`); // LOG PARA VER EL CÓDIGO EN CONSOLA
+
     // send mail
     const html = `
       <div style="font-family:Arial, sans-serif;max-width:600px">
@@ -69,11 +78,12 @@ export async function solicitar(req, res) {
         <div style="font-size:28px;font-weight:700;letter-spacing:6px;background:#f3f4f6;padding:12px;text-align:center">${code}</div>
         <p>Expira en ${Math.round(CODE_TTL/60000)} minutos.</p>
       </div>`;
-    await transporter.sendMail({ from: SMTP_FROM, to: email, subject: "Código de recuperación", html });
+    
+    await transporter.sendMail({ from: SMTP_FROM, to: email, subject: "Código de recuperación - TecnicoJoel", html });
 
-    return res.json({ message: "Código enviado" });
+    return res.json({ message: "Código enviado", email }); // Retornar también el email
   } catch (err) {
-    console.error("rec.solicitar:", err);
+    console.error("❌ ERROR rec.solicitar:", err);
     return res.status(500).json({ error: "Error enviando código" });
   }
 }
@@ -119,5 +129,20 @@ export async function cambiar(req, res) {
   } catch (err) {
     console.error("rec.cambiar:", err);
     return res.status(500).json({ error: "Error cambiando contraseña" });
+  }
+
+  
+}
+
+// SOLO PARA DESARROLLO - Limpiar contadores
+export async function limpiar(req, res) {
+  try {
+    codes.clear();
+    ipCounts.clear();
+    console.log("🧹 Contadores limpiados");
+    return res.json({ message: "Contadores limpiados exitosamente" });
+  } catch (err) {
+    console.error("rec.limpiar:", err);
+    return res.status(500).json({ error: "Error limpiando contadores" });
   }
 }
