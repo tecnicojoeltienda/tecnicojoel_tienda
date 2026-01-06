@@ -61,10 +61,13 @@ export async function actualizarCliente(id, data = {}) {
     fields.push("email = ?");
     params.push(data.email);
   }
-
   if (Object.prototype.hasOwnProperty.call(data, "telefono")) {
     fields.push("telefono = ?");
     params.push(data.telefono);
+  }
+  if (Object.prototype.hasOwnProperty.call(data, "clave")) {
+    fields.push("clave = ?");
+    params.push(data.clave);
   }
 
   if (fields.length === 0) {

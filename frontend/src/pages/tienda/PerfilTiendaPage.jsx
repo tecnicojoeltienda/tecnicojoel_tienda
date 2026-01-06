@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import HeaderTienda from "../../layouts/tienda/HeaderTienda";
 import FooterTienda from "../../layouts/tienda/FooterTienda";
 import api from "../../service/api";
-import { FiUser, FiMail, FiPackage, FiHome, FiCalendar, FiPhone, FiEdit3, FiLock, FiCamera } from "react-icons/fi";
+import { FiUser, FiMail, FiPackage, FiHome, FiCalendar, FiPhone, FiEdit3, FiLock, FiCamera, FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function PerfilTiendaPage() {
   const [user, setUser] = useState(null);
@@ -544,38 +544,77 @@ export default function PerfilTiendaPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-semibold text-gray-700">Contraseña actual</label>
-                    <input
-                      name="currentPassword"
-                      value={form.currentPassword}
-                      onChange={handleChange}
-                      type="password"
-                      className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ingresa tu contraseña actual"
-                    />
+                    <div className="relative">
+                      <input
+                        name="currentPassword"
+                        value={form.currentPassword}
+                        onChange={handleChange}
+                        type={form.showCurrentPassword ? "text" : "password"}
+                        className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ingresa tu contraseña actual"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm((s) => ({ ...s, showCurrentPassword: !s.showCurrentPassword }))}
+                        className="absolute right-3 top-3 text-gray-500"
+                      >
+                        {form.showCurrentPassword ? (
+                          <FiEyeOff className="w-5 h-5" />
+                        ) : (
+                          <FiEye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="text-sm font-semibold text-gray-700">Nueva contraseña</label>
-                    <input
-                      name="newPassword"
-                      value={form.newPassword}
-                      onChange={handleChange}
-                      type="password"
-                      className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Mínimo 6 caracteres"
-                    />
+                    <div className="relative">
+                      <input
+                        name="newPassword"
+                        value={form.newPassword}
+                        onChange={handleChange}
+                        type={form.showNewPassword ? "text" : "password"}
+                        className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm((s) => ({ ...s, showNewPassword: !s.showNewPassword }))}
+                        className="absolute right-3 top-3 text-gray-500"
+                      >
+                        {form.showNewPassword ? (
+                          <FiEyeOff className="w-5 h-5" />
+                        ) : (
+                          <FiEye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="text-sm font-semibold text-gray-700">Confirmar nueva contraseña</label>
-                    <input
-                      name="confirmPassword"
-                      value={form.confirmPassword}
-                      onChange={handleChange}
-                      type="password"
-                      className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Confirma tu nueva contraseña"
-                    />
+                    <div className="relative">
+                      <input
+                        name="confirmPassword"
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        type={form.showConfirmPassword ? "text" : "password"}
+                        className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Confirma tu nueva contraseña"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm((s) => ({ ...s, showConfirmPassword: !s.showConfirmPassword }))}
+                        className="absolute right-3 top-3 text-gray-500"
+                      >
+                        {form.showConfirmPassword ? (
+                          <FiEyeOff className="w-5 h-5" />
+                        ) : (
+                          <FiEye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

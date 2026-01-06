@@ -279,15 +279,22 @@ export default function ProductDetail({
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-gray-50 rounded-xl">
                 <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Stock</div>
-                <div className={`text-sm font-bold px-3 py-1 rounded-full ${getStockColor(product.stock)}`}>
-                  {getStockText(product.stock)}
+                <div className="text-sm font-bold px-3 py-1 rounded-full bg-green-50 text-green-600">
+                  {product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"}
                 </div>
               </div>
               
               <div className="text-center p-4 bg-gray-50 rounded-xl">
                 <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Estado</div>
-                <div className="text-sm font-bold text-gray-800">
-                  {product.estado || "Nuevo"}
+                <div className={`text-sm font-bold px-3 py-1 rounded-full ${
+                  !product.stock || product.stock <= 0 || product.estado === 'agotado'
+                    ? 'bg-red-50 text-red-600'
+                    : 'bg-green-50 text-green-600'
+                }`}>
+                  {!product.stock || product.stock <= 0 || product.estado === 'agotado'
+                    ? 'Agotado'
+                    : 'Disponible'
+                  }
                 </div>
               </div>
             </div>
