@@ -566,7 +566,7 @@ function HeaderTienda() {
           aria-label="Panel de categorías"
         >
           {/* Header del panel */}
-          <div className="flex items-center gap-3 p-4 sm:p-6 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center gap-6 p-4 sm:p-6 bg-gray-50 border-b border-gray-200">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-700 shadow-lg">
               <img src="/assets/logo.png" alt="Logo Tecnico Joel" className="w-10 h-10 object-contain" loading="lazy" />
             </div>

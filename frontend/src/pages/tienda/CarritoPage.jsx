@@ -7,6 +7,16 @@ import api from "../../service/api";
 import { FiTrash2, FiPlus, FiMinus, FiShoppingCart, FiTag, FiPercent, FiCheck, FiX, FiAlertTriangle } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 
+const STORE_URL = "https://tiendatecnicojoel.vercel.app/";
+const DEFAULT_WHATSAPP_PHONE = "51984122549";
+
+function shareStoreWhatsapp(customText, phone = DEFAULT_WHATSAPP_PHONE) {
+  const baseText = (customText || `Visita la tienda TécnicoJoel: ${STORE_URL}`).trim();
+  const fullText = `${baseText}\n\n${STORE_URL}`;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(fullText)}`;
+  window.open(url, "_blank");
+}
+
 export default function CarritoPage() {
   const cart = useCart();
 
