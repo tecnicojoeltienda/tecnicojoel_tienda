@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { FiEdit, FiEye } from "react-icons/fi";
+import { FiEdit, FiEye, FiTrash } from "react-icons/fi";
+import { toast } from "react-toastify";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,6 +12,9 @@ function formatDate(d) {
 function formatMoney(v) {
   return `S/. ${Number(v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
+
+const [deleteOpen, setDeleteOpen] = useState(false);
+const [deletingVenta, setDeletingVenta] = useState(null);
 
 
 function Modal({ open, onClose, title, children, footer, maxW = "max-w-4xl" }) {
@@ -184,6 +188,36 @@ export default function VentasPage() {
     } finally { setLoading(false); }
   }
 
+  const openDeleteModal = (venta) => {
+    setDeletingVenta(venta);
+    setDeleteOpen(true);
+  };
+
+  const submitDelete = async () => {
+    if (!deletingVenta) return;
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (!token) { toast.error("No estás autorizado"); return; }
+
+      const response = await fetch(`${API}/ventas/${deletingVenta.id_venta}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || "Error al eliminar venta");
+      }
+
+      toast.success("Venta eliminada correctamente");
+      setDeleteOpen(false);
+      setDeletingVenta(null);
+      cargarVentas();
+    } catch (err) {
+      toast.error(err.message || "Error al eliminar venta");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 p-4 md:p-6 font-['Inter','system-ui',sans-serif]">
       <div className="max-w-7xl mx-auto">
@@ -296,6 +330,7 @@ export default function VentasPage() {
                       <div className="flex items-center justify-center gap-2">
                         <button onClick={() => openDetail(v)} className="p-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md"><FiEye /></button>
                         <button onClick={() => openEditModal(v)} className="p-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md"><FiEdit /></button>
+                        <button onClick={() => openDeleteModal(v)} className="p-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"><FiTrash /></button>
                       </div>
                     </td>
                   </tr>
@@ -370,6 +405,18 @@ export default function VentasPage() {
             <option value="otro">Otro</option>
           </select>
           <div className="text-sm text-indigo-600 bg-indigo-50 p-3 rounded-lg">💡 Cambiar el método no modifica montos.</div>
+        </div>
+      </Modal>
+
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={`Eliminar Venta #${deletingVenta?.id_venta}`} maxW="max-w-sm"
+        footer={
+          <>
+            <button onClick={() => setDeleteOpen(false)} className="w-full px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
+            <button onClick={submitDelete} className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg">Eliminar</button>
+          </>
+        }>
+        <div className="text-base text-gray-700">
+          ¿Estás seguro de que deseas eliminar esta venta? Esta acción no se puede deshacer.
         </div>
       </Modal>
     </div>

@@ -441,14 +441,14 @@ function HeaderTienda() {
           {/* Línea divisoria - solo desktop */}
           <div className="hidden lg:block w-full h-px bg-gray-700 my-0" />
 
-          {/* Navegación secundaria - solo desktop */}
+          {/* Navegación secundaria - solo desktop con TODAS las categorías alfabéticamente */}
           <div className="hidden lg:flex justify-center">
-            <nav className="flex gap-4 xl:gap-8 py-2">
-              {["Computadoras", "Laptops", "Monitores", "Impresoras"].map((c) => (
+            <nav className="flex flex-wrap gap-2 xl:gap-4 py-2 px-4">
+              {categorias.map((c, index) => (
                 <button
-                  key={c}
+                  key={index}
                   onClick={() => navigate(getRoute(c))}
-                  className="text-gray-200 hover:text-white text-sm lg:text-base xl:text-base font-bold uppercase tracking-tight px-2 lg:px-3 py-1 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
+                  className="text-gray-200 hover:text-white text-xs xl:text-sm font-bold uppercase tracking-tight px-2 xl:px-3 py-1 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
                 >
                   {c}
                 </button>
