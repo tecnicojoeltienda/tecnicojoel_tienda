@@ -247,8 +247,8 @@ function HeaderTienda() {
         <nav className="w-full px-4 sm:px-6 lg:px-8">
           {/* Header principal */}
           <div className="flex items-center justify-between h-14 lg:h-16 gap-2 lg:gap-3">
-            {/* Logo y menú categorías */}
-            <div className="flex items-center gap-2">
+            {/* Logo, nombre y botón categorías */}
+            <div className="flex items-center gap-2 lg:gap-4">
               {/* Logo */}
               <Link 
                 to="/" 
@@ -269,13 +269,14 @@ function HeaderTienda() {
                 </span>
               </Link>
 
-              {/* Botón categorías al lado del logo - SOLO MÓVIL */}
+              {/* Botón categorías con icono hamburguesa - MÓVIL Y DESKTOP */}
               <button
                 onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
-                className="lg:hidden p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded-lg transition-colors"
                 aria-label="Menú de categorías"
               >
-                <FiMenu className="w-6 h-6 text-white" />
+                <FiMenu className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                <span className="hidden lg:block text-sm xl:text-base font-bold text-white uppercase">Categorías</span>
               </button>
             </div>
 
@@ -311,7 +312,7 @@ function HeaderTienda() {
                             const img = pickImageUrl(p);
 
                             const info = getCategoryAndSlug(p);
-                            if (!info) return null; // ignorar productos sin categoría vinculada
+                            if (!info) return null;
 
                             const { categorySlug, productSlug } = info;
                             const detailPath = `/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}`;
@@ -441,14 +442,14 @@ function HeaderTienda() {
           {/* Línea divisoria - solo desktop */}
           <div className="hidden lg:block w-full h-px bg-gray-700 my-0" />
 
-          {/* Navegación secundaria - solo desktop con TODAS las categorías alfabéticamente */}
+          {/* Navegación secundaria - solo desktop con 4 categorías */}
           <div className="hidden lg:flex justify-center">
-            <nav className="flex flex-wrap gap-2 xl:gap-4 py-2 px-4">
-              {categorias.map((c, index) => (
+            <nav className="flex gap-2 xl:gap-4 py-2 px-4">
+              {["Computadoras", "Laptops", "Monitores", "Impresoras"].map((c) => (
                 <button
-                  key={index}
+                  key={c}
                   onClick={() => navigate(getRoute(c))}
-                  className="text-gray-200 hover:text-white text-xs xl:text-sm font-bold uppercase tracking-tight px-2 xl:px-3 py-1 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
+                  className="text-gray-200 hover:text-white text-sm lg:text-base xl:text-base font-bold uppercase tracking-tight px-2 lg:px-3 py-1 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
                 >
                   {c}
                 </button>
