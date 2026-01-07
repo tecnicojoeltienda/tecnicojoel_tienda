@@ -409,15 +409,21 @@ export default function VentasPage() {
         </div>
       </Modal>
 
-      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={`Eliminar Venta #${deletingVenta?.id_venta}`} maxW="max-w-sm"
+      <Modal open={deleteOpen} onClose={() => { setDeleteOpen(false); setDeletingVenta(null); }} title="⚠️ Confirmar Eliminación" maxW="max-w-lg"
         footer={
           <>
-            <button onClick={() => setDeleteOpen(false)} className="w-full px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
-            <button onClick={submitDelete} className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg">Eliminar</button>
+            <button onClick={() => { setDeleteOpen(false); setDeletingVenta(null); }} className="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
+            <button onClick={submitDelete} className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg">Eliminar</button>
           </>
         }>
-        <div className="text-base text-gray-700">
-          ¿Estás seguro de que deseas eliminar esta venta? Esta acción no se puede deshacer.
+        <div className="space-y-3">
+          <div className="text-base text-gray-700 bg-red-50 p-4 rounded-lg border border-red-200">
+            <p className="font-semibold mb-2">¿Estás seguro de eliminar esta venta?</p>
+            <p className="text-sm"><strong>Venta:</strong> #{deletingVenta?.id_venta}</p>
+            <p className="text-sm"><strong>Total:</strong> {formatMoney(deletingVenta?.total)}</p>
+            <p className="text-sm"><strong>Fecha:</strong> {formatDate(deletingVenta?.fecha_venta)}</p>
+          </div>
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">⚠️ Esta acción no se puede deshacer.</div>
         </div>
       </Modal>
     </div>

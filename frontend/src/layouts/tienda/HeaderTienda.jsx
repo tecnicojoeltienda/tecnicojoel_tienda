@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FiSearch, FiShoppingCart, FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiPackage } from "react-icons/fi";
+import { FiSearch, FiShoppingCart, FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiPackage, FiEdit, FiEye, FiTrash } from "react-icons/fi";
 import { useCart } from "../../context/CartContext";
 import { useNavigate, Link } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
@@ -246,13 +246,13 @@ function HeaderTienda() {
       <header className="fixed top-0 left-0 right-0 z-50 w-screen bg-gray-900 shadow-xl border-b border-gray-800">
         <nav className="w-full px-4 sm:px-6 lg:px-8">
           {/* Header principal */}
-          <div className="flex items-center justify-between h-14 lg:h-16 gap-2 lg:gap-3">
+          <div className="flex items-center justify-between h-14 lg:h-20 gap-2 lg:gap-3">
             {/* Logo, nombre y botón categorías */}
             <div className="flex items-center gap-2 lg:gap-4">
-              {/* Logo */}
+              {/* Logo con margen superior en desktop */}
               <Link 
                 to="/" 
-                className="flex items-center gap-3"
+                className="flex items-center gap-3 lg:mt-2"
                 onClick={() => {
                   setIsMenuOpen(false);
                   setIsCategoryMenuOpen(false);
@@ -269,13 +269,13 @@ function HeaderTienda() {
                 </span>
               </Link>
 
-              {/* Botón categorías con icono hamburguesa - MÓVIL Y DESKTOP */}
+              {/* Botón categorías con icono hamburguesa - SOLO EN MÓVIL Y DESKTOP */}
               <button
                 onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
                 className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded-lg transition-colors"
                 aria-label="Menú de categorías"
               >
-                <FiMenu className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                <FiMenu className="w-5 h-5 lg:w-8 lg:h-6 text-white" />
                 <span className="hidden lg:block text-sm xl:text-base font-bold text-white uppercase">Categorías</span>
               </button>
             </div>
@@ -517,13 +517,6 @@ function HeaderTienda() {
                   <FiPackage className="w-4 h-4" />
                   Pedidos
                 </button>
-                <button
-                  onClick={() => setIsCategoryMenuOpen(true)}
-                  className="flex-1 px-2 py-2 bg-gray-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
-                >
-                  <FiMenu className="w-4 h-4" />
-                  Categorías
-                </button>
               </div>
 
               {/* Grid de categorías principales móvil */}
@@ -550,7 +543,7 @@ function HeaderTienda() {
       </header>
 
       {/* Espaciado para el header fijo */}
-      <div className="h-14 lg:h-16" />
+      <div className="h-14 lg:h-20" />
 
       {/* Panel lateral de categorías */}
       <div
