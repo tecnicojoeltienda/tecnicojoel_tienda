@@ -13,8 +13,7 @@ function formatMoney(v) {
   return `S/. ${Number(v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-const [deleteOpen, setDeleteOpen] = useState(false);
-const [deletingVenta, setDeletingVenta] = useState(null);
+
 
 
 function Modal({ open, onClose, title, children, footer, maxW = "max-w-4xl" }) {
@@ -93,6 +92,8 @@ export default function VentasPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editingVenta, setEditingVenta] = useState(null);
   const [editMetodoValue, setEditMetodoValue] = useState("efectivo");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingVenta, setDeletingVenta] = useState(null);
 
   async function cargarVentas() {
     setLoading(true); setError(null);
