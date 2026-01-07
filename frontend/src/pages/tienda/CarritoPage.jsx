@@ -407,7 +407,8 @@ export default function CarritoPage() {
 
       setTimeout(() => {
         const telefono = "51984122549";
-        const url = `https://wa.me/${telefono}?text=${encodeURIComponent(body)}`;
+        const bodyWithStore = `${body}\n\nVisita la tienda: ${STORE_URL}`;
+        const url = `https://wa.me/${telefono}?text=${encodeURIComponent(bodyWithStore)}`;
         window.open(url, "_blank");
       }, 2000);
 
@@ -719,6 +720,13 @@ export default function CarritoPage() {
                 className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 Entendido
+              </button>
+
+              <button
+                onClick={() => shareStoreWhatsapp(`Te comparto la tienda TécnicoJoel: ${STORE_URL}`)}
+                className="w-full mt-3 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all"
+              >
+                Compartir tienda en WhatsApp
               </button>
 
               <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
