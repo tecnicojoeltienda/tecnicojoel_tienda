@@ -6,3 +6,4 @@ npm install react-icons
 npm install prop-types
 npm install sonner
 npm install react-hot-toast
+npm install react-toastify
