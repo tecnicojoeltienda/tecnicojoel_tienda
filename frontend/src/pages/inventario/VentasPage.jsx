@@ -196,26 +196,48 @@ export default function VentasPage() {
 
   const submitDelete = async () => {
     if (!deletingVenta) return;
-    try {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) { toast.error("No estás autorizado"); return; }
+    
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) { 
+      toast.error("No estás autorizado. Por favor inicia sesión."); 
+      return; 
+    }
 
+    try {
+      console.log(`Intentando eliminar venta #${deletingVenta.id_venta}`);
+      
       const response = await fetch(`${API}/ventas/${deletingVenta.id_venta}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
       });
 
+      console.log("Response status:", response.status);
+
       if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(errText || "Error al eliminar venta");
+        let errorMessage = "Error al eliminar venta";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (e) {
+          const errorText = await response.text();
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
-      toast.success("Venta eliminada correctamente");
+      const result = await response.json();
+      console.log("Resultado eliminación:", result);
+
+      toast.success("✅ Venta eliminada correctamente");
       setDeleteOpen(false);
       setDeletingVenta(null);
-      cargarVentas();
+      await cargarVentas();
     } catch (err) {
-      toast.error(err.message || "Error al eliminar venta");
+      console.error("Error eliminando venta:", err);
+      toast.error(err.message || "❌ Error al eliminar venta");
     }
   };
 
@@ -282,6 +304,9 @@ export default function VentasPage() {
                 </button>
                 <button onClick={() => openEditModal(v)} className="flex-1 px-3 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg text-sm flex items-center justify-center gap-2">
                   <FiEdit /> Editar
+                </button>
+                <button onClick={() => openDeleteModal(v)} className="px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg text-sm flex items-center justify-center">
+                  <FiTrash />
                 </button>
               </div>
             </div>
