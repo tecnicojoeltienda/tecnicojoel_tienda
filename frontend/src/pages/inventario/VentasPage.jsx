@@ -195,18 +195,28 @@ export default function VentasPage() {
   };
 
   const submitDelete = async () => {
-    if (!deletingVenta) return;
+    if (!deletingVenta) {
+      console.error("❌ No hay venta seleccionada para eliminar");
+      return;
+    }
+    
+    console.log("📋 Iniciando eliminación de venta:", deletingVenta);
     
     const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     if (!token) { 
+      console.error("❌ No hay token de autenticación");
       toast.error("No estás autorizado. Por favor inicia sesión."); 
       return; 
     }
 
+    console.log("🔑 Token encontrado:", token.substring(0, 20) + "...");
+
     try {
-      console.log(`Intentando eliminar venta #${deletingVenta.id_venta}`);
+      const url = `${API}/ventas/${deletingVenta.id_venta}`;
+      console.log("🌐 URL de eliminación:", url);
+      console.log("📤 Enviando solicitud DELETE...");
       
-      const response = await fetch(`${API}/ventas/${deletingVenta.id_venta}`, {
+      const response = await fetch(url, {
         method: "DELETE",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -214,29 +224,40 @@ export default function VentasPage() {
         }
       });
 
-      console.log("Response status:", response.status);
+      console.log("📥 Respuesta recibida - Status:", response.status);
+      console.log("📥 Respuesta recibida - StatusText:", response.statusText);
 
       if (!response.ok) {
         let errorMessage = "Error al eliminar venta";
         try {
           const errorData = await response.json();
+          console.error("❌ Error del servidor (JSON):", errorData);
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (e) {
           const errorText = await response.text();
+          console.error("❌ Error del servidor (texto):", errorText);
           errorMessage = errorText || errorMessage;
         }
         throw new Error(errorMessage);
       }
 
       const result = await response.json();
-      console.log("Resultado eliminación:", result);
+      console.log("✅ Resultado exitoso:", result);
 
-      toast.success("✅ Venta eliminada correctamente");
-      setDeleteOpen(false);
-      setDeletingVenta(null);
-      await cargarVentas();
+      if (result.deleted) {
+        toast.success("✅ Venta eliminada correctamente");
+        setDeleteOpen(false);
+        setDeletingVenta(null);
+        await cargarVentas();
+        console.log("✅ Lista de ventas recargada");
+      } else {
+        console.warn("⚠️ El servidor respondió pero deleted=false");
+        toast.warning("La venta no pudo ser eliminada");
+      }
     } catch (err) {
-      console.error("Error eliminando venta:", err);
+      console.error("❌ Error capturado:", err);
+      console.error("❌ Mensaje:", err.message);
+      console.error("❌ Stack:", err.stack);
       toast.error(err.message || "❌ Error al eliminar venta");
     }
   };
