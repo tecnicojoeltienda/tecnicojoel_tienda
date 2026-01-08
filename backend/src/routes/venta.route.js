@@ -1,6 +1,5 @@
 import { Router } from "express";
 import * as ctrl from "../controllers/venta.controller.js";
-import authMiddleware from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -10,13 +9,13 @@ router.get("/", ctrl.listar);
 // GET /apij/ventas/:id - no requiere auth
 router.get("/:id", ctrl.obtener);
 
-// POST /apij/ventas - requiere auth para crear
-router.post("/", authMiddleware, ctrl.crear);
+// POST /apij/ventas - no requiere auth (quitado middleware)
+router.post("/", ctrl.crear);
 
-// PUT /apij/ventas/:id - requiere auth para editar
-router.put("/:id", authMiddleware, ctrl.actualizar);
+// PUT /apij/ventas/:id - no requiere auth (quitado middleware)
+router.put("/:id", ctrl.actualizar);
 
-// DELETE /apij/ventas/:id - requiere auth para eliminar
-router.delete("/:id", authMiddleware, ctrl.eliminar);
+// DELETE /apij/ventas/:id - no requiere auth (quitado middleware)
+router.delete("/:id", ctrl.eliminar);
 
 export default router;
