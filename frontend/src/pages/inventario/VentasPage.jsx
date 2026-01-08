@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { FiEdit, FiEye, FiTrash } from "react-icons/fi";
-import { toast } from "react-toastify";
+import { FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,9 +11,6 @@ function formatDate(d) {
 function formatMoney(v) {
   return `S/. ${Number(v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
-
-
-
 
 function Modal({ open, onClose, title, children, footer, maxW = "max-w-4xl" }) {
   if (!open) return null;
@@ -39,21 +35,33 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   const maxVisiblePages = 5;
   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
   let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-  if (endPage - startPage + 1 < maxVisiblePages) startPage = Math.max(1, endPage - maxVisiblePages + 1);
-  for (let i = startPage; i <= endPage; i++) pages.push(i);
+  if (endPage - startPage + 1 < maxVisiblePages) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
 
   return (
     <div className="flex items-center justify-center flex-wrap gap-2 mt-4 md:mt-8">
       <button onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1}
-        className="px-3 py-2 text-sm text-gray-500 bg-white border rounded-lg disabled:opacity-50">Anterior</button>
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+        Anterior
+      </button>
       {pages.map(p => (
         <button key={p} onClick={() => onPageChange(p)}
-          className={`px-3 py-2 text-sm rounded-lg ${p === currentPage ? 'bg-green-600 text-white' : 'bg-white border'}`}>
+          className={`px-3 py-2 text-sm font-medium rounded-lg ${
+            p === currentPage
+              ? 'bg-green-600 text-white border-green-600'
+              : 'text-gray-700 bg-white border border-gray-300 hover:bg-green-50'
+          }`}>
           {p}
         </button>
       ))}
       <button onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}
-        className="px-3 py-2 text-sm text-gray-500 bg-white border rounded-lg disabled:opacity-50">Siguiente</button>
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+        Siguiente
+      </button>
     </div>
   );
 }
@@ -85,21 +93,23 @@ export default function VentasPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Modal states
   const [detailOpen, setDetailOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
   const [selectedVenta, setSelectedVenta] = useState(null);
   const [ventaPedidoItems, setVentaPedidoItems] = useState([]);
-
-  const [editOpen, setEditOpen] = useState(false);
-  const [editingVenta, setEditingVenta] = useState(null);
   const [editMetodoValue, setEditMetodoValue] = useState("efectivo");
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deletingVenta, setDeletingVenta] = useState(null);
 
   async function cargarVentas() {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/apij/ventas`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const res = await fetch(`${API}/apij/ventas`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
         throw new Error(json?.message || "Error al cargar ventas");
@@ -110,16 +120,21 @@ export default function VentasPage() {
       console.error(err);
       setError("No se pudieron cargar las ventas");
       setVentas([]);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { cargarVentas(); }, []);
 
-  const metodos = useMemo(() => Array.from(new Set((ventas || []).map(v => v.metodo_pago || "efectivo"))).sort(), [ventas]);
+  const metodos = useMemo(() => {
+    const m = new Set((ventas || []).map(v => v.metodo_pago || "efectivo"));
+    return Array.from(m).sort();
+  }, [ventas]);
 
   const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
     return (ventas || []).filter(v => {
+      const term = q.trim().toLowerCase();
       if (metodoFilter && String(v.metodo_pago) !== String(metodoFilter)) return false;
       if (!term) return true;
       return String(v.id_venta || "").toLowerCase().includes(term)
@@ -133,26 +148,43 @@ export default function VentasPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filtered.slice(startIndex, endIndex);
-  useEffect(() => setCurrentPage(1), [q, metodoFilter]);
 
-  async function openDetail(venta) {
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [q, metodoFilter]);
+
+  // Open detail modal
+  async function openDetailModal(venta) {
     try {
       setSelectedVenta(venta);
       setVentaPedidoItems([]);
       setDetailOpen(true);
+
       const pedidoId = venta?.id_pedido ?? venta?.id_pedido_fk ?? venta?.id;
       if (!pedidoId) return;
+
       const resp = await fetch(`${API}/apij/detalle_pedidos/pedido/${pedidoId}`);
       const data = await resp.json();
       const detalles = Array.isArray(data) ? data : (data?.results || data?.rows || []);
+
+      // Resolver nombres de producto (con caché)
       const detallesConNombres = await Promise.all(detalles.map(async (d) => {
         const id_producto = d.id_producto ?? d.id_producto_fk ?? d.id_producto_id ?? d.id;
         const nombre = d.nombre_producto || d.nombre || await fetchProductName(id_producto);
         const precio_unitario = d.precio_unitario ?? d.precio ?? d.precio_venta ?? 0;
         const cantidad = d.cantidad ?? d.qty ?? d.quantity ?? 1;
         const subtotal = d.subtotal ?? (cantidad * (precio_unitario || 0));
-        return { ...d, id_producto, nombre_producto: nombre, precio_unitario, cantidad, subtotal };
+        return {
+          ...d,
+          id_producto,
+          nombre_producto: nombre,
+          precio_unitario,
+          cantidad,
+          subtotal,
+        };
       }));
+
       setVentaPedidoItems(detallesConNombres);
     } catch (err) {
       console.error("Error al cargar detalle de venta:", err);
@@ -160,113 +192,74 @@ export default function VentasPage() {
     }
   }
 
+  // Open edit modal
   function openEditModal(venta) {
-    setEditingVenta(venta);
-    setEditMetodoValue(venta.metodo_pago ?? "efectivo");
+    setSelectedVenta(venta);
+    const current = venta.metodo_pago || "efectivo";
+    setEditMetodoValue(current);
     setEditOpen(true);
   }
 
+  // Submit edit
   async function submitEditMetodo() {
-    if (!editingVenta) return;
-    const id = editingVenta.id_venta;
-    
+    if (!selectedVenta) return;
+    const id = selectedVenta.id_venta;
+
+    const token = localStorage.getItem("token");
     try {
       setLoading(true);
-      const res = await fetch(`${API}/ventas/${id}`, {
+      const res = await fetch(`${API}/apij/ventas/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ metodo_pago: editMetodoValue })
       });
-      
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Error al actualizar");
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json?.message || "Error actualizando método de pago");
       }
-      
-      toast.success("✅ Método de pago actualizado");
       await cargarVentas();
       setEditOpen(false);
-      setEditingVenta(null);
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "No se pudo actualizar el método de pago");
+      setError("No se pudo cambiar el método de pago");
     } finally {
       setLoading(false);
     }
   }
 
-  const openDeleteModal = (venta) => {
-    setDeletingVenta(venta);
+  // Open delete modal
+  function openDeleteModal(venta) {
+    setSelectedVenta(venta);
     setDeleteOpen(true);
-  };
+  }
 
-  const submitDelete = async () => {
-    if (!deletingVenta) {
-      console.error("❌ No hay venta seleccionada para eliminar");
-      return;
-    }
-    
-    console.log("📋 Iniciando eliminación de venta:", deletingVenta);
-    
-    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-    if (!token) { 
-      console.error("❌ No hay token de autenticación");
-      toast.error("No estás autorizado. Por favor inicia sesión."); 
-      return; 
-    }
-
-    console.log("🔑 Token encontrado:", token.substring(0, 20) + "...");
-
+  // Confirm delete
+  async function confirmDelete() {
+    if (!selectedVenta) return;
+    const id = selectedVenta.id_venta;
+    const token = localStorage.getItem("token");
     try {
-      const url = `${API}/ventas/${deletingVenta.id_venta}`;
-      console.log("🌐 URL de eliminación:", url);
-      console.log("📤 Enviando solicitud DELETE...");
-      
-      const response = await fetch(url, {
+      setLoading(true);
+      const res = await fetch(`${API}/apij/ventas/${id}`, {
         method: "DELETE",
-        headers: { 
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-
-      console.log("📥 Respuesta recibida - Status:", response.status);
-      console.log("📥 Respuesta recibida - StatusText:", response.statusText);
-
-      if (!response.ok) {
-        let errorMessage = "Error al eliminar venta";
-        try {
-          const errorData = await response.json();
-          console.error("❌ Error del servidor (JSON):", errorData);
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (e) {
-          const errorText = await response.text();
-          console.error("❌ Error del servidor (texto):", errorText);
-          errorMessage = errorText || errorMessage;
-        }
-        throw new Error(errorMessage);
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json?.message || "Error eliminando venta");
       }
-
-      const result = await response.json();
-      console.log("✅ Resultado exitoso:", result);
-
-      if (result.deleted) {
-        toast.success("✅ Venta eliminada correctamente");
-        setDeleteOpen(false);
-        setDeletingVenta(null);
-        await cargarVentas();
-        console.log("✅ Lista de ventas recargada");
-      } else {
-        console.warn("⚠️ El servidor respondió pero deleted=false");
-        toast.warning("La venta no pudo ser eliminada");
-      }
+      await cargarVentas();
+      setDeleteOpen(false);
     } catch (err) {
-      console.error("❌ Error capturado:", err);
-      console.error("❌ Mensaje:", err.message);
-      console.error("❌ Stack:", err.stack);
-      toast.error(err.message || "❌ Error al eliminar venta");
+      console.error(err);
+      setError("No se pudo eliminar la venta");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 p-4 md:p-6 font-['Inter','system-ui',sans-serif]">
@@ -276,8 +269,12 @@ export default function VentasPage() {
             <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1 truncate">Gestión de Ventas</h1>
             <p className="text-sm md:text-lg text-gray-600">Registro completo de ventas realizadas con detalles de productos y métodos de pago.</p>
           </div>
+
           <div className="w-full md:w-auto flex gap-3">
-            <button onClick={cargarVentas} className="w-full md:w-auto px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow hover:shadow-lg">
+            <button
+              onClick={cargarVentas}
+              className="w-full md:w-auto px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white text-sm md:text-lg font-semibold rounded-xl shadow hover:shadow-xl transition-all duration-200"
+            >
               {loading ? "Cargando..." : "Actualizar"}
             </button>
           </div>
@@ -285,24 +282,31 @@ export default function VentasPage() {
 
         <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center gap-3">
-            <input value={q} onChange={(e) => setQ(e.target.value)}
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar por ID venta, pedido, total o método..."
-              className="w-full md:flex-1 border-2 border-gray-200 rounded-xl px-3 md:px-4 py-2 md:py-3 text-sm md:text-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition" />
-            <select value={metodoFilter} onChange={(e) => setMetodoFilter(e.target.value)}
-              className="w-full md:w-64 border-2 border-gray-200 rounded-xl px-3 py-2 text-sm md:text-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+              className="w-full md:flex-1 border-2 border-gray-200 rounded-xl px-3 md:px-4 py-2 md:py-3 text-sm md:text-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+            />
+            <select
+              value={metodoFilter}
+              onChange={(e) => setMetodoFilter(e.target.value)}
+              className="w-full md:w-64 border-2 border-gray-200 rounded-xl px-3 py-2 text-sm md:text-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
               <option value="">Todos los métodos</option>
-              {metodos.map(m => <option key={m} value={m}>{m}</option>)}
+              {metodos.map((m) => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
         </div>
 
-        {error && <div className="mb-6 p-3 text-sm md:text-lg text-red-700 bg-red-50 border border-red-200 rounded-xl">{error}</div>}
+        {error && <div className="mb-6 p-4 text-sm md:text-lg text-red-700 bg-red-50 border border-red-200 rounded-xl">{error}</div>}
 
-        {/* MOBILE: cards */}
+        {/* MOBILE: cards list */}
         <div className="space-y-3 md:hidden">
-          {loading && <div className="text-center py-6 text-gray-500">Cargando ventas...</div>}
-          {!loading && currentItems.length === 0 && <div className="text-center py-6 text-gray-500">No se encontraron ventas</div>}
-          {!loading && currentItems.map(v => (
+          {loading && <div className="text-center py-8 text-gray-500">Cargando ventas...</div>}
+          {!loading && currentItems.length === 0 && <div className="text-center py-8 text-gray-500">No se encontraron ventas</div>}
+
+          {!loading && currentItems.map((v) => (
             <div key={v.id_venta} className="bg-white rounded-2xl shadow p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -312,28 +316,33 @@ export default function VentasPage() {
                   </div>
                   <div className="mt-2">
                     <div className="text-sm text-gray-700">Pedido: <span className="font-semibold text-blue-600">#{v.id_pedido ?? "-"}</span></div>
-                    <div className="text-sm text-green-700 font-bold mt-1">{formatMoney(v.total)}</div>
+                    <div className="text-base font-bold text-green-600 mt-1">{formatMoney(v.total)}</div>
                   </div>
                 </div>
+
                 <div className="flex flex-col items-end gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    v.metodo_pago === "efectivo" ? "bg-green-100 text-green-800" :
-                    v.metodo_pago === "tarjeta" ? "bg-blue-100 text-blue-800" :
-                    v.metodo_pago === "transferencia" ? "bg-purple-100 text-purple-800" :
-                    "bg-gray-100 text-gray-800"
-                  }`}>{v.metodo_pago ?? "efectivo"}</span>
+                  <div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      v.metodo_pago === "efectivo" ? "bg-green-100 text-green-800 border border-green-300" :
+                      v.metodo_pago === "tarjeta" ? "bg-blue-100 text-blue-800 border border-blue-300" :
+                      v.metodo_pago === "transferencia" ? "bg-purple-100 text-purple-800 border border-purple-300" :
+                      "bg-gray-100 text-gray-800 border border-gray-300"
+                    }`}>
+                      {v.metodo_pago ?? "efectivo"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="mt-3 flex gap-2">
-                <button onClick={() => openDetail(v)} className="flex-1 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg text-sm flex items-center justify-center gap-2">
+                <button onClick={() => openDetailModal(v)} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg shadow text-sm">
                   <FiEye /> Ver
                 </button>
-                <button onClick={() => openEditModal(v)} className="flex-1 px-3 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg text-sm flex items-center justify-center gap-2">
+                <button onClick={() => openEditModal(v)} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg shadow text-sm">
                   <FiEdit /> Editar
                 </button>
-                <button onClick={() => openDeleteModal(v)} className="px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg text-sm flex items-center justify-center">
-                  <FiTrash />
+                <button onClick={() => openDeleteModal(v)} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow text-sm">
+                  <FiTrash2 /> Eliminar
                 </button>
               </div>
             </div>
@@ -341,7 +350,9 @@ export default function VentasPage() {
 
           {filtered.length > 0 && (
             <div className="pt-3">
-              <div className="text-sm text-gray-600 text-center mb-2">Mostrando {startIndex + 1} - {Math.min(endIndex, filtered.length)} de {filtered.length}</div>
+              <div className="text-sm text-gray-600 text-center mb-2">
+                Mostrando {startIndex + 1} - {Math.min(endIndex, filtered.length)} de {filtered.length}
+              </div>
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
           )}
@@ -363,27 +374,40 @@ export default function VentasPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {currentItems.length === 0 && (
-                  <tr><td colSpan="6" className="text-center py-12 text-gray-500">{loading ? "⏳ Cargando ventas..." : "📭 No se encontraron ventas"}</td></tr>
+                  <tr>
+                    <td colSpan="6" className="text-center text-lg text-gray-500 py-16">
+                      {loading ? "⏳ Cargando ventas..." : "📭 No se encontraron ventas"}
+                    </td>
+                  </tr>
                 )}
-                {currentItems.map((v, idx) => (
-                  <tr key={v.id_venta} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+
+                {currentItems.map((v, index) => (
+                  <tr key={v.id_venta} className={`transition-all duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                     <td className="px-6 py-5 text-lg font-bold text-gray-900">#{v.id_venta}</td>
                     <td className="px-6 py-5 text-lg font-semibold text-blue-600">#{v.id_pedido ?? "-"}</td>
                     <td className="px-6 py-5 text-base text-gray-700">{formatDate(v.fecha_venta)}</td>
                     <td className="px-6 py-5 text-lg font-bold text-right text-green-600">{formatMoney(v.total)}</td>
                     <td className="px-6 py-5">
                       <span className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide ${
-                        v.metodo_pago === "efectivo" ? "bg-green-100 text-green-800" :
-                        v.metodo_pago === "tarjeta" ? "bg-blue-100 text-blue-800" :
-                        v.metodo_pago === "transferencia" ? "bg-purple-100 text-purple-800" :
-                        "bg-gray-100 text-gray-800"
-                      }`}>{v.metodo_pago ?? "efectivo"}</span>
+                        v.metodo_pago === "efectivo" ? "bg-green-100 text-green-800 border border-green-300" :
+                        v.metodo_pago === "tarjeta" ? "bg-blue-100 text-blue-800 border border-blue-300" :
+                        v.metodo_pago === "transferencia" ? "bg-purple-100 text-purple-800 border border-purple-300" :
+                        "bg-gray-100 text-gray-800 border border-gray-300"
+                      }`}>
+                        {v.metodo_pago ?? "efectivo"}
+                      </span>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openDetail(v)} className="p-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md"><FiEye /></button>
-                        <button onClick={() => openEditModal(v)} className="p-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md"><FiEdit /></button>
-                        <button onClick={() => openDeleteModal(v)} className="p-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"><FiTrash /></button>
+                        <button onClick={() => openEditModal(v)} title="Editar método" aria-label="Editar método" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                          <FiEdit className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => openDeleteModal(v)} title="Eliminar venta" aria-label="Eliminar venta" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                          <FiTrash2 className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => openDetailModal(v)} title="Ver detalles" aria-label="Ver detalles" className="p-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                          <FiEye className="w-5 h-5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -395,87 +419,108 @@ export default function VentasPage() {
           {filtered.length > 0 && (
             <div className="px-6 py-4 bg-gray-50 border-t">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-lg text-gray-600">Mostrando <span className="font-bold text-green-600">{startIndex + 1}</span> a <span className="font-bold text-green-600">{Math.min(endIndex, filtered.length)}</span> de <span className="font-bold text-green-600">{filtered.length}</span> ventas</div>
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                <div className="text-lg text-gray-600">
+                  Mostrando <span className="font-bold text-green-600">{startIndex + 1}</span> a <span className="font-bold text-green-600">{Math.min(endIndex, filtered.length)}</span> de <span className="font-bold text-green-600">{filtered.length}</span> ventas
+                </div>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <Modal open={detailOpen} onClose={() => { setDetailOpen(false); setSelectedVenta(null); setVentaPedidoItems([]); }} title={`Detalle de Venta #${selectedVenta?.id_venta ?? ""}`} maxW="max-w-lg"
-        footer={<button onClick={() => { setDetailOpen(false); setSelectedVenta(null); setVentaPedidoItems([]); }} className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg">Cerrar</button>}>
-        {selectedVenta ? (
-          <div className="space-y-4">
-            <div className="text-base text-gray-700 bg-gray-50 p-3 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+      {/* Detail Modal */}
+      <Modal
+        open={detailOpen}
+        onClose={() => { setDetailOpen(false); setVentaPedidoItems([]); setSelectedVenta(null); }}
+        title={`📋 Detalle de Venta #${selectedVenta?.id_venta ?? ""}`}
+        footer={<button onClick={() => { setDetailOpen(false); setVentaPedidoItems([]); setSelectedVenta(null); }} className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg shadow-md">Cerrar</button>}
+      >
+        <div className="space-y-4">
+          {selectedVenta && (
+            <div className="text-base text-gray-700 bg-gray-50 p-3 md:p-4 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div><strong className="text-green-600">Venta:</strong> #{selectedVenta.id_venta}</div>
                 <div><strong className="text-green-600">Pedido:</strong> #{selectedVenta.id_pedido ?? "-"}</div>
                 <div><strong className="text-green-600">Fecha:</strong> {formatDate(selectedVenta.fecha_venta)}</div>
-                <div><strong className="text-green-600">Método:</strong> <span className="font-bold">{selectedVenta.metodo_pago ?? "efectivo"}</span></div>
-                <div className="col-span-2"><strong className="text-green-600">Total:</strong> <span className="font-bold text-green-700">{formatMoney(selectedVenta.total)}</span></div>
+                <div><strong className="text-green-600">Método:</strong> <span className="font-bold text-lg">{selectedVenta.metodo_pago ?? "efectivo"}</span></div>
               </div>
             </div>
+          )}
 
-            <div>
-              <h4 className="text-lg font-bold mb-3 text-gray-800">Detalles del Pedido</h4>
-              {ventaPedidoItems.length === 0 ? (
-                <div className="text-base text-gray-500 text-center py-4">No hay items vinculados o no se encontraron.</div>
-              ) : (
-                <div className="space-y-3">
-                  {ventaPedidoItems.map(it => (
-                    <div key={it.id_detalle_pedido ?? `${it.id_producto}-${it.cantidad}`} className="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-200">
-                      <div>
-                        <div className="font-semibold text-base text-gray-900">{it.nombre_producto ?? `Producto #${it.id_producto}`}</div>
-                        <div className="text-sm text-green-600">Cantidad: {it.cantidad}</div>
-                      </div>
-                      <div className="text-base font-bold text-green-600">{formatMoney(it.subtotal ?? (it.cantidad * (it.precio_unitario ?? 0)))}</div>
+          <div>
+            <h4 className="text-lg md:text-xl font-bold mb-3 text-gray-800">Artículos de la Venta</h4>
+            {ventaPedidoItems.length === 0 ? (
+              <div className="text-base text-gray-500 text-center py-6">No hay artículos (o cargando)...</div>
+            ) : (
+              <div className="space-y-3">
+                {ventaPedidoItems.map(d => (
+                  <div key={d.id_detalle_pedido || `${d.id_producto}-${d.cantidad}`} className="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-200">
+                    <div>
+                      <div className="font-semibold text-base text-gray-900">{d.nombre_producto ?? `Producto #${d.id_producto}` ?? "Producto"}</div>
+                      <div className="text-sm text-green-600 font-medium">Cantidad: {d.cantidad}</div>
                     </div>
-                  ))}
-                  <div className="flex justify-end pt-3 border-t">
-                    <div className="text-lg font-bold text-gray-900">Subtotal: <span className="text-green-600">{formatMoney(ventaPedidoItems.reduce((s, it) => s + (Number(it.subtotal || (it.cantidad * (it.precio_unitario ?? 0))) || 0), 0))}</span></div>
+                    <div className="text-base md:text-lg font-bold text-green-600">{formatMoney(d.subtotal ?? (d.cantidad * (d.precio_unitario ?? 0)))}</div>
                   </div>
+                ))}
+                <div className="flex justify-end pt-4 border-t">
+                  <div className="text-lg md:text-xl font-bold text-gray-900">Total: <span className="text-green-600">{formatMoney(selectedVenta?.total)}</span></div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-        ) : <div className="text-base text-gray-500 text-center py-6">Cargando...</div>}
+        </div>
       </Modal>
 
-      <Modal open={editOpen} onClose={() => { setEditOpen(false); setEditingVenta(null); }} title={`Editar Método - Venta #${editingVenta?.id_venta ?? ""}`} maxW="max-w-lg"
+      {/* Edit Method Modal */}
+      <Modal
+        open={editOpen}
+        onClose={() => { setEditOpen(false); setSelectedVenta(null); }}
+        title={`Editar Método de Pago - Venta #${selectedVenta?.id_venta ?? ""}`}
+        maxW="max-w-lg"
         footer={
           <>
-            <button onClick={() => { setEditOpen(false); setEditingVenta(null); }} className="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
-            <button onClick={submitEditMetodo} className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg">Guardar</button>
+            <button onClick={() => { setEditOpen(false); setSelectedVenta(null); }} className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-200">Cancelar</button>
+            <button onClick={submitEditMetodo} className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg shadow-md">Guardar</button>
           </>
-        }>
+        }
+      >
         <div className="space-y-3">
-          <div className="text-base text-gray-700">Selecciona el método de pago:</div>
-          <select value={editMetodoValue} onChange={(e) => setEditMetodoValue(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-3 py-2">
+          <div className="text-base text-gray-700">Selecciona el nuevo método de pago:</div>
+          <select value={editMetodoValue} onChange={(e) => setEditMetodoValue(e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500">
             <option value="efectivo">Efectivo</option>
             <option value="transferencia">Transferencia</option>
             <option value="tarjeta">Tarjeta</option>
             <option value="otro">Otro</option>
           </select>
-          <div className="text-sm text-indigo-600 bg-indigo-50 p-3 rounded-lg">💡 Cambiar el método no modifica montos.</div>
+          <div className="text-sm text-green-600 bg-green-50 p-3 rounded-lg">
+            💡 <strong>Tip:</strong> Cambiar el método de pago no afecta los montos ni el inventario.
+          </div>
         </div>
       </Modal>
 
-      <Modal open={deleteOpen} onClose={() => { setDeleteOpen(false); setDeletingVenta(null); }} title="⚠️ Confirmar Eliminación" maxW="max-w-lg"
+      {/* Delete Confirm Modal */}
+      <Modal
+        open={deleteOpen}
+        onClose={() => { setDeleteOpen(false); setSelectedVenta(null); }}
+        title={`Eliminar Venta #${selectedVenta?.id_venta ?? ""}`}
+        maxW="max-w-lg"
         footer={
           <>
-            <button onClick={() => { setDeleteOpen(false); setDeletingVenta(null); }} className="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
-            <button onClick={submitDelete} className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg">Eliminar</button>
+            <button onClick={() => { setDeleteOpen(false); setSelectedVenta(null); }} className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-200">Cancelar</button>
+            <button onClick={confirmDelete} className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg shadow-md">Eliminar</button>
           </>
-        }>
+        }
+      >
         <div className="space-y-3">
-          <div className="text-base text-gray-700 bg-red-50 p-4 rounded-lg border border-red-200">
-            <p className="font-semibold mb-2">¿Estás seguro de eliminar esta venta?</p>
-            <p className="text-sm"><strong>Venta:</strong> #{deletingVenta?.id_venta}</p>
-            <p className="text-sm"><strong>Total:</strong> {formatMoney(deletingVenta?.total)}</p>
-            <p className="text-sm"><strong>Fecha:</strong> {formatDate(deletingVenta?.fecha_venta)}</p>
+          <div className="text-base text-gray-700">¿Estás seguro que deseas eliminar esta venta? Esta acción no se puede deshacer.</div>
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+            ⚠️ <strong>Advertencia:</strong> Venta #{selectedVenta?.id_venta} será eliminada permanentemente.
           </div>
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">⚠️ Esta acción no se puede deshacer.</div>
         </div>
       </Modal>
     </div>
