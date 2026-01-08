@@ -169,24 +169,30 @@ export default function VentasPage() {
   async function submitEditMetodo() {
     if (!editingVenta) return;
     const id = editingVenta.id_venta;
-    const token = localStorage.getItem("token");
+    
     try {
       setLoading(true);
-      const res = await fetch(`${API}/apij/ventas/${id}`, {
+      const res = await fetch(`${API}/ventas/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ metodo_pago: editMetodoValue })
       });
+      
       if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error(json?.message || "Error actualizando venta");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Error al actualizar");
       }
+      
+      toast.success("✅ Método de pago actualizado");
       await cargarVentas();
-      setEditOpen(false); setEditingVenta(null);
+      setEditOpen(false);
+      setEditingVenta(null);
     } catch (err) {
       console.error(err);
-      setError("No se pudo actualizar el método de pago");
-    } finally { setLoading(false); }
+      toast.error(err.message || "No se pudo actualizar el método de pago");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const openDeleteModal = (venta) => {
