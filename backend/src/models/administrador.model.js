@@ -21,7 +21,6 @@ export async function crearAdmin({ nombre, usuario, clave, rol = "admin", estado
   return { id: result.insertId };
 }
 
-// actualizar sólo permite clave (hashed), rol, estado y email
 export async function actualizarAdmin(id, data) {
   const conn = await conexion;
   const allowed = ["clave", "rol", "estado", "email"];
@@ -51,7 +50,6 @@ export async function actualizarAdmin(id, data) {
 
 /*=====================================
 ESTADISTICAS COMPLETAS PARA EL DASHBOARD
-(Mantengo el resto tal cual en tu archivo original)
 ======================================*/
 export async function obtenerEstadisticas() {
   const conn = await conexion;
@@ -281,6 +279,31 @@ export async function obtenerEstadisticas() {
     promedioDiario = 0;
   }
 
+  // obtener categorías con conteo de productos ---
+  let categorias = [];
+  try {
+    const [rCats] = await conn.query(`
+      SELECT 
+        c.id_categoria,
+        c.nombre_categoria,
+        c.descripcion,
+        IFNULL(COUNT(p.id_producto),0) AS productos_count
+      FROM categoria c
+      LEFT JOIN producto p ON p.id_categoria = c.id_categoria
+      GROUP BY c.id_categoria, c.nombre_categoria, c.descripcion
+      ORDER BY c.nombre_categoria
+    `);
+    categorias = (rCats || []).map(r => ({
+      id_categoria: r.id_categoria,
+      nombre_categoria: r.nombre_categoria,
+      descripcion: r.descripcion,
+      productos_count: Number(r.productos_count || 0)
+    }));
+  } catch (e) {
+    console.error("Error obteniendo categorías:", e);
+    categorias = [];
+  }
+
   return {
     // 8 estadísticas principales
     total_clientes,
@@ -301,6 +324,7 @@ export async function obtenerEstadisticas() {
     productoEstrella,
     stockBajo,
     ventasPorMes,
-    promedioDiario
+    promedioDiario,
+    categorias
   };
 }

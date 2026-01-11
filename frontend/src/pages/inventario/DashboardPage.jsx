@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiShoppingCart, FiUsers, FiPackage, FiRefreshCw, FiDollarSign, FiTrendingUp, FiTrendingDown, FiUserCheck } from "react-icons/fi";
 
 const API = import.meta.env.VITE_API_BASE_URL;
@@ -164,6 +164,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // New: categories state
+  const [categorias, setCategorias] = useState([]);
+  const [loadingCategorias, setLoadingCategorias] = useState(false);
+
   async function cargarEstadisticas() {
     setLoading(true);
     setError(null);
@@ -186,6 +190,29 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }
+
+  // New: load categories for dashboard display (fallback to endpoint /apij/categorias)
+  useEffect(() => {
+    async function loadCategorias() {
+      setLoadingCategorias(true);
+      try {
+        // Preferir categorias incluidas en stats
+        if (stats && Array.isArray(stats.categorias) && stats.categorias.length > 0) {
+          setCategorias(stats.categorias);
+        } else {
+          const res = await fetch(`${API}/apij/categorias`);
+          const data = await res.json().catch(() => ([]));
+          setCategorias(Array.isArray(data) ? data : (data.rows || []));
+        }
+      } catch (err) {
+        console.error("Error cargando categorías:", err);
+        setCategorias([]);
+      } finally {
+        setLoadingCategorias(false);
+      }
+    }
+    loadCategorias();
+  }, [stats]);
 
   useEffect(() => { cargarEstadisticas(); }, []);
 
@@ -351,10 +378,34 @@ export default function DashboardPage() {
               <div className="text-xl md:text-2xl font-bold text-purple-800">{stats?.total_movimientos || 0}</div>
               <div className="text-xs text-gray-500 mt-1">total registros</div>
             </div>
+
+            {/* Categorías responsivas */}
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 md:p-6 rounded-2xl">
-              <div className="text-xs md:text-sm text-gray-600 mb-1">Categorías</div>
-              <div className="text-xl md:text-2xl font-bold text-orange-800">—</div>
-              <div className="text-xs text-gray-500 mt-1">disponibles</div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs md:text-sm text-gray-600 mb-1">Categorías</div>
+                  <div className="text-xl md:text-2xl font-bold text-orange-800">{loadingCategorias ? '…' : (categorias.length || 0)}</div>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                {loadingCategorias ? (
+                  <div className="text-sm text-gray-500">Cargando categorías...</div>
+                ) : categorias.length === 0 ? (
+                  <div className="text-sm text-gray-400">No hay categorías</div>
+                ) : (
+                  <div className="flex gap-2 flex-wrap overflow-x-auto py-1">
+                    {categorias.map((c) => (
+                      <span
+                        key={c.id_categoria}
+                        className="text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap"
+                      >
+                        {c.nombre_categoria}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>

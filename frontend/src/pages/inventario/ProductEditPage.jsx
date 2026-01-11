@@ -20,6 +20,7 @@ export default function ProductEditPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [productosRelacionados, setProductosRelacionados] = useState([]);
+  const [categoriasOptions, setCategoriasOptions] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -228,6 +229,20 @@ export default function ProductEditPage() {
   useEffect(() => {
     console.log("🎯 ProductosRelacionados - IDs seleccionados actuales:", productosRelacionados);
   }, [productosRelacionados]);
+
+  useEffect(() => {
+    async function cargarCategorias() {
+      try {
+        const res = await fetch(`${API}/apij/categorias`);
+        const data = await res.json();
+        setCategoriasOptions(Array.isArray(data) ? data : (data.rows || []));
+      } catch (err) {
+        console.error("Error cargando categorías:", err);
+        setCategoriasOptions([]);
+      }
+    }
+    cargarCategorias();
+  }, []);
 
   if (loading) {
     return (
@@ -571,6 +586,25 @@ export default function ProductEditPage() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Seleccionar categoría */}
+              <div className="mb-6">
+                <label className="block text-lg font-bold text-gray-800 mb-2">Categoría</label>
+                <select
+                  name="id_categoria"
+                  value={form?.id_categoria ?? ""}
+                  onChange={(e) => setForm(s => ({ ...s, id_categoria: e.target.value }))}
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                >
+                  <option value="">-- Seleccionar categoría --</option>
+                  {categoriasOptions.map((c) => (
+                    <option key={c.id_categoria} value={c.id_categoria}>
+                      {c.nombre_categoria}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-sm text-gray-600">Selecciona la categoría del producto</p>
               </div>
 
               {/* Productos Relacionados */}
