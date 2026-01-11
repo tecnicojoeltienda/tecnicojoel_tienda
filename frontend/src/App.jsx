@@ -124,7 +124,7 @@ function App() {
             <Route path="/redes" element={<RedesPage />} />
             <Route path="/tintas" element={<TintasPage />} />
             <Route path="/estabilizadores" element={<EstabilizadoresPage />} />
-            <Route path="/reacondicionados" element={<PreacondicionadosPage />} />
+            <Route path="/segunda-mano" element={<PreacondicionadosPage />} />
             <Route path="/carrito" element={<CarritoPage />} />
             <Route path="/:category/:slug" element={<ProductosDetallesPage />} />
 

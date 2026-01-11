@@ -36,11 +36,11 @@ export default function MonitoresPage() {
     async function cargar() {
       try {
         setLoading(true);
-        const res = await api.get("/apij/productos/categoria/nombre/reacondicionados");
+        const res = await api.get("/apij/productos/categoria/nombre/segunda%20mano");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
         setProductos(shuffleArray(rows));
       } catch (err) {
-        console.error("Error cargando reacondicionados por categoría:", err);
+        console.error("Error cargando segunda mano por categoría:", err);
         setProductos([]);
       } finally {
         setLoading(false);
@@ -257,7 +257,7 @@ export default function MonitoresPage() {
 
           <section className="flex-1 order-2">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">Reacondicionados</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">Segunda mano</h1>
               <p className="text-gray-600">Encuentra reacondicionados para tu setup</p>
             </div>
 

@@ -175,7 +175,7 @@ function HeaderTienda() {
     "Licencia",
     "Monitores",
     "Mouse",
-    "Reacondicionados",
+    "Segunda mano",
     "Redes",
     "Sonido",
     "Tintas"
@@ -202,7 +202,7 @@ function HeaderTienda() {
     sonido: "/sonido",
     tintas: "/tintas",
     licencia: "/licencia",
-    reacondicionados: "/reacondicionados",
+    "segunda-mano": "/segunda-mano",
     redes: "/redes",
     estabilizadores: "/estabilizadores"
   };
