@@ -59,6 +59,17 @@ export default function ImpresorasPage() {
     return true;
   };
 
+  const getStockCount = (p) => {
+    const candidates = [p.stock, p.cantidad, p.cantidad_stock, p.stock_actual, p.stock_minimo];
+    for (const c of candidates) {
+      if (typeof c !== "undefined" && c !== null && c !== "") {
+        const n = Number(c);
+        if (!Number.isNaN(n)) return n;
+      }
+    }
+    return null;
+  };
+
   const resetFilters = () => {
     setFilters({ availability: "all", view: "grid", sort: "relevance" });
   };
@@ -167,7 +178,12 @@ export default function ImpresorasPage() {
             </p>
 
             <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">En stock</span>
+              {(() => {
+                const stock = getStockCount(p);
+                if (stock === null) return <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Sin info</span>;
+                if (stock > 0) return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Stock: {stock} {stock === 1 ? 'unidad' : 'unidades'}</span>;
+                return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">🚫 AGOTADO</span>;
+              })()}
             </div>
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

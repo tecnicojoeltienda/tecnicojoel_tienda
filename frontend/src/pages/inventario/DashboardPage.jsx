@@ -391,19 +391,8 @@ export default function DashboardPage() {
               <div className="mt-3">
                 {loadingCategorias ? (
                   <div className="text-sm text-gray-500">Cargando categorías...</div>
-                ) : categorias.length === 0 ? (
-                  <div className="text-sm text-gray-400">No hay categorías</div>
                 ) : (
-                  <div className="flex gap-2 flex-wrap overflow-x-auto py-1">
-                    {categorias.map((c) => (
-                      <span
-                        key={c.id_categoria}
-                        className="text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap"
-                      >
-                        {c.nombre_categoria}
-                      </span>
-                    ))}
-                  </div>
+                  <div className="text-sm text-gray-700">{categorias.length} categorías</div>
                 )}
               </div>
             </div>
