@@ -180,9 +180,9 @@ export default function ImpresorasPage() {
             <div className="flex items-center gap-2 mb-3">
               {(() => {
                 const stock = getStockCount(p);
-                if (stock === null) return <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Sin info</span>;
-                if (stock > 0) return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Stock: {stock} {stock === 1 ? 'unidad' : 'unidades'}</span>;
-                return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">🚫 AGOTADO</span>;
+                if (stock === null) return null;
+                if (stock > 0) return <div className="text-xs text-green-600 font-medium mb-2">Stock: {stock} {stock === 1 ? 'unidad' : 'unidades'}</div>;
+                return <div className="text-xs text-red-600 font-bold mb-2">🚫 AGOTADO</div>;
               })()}
             </div>
 
