@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../service/api.js";
-import { FiRefreshCw, FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
+import { FiRefreshCw, FiEdit2, FiPlus, FiCheck, FiX } from "react-icons/fi";
+import { MdDelete } from "react-icons/md";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -9,9 +10,8 @@ export default function CategoriasPage() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [editModal, setEditModal] = useState(false);
-  const [selectedCategoria, setSelectedCategoria] = useState(null);
-  const [formEdit, setFormEdit] = useState({ nombre_categoria: "", descripcion: "" });
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,30 +51,33 @@ export default function CategoriasPage() {
     }
   }
 
-  function openEditModal(cat) {
-    setSelectedCategoria(cat);
-    setFormEdit({
-      nombre_categoria: cat.nombre_categoria || "",
-      descripcion: cat.descripcion || ""
-    });
-    setEditModal(true);
+  function startEditing(cat) {
+    setEditingId(cat.id_categoria);
+    setEditName(cat.nombre_categoria || "");
   }
 
-  async function handleUpdate() {
-    if (!selectedCategoria) return;
+  function cancelEditing() {
+    setEditingId(null);
+    setEditName("");
+  }
+
+  async function saveEditing(cat) {
+    if (!editingId) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/apij/categorias/${selectedCategoria.id_categoria}`, {
+      const res = await fetch(`${API}/apij/categorias/${cat.id_categoria}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(formEdit),
+        body: JSON.stringify({
+          nombre_categoria: editName,
+          descripcion: cat.descripcion ?? "",
+        }),
       });
       if (!res.ok) throw new Error("Error al actualizar");
-      setEditModal(false);
-      setSelectedCategoria(null);
+      cancelEditing();
       await loadCategorias();
     } catch (err) {
       console.error(err);
@@ -151,24 +154,58 @@ export default function CategoriasPage() {
                 categorias.map((cat) => (
                   <tr key={cat.id_categoria} className="border-b last:border-b-0 hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-700">{cat.id_categoria}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{cat.nombre_categoria}</td>
+
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {editingId === cat.id_categoria ? (
+                        <input
+                          className="w-full px-3 py-2 border rounded-lg"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                        />
+                      ) : (
+                        cat.nombre_categoria
+                      )}
+                    </td>
+
                     <td className="px-6 py-4 text-sm text-gray-700">{cat.descripcion || "-"}</td>
+
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-3">
-                        <button
-                          title="Editar"
-                          onClick={() => openEditModal(cat)}
-                          className="p-2 rounded-lg hover:bg-gray-100"
-                        >
-                          <FiEdit2 className="text-blue-600" />
-                        </button>
-                        <button
-                          title="Eliminar"
-                          onClick={() => handleDelete(cat.id_categoria, cat.nombre_categoria)}
-                          className="p-2 rounded-lg hover:bg-gray-100"
-                        >
-                          <FiTrash2 className="text-red-500" />
-                        </button>
+                        {editingId === cat.id_categoria ? (
+                          <>
+                            <button
+                              title="Guardar"
+                              onClick={() => saveEditing(cat)}
+                              className="p-2 rounded-lg hover:bg-gray-100"
+                            >
+                              <FiCheck className="text-green-600" />
+                            </button>
+                            <button
+                              title="Cancelar"
+                              onClick={cancelEditing}
+                              className="p-2 rounded-lg hover:bg-gray-100"
+                            >
+                              <FiX className="text-gray-600" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              title="Editar nombre"
+                              onClick={() => startEditing(cat)}
+                              className="p-2 rounded-lg hover:bg-gray-100"
+                            >
+                              <FiEdit2 className="text-blue-600" />
+                            </button>
+                            <button
+                              title="Eliminar"
+                              onClick={() => handleDelete(cat.id_categoria, cat.nombre_categoria)}
+                              className="p-2 rounded-lg hover:bg-gray-100"
+                            >
+                              <MdDelete className="text-red-500" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -190,67 +227,56 @@ export default function CategoriasPage() {
               <div key={cat.id_categoria} className="bg-white rounded-xl shadow p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-gray-900">{cat.nombre_categoria}</div>
+                    {editingId === cat.id_categoria ? (
+                      <input
+                        className="w-full px-3 py-2 border rounded-lg"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                      />
+                    ) : (
+                      <div className="text-sm font-semibold text-gray-900">{cat.nombre_categoria}</div>
+                    )}
                     <div className="mt-1 text-xs text-gray-600">{cat.descripcion || "Sin descripción"}</div>
                     <div className="mt-1 text-xs text-gray-500">ID: {cat.id_categoria}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openEditModal(cat)}
-                      className="p-2 bg-blue-50 rounded-lg text-blue-600"
-                    >
-                      <FiEdit2 />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(cat.id_categoria, cat.nombre_categoria)}
-                      className="p-2 bg-red-50 rounded-lg text-red-600"
-                    >
-                      <FiTrash2 />
-                    </button>
+                    {editingId === cat.id_categoria ? (
+                      <>
+                        <button
+                          onClick={() => saveEditing(cat)}
+                          className="p-2 bg-green-50 rounded-lg text-green-600"
+                        >
+                          <FiCheck />
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          className="p-2 bg-gray-50 rounded-lg text-gray-600"
+                        >
+                          <FiX />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => startEditing(cat)}
+                          className="p-2 bg-blue-50 rounded-lg text-blue-600"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(cat.id_categoria, cat.nombre_categoria)}
+                          className="p-2 bg-red-50 rounded-lg text-red-600"
+                        >
+                          <MdDelete />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
         </div>
       </div>
-
-      {/* Modal: Editar categoría */}
-      {editModal && selectedCategoria && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setEditModal(false)}></div>
-          <div className="bg-white rounded-xl p-4 z-10 w-full max-w-md mx-4 sm:p-6">
-            <h3 className="text-lg font-bold mb-3">Editar Categoría</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                <input
-                  type="text"
-                  value={formEdit.nombre_categoria}
-                  onChange={(e) => setFormEdit({ ...formEdit, nombre_categoria: e.target.value })}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                <textarea
-                  value={formEdit.descripcion}
-                  onChange={(e) => setFormEdit({ ...formEdit, descripcion: e.target.value })}
-                  className="w-full px-4 py-3 border rounded-lg"
-                  rows={3}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
-              <button onClick={() => setEditModal(false)} className="px-4 py-2 bg-gray-100 rounded-lg">
-                Cancelar
-              </button>
-              <button onClick={handleUpdate} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
