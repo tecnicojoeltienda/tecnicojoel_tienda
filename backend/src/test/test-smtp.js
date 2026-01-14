@@ -1,29 +1,33 @@
-// test-smtp.js
+// src/test/test-smtp.js
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",          // o smtp-relay.brevo.com si usas Brevo
-  port: 587,
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT) || 587,
   secure: false,
   auth: {
-    user: "nellfuep@gmail.com",    // o tu SMTP_USER de Brevo
-    pass: "saatpwuaqzmjazgc"
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS  
   }
 });
 
 async function run(){
   try{
+    console.log("🔄 Verificando conexión SMTP...");
     await transporter.verify();
-    console.log("SMTP connect OK");
+    console.log("✅ SMTP connect OK");
+    
     const info = await transporter.sendMail({
-      from: '"TecnicoJoel" <nellfuep@gmail.com>',
+      from: `"TecnicoJoel" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: "davidmesta09@gmail.com",
-      subject: "Prueba SMTP",
-      text: "Prueba desde nodemailer"
+      subject: "✅ Prueba SMTP TecnicoJoel",
+      html: `<h1>Conexión exitosa</h1><p>El SMTP está configurado correctamente.</p>`
     });
-    console.log("Sent:", info);
+    console.log("✅ Email enviado:", info.messageId);
   }catch(e){
-    console.error("SMTP ERROR:", e);
+    console.error("❌ SMTP ERROR:", e.message);
+    console.error("Código:", e.code);
+    console.error("Response:", e.response);
   }
 }
 run();

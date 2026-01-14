@@ -1,24 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../service/api";
+import { toast } from "sonner";
 
 export default function RecuperarPage() {
   const [email, setEmail] = useState("");
-  const [ok, setOk] = useState(false);
-  const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
   const navigate = useNavigate();
 
   async function send(e) {
     e.preventDefault();
-    setError("");
+    if (!email) { toast.error("Ingresa un correo válido."); return; }
+    setSending(true);
     try {
-      await api.post("/apij/recuperacion/solicitar", { email });
-      setOk(true);
+      const res = await api.post("/apij/recuperacion/solicitar", { email });
+      toast.success("Código enviado. Revisa tu correo.");
       sessionStorage.setItem("recovery_started", "1");
-      sessionStorage.setItem("recovery_email", email); // opcional
+      sessionStorage.setItem("recovery_email", email);
       setTimeout(() => navigate(`/validar-codigo?email=${encodeURIComponent(email)}`), 1200);
     } catch (err) {
-      setError(err.response?.data?.error || "Error enviando código");
+      const msg = err?.response?.data?.error || err.message || "Error enviando código";
+      toast.error(msg);
+    } finally {
+      setSending(false);
     }
   }
 
@@ -27,10 +31,18 @@ export default function RecuperarPage() {
       <form onSubmit={send} className="w-full max-w-md bg-white p-6 rounded-lg shadow">
         <h2 className="text-xl font-bold mb-3">Recuperar contraseña</h2>
         <p className="text-sm text-gray-600 mb-4">Ingresa tu correo y te enviaremos un código de 6 dígitos.</p>
-        {error && <div className="mb-3 text-red-600">{error}</div>}
-        {ok && <div className="mb-3 text-green-600">Código enviado. Revisa tu correo.</div>}
-        <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="tucorreo@ejemplo.com" className="w-full p-3 border rounded mb-3" />
-        <button className="w-full bg-blue-600 text-white p-3 rounded">Enviar código</button>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          placeholder="tucorreo@ejemplo.com"
+          className="w-full p-3 border rounded mb-3"
+          disabled={sending}
+        />
+        <button type="submit" disabled={sending} className={`w-full p-3 rounded ${sending ? "bg-gray-400" : "bg-blue-600 text-white"}`}>
+          {sending ? "Enviando..." : "Enviar código"}
+        </button>
       </form>
     </div>
   );
