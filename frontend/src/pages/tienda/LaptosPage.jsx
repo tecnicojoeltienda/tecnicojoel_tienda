@@ -184,7 +184,7 @@ export default function LaptopsPage() {
         }
 
         addToCart(producto);
-        toast.success('✅ Agregado al carrito', {
+        toast.success('Agregado al carrito', {
           description: producto.nombre_producto,
           duration: 2000,
         });
@@ -240,7 +240,7 @@ export default function LaptopsPage() {
               </span>
             ) : (
               <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold mb-3">
-                🚫 AGOTADO
+                 AGOTADO
               </span>
             )}
 
@@ -308,7 +308,7 @@ export default function LaptopsPage() {
           {/* Estado de agotado */}
           {(!p.stock || p.stock <= 0 || p.estado === 'agotado') && (
             <div className="text-xs text-red-600 font-bold mb-2">
-              🚫 AGOTADO
+              AGOTADO
             </div>
           )}
 

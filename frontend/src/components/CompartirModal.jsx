@@ -20,8 +20,11 @@ export default function CompartirModal({ open, onClose, product = {} }) {
   const text = product.subtitulo || product.descripcion || title;
   const url = getVercelUrl();
 
+  const isRenderUrl = (u) => typeof u === "string" && /render\.com|onrender\.com/i.test(u || "");
+
   const tryFetchImageFile = async () => {
     if (!img) return null;
+    if (isRenderUrl(img)) return null; 
     try {
       const res = await fetch(img, { mode: "cors" });
       const blob = await res.blob();
@@ -34,7 +37,8 @@ export default function CompartirModal({ open, onClose, product = {} }) {
   };
 
   const shareWhatsApp = () => {
-    const body = `${title}\n${text}\n${url}\n${img || ""}`;
+    // NO incluir la URL de la imagen que apunta a Render
+    const body = `${title}\n${text}\n${url}`;
     const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(body)}`;
     window.open(shareUrl, "_blank");
     onClose();
@@ -61,14 +65,14 @@ export default function CompartirModal({ open, onClose, product = {} }) {
             text,
             url
           });
-          toast.success("✅ Producto compartido");
+          toast.success("Producto compartido");
           onClose();
           return;
         }
       }
       if (navigator.share) {
         await navigator.share({ title, text, url });
-        toast.success("✅ Producto compartido");
+        toast.success("Producto compartido");
         onClose();
         return;
       }
@@ -135,7 +139,7 @@ export default function CompartirModal({ open, onClose, product = {} }) {
 
         <div className="p-3 border-t text-sm text-gray-500">
           <div className="flex items-center gap-3">
-            {img ? (
+            {img && !isRenderUrl(img) ? (
               <img src={img} alt={title} className="w-16 h-16 object-cover rounded-md flex-shrink-0" />
             ) : (
               <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0" />
