@@ -1,9 +1,12 @@
 import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { resolveImageUrl } from "../../service/api";
-import CompartirProductoNodal from "../CompartirProductoModal";
+import CompartirModal from "../CompartirProductoModal";
 import { FiPlus, FiMinus, FiArrowLeft, FiShoppingCart, FiPackage, FiStar, FiInfo, FiSettings, FiShare } from "react-icons/fi";
 import { toast } from 'sonner';
+
+const slugify = (s = "") =>
+  s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
 
 export default function ProductDetail({
   product = {},
@@ -361,7 +364,7 @@ export default function ProductDetail({
                 <FiShare className="w-5 h-5" />
                 Compartir producto
               </button>
-              <CompartirProductoModal open={shareOpen} onClose={() => setShareOpen(false)} product={product} />
+              <CompartirModal open={shareOpen} onClose={() => setShareOpen(false)} product={product} />
             </div>
           </div>
 

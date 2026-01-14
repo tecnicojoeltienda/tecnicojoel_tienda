@@ -1,14 +1,22 @@
 import React from "react";
-import { resolveImageUrl } from "../../service/api";
+import { resolveImageUrl } from "../service/api";
 import { toast } from "sonner";
 
-export default function CompartirProductoModal({ open, onClose, product = {} }) {
+const VERCEL_HOST = "https://tiendatecnicojoel.vercel.app";
+
+function getVercelUrl() {
+  if (typeof window === "undefined") return VERCEL_HOST;
+  const path = (window.location.pathname || "") + (window.location.search || "") + (window.location.hash || "");
+  return `${VERCEL_HOST.replace(/\/$/, "")}${path}`;
+}
+
+export default function CompartirModal({ open, onClose, product = {} }) {
   if (!open) return null;
 
   const img = resolveImageUrl(product.imagen_url);
   const title = product.nombre_producto || "Producto";
   const text = product.subtitulo || product.descripcion || title;
-  const url = typeof window !== "undefined" ? window.location.href : "";
+  const url = getVercelUrl();
 
   const tryFetchImageFile = async () => {
     if (!img) return null;
@@ -75,7 +83,7 @@ export default function CompartirProductoModal({ open, onClose, product = {} }) 
         onClick={onClose}
         aria-hidden
       >
-        <div className="w-full h-full bg-gradient-to-br from-blue-700/40 via-blue-600/30 to-transparent backdrop-blur-sm" />
+        <div className="w-full h-full bg-gradient-to-br from-blue-800/50 via-blue-700/30 to-transparent backdrop-blur-sm" />
       </div>
 
       <div className="relative max-w-md w-[92%] bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -124,7 +132,7 @@ export default function CompartirProductoModal({ open, onClose, product = {} }) 
             )}
             <div className="flex-1">
               <div className="font-semibold">{title}</div>
-              <div className="text-xs text-gray-400">{text}</div>
+              <div className="text-xs text-gray-400 truncate">{text}</div>
             </div>
           </div>
         </div>
