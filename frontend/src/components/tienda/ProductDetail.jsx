@@ -1,7 +1,7 @@
 import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { resolveImageUrl } from "../../service/api";
-import { FiPlus, FiMinus, FiArrowLeft, FiShoppingCart, FiPackage, FiStar, FiInfo, FiSettings } from "react-icons/fi";
+import { FiPlus, FiMinus, FiArrowLeft, FiShoppingCart, FiPackage, FiStar, FiInfo, FiSettings, FiShare } from "react-icons/fi";
 import { toast } from 'sonner';
 
 export default function ProductDetail({
@@ -76,6 +76,69 @@ export default function ProductDetail({
     }
   };
 
+  // Nuevo: función para compartir
+  const slugify = (s = "") =>
+    s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+
+  const handleShare = async () => {
+    try {
+      const productTitle = product.nombre_producto || "Producto";
+      const productText = product.subtitulo || product.descripcion || productTitle;
+      // Usar la URL actual como enlace de producto (puedes adaptar si necesitas un slug específico)
+      const productUrl = window.location.href;
+
+      // Intentar compartir imagen + datos si el navegador lo permite
+      if (img && navigator.canShare) {
+        try {
+          const res = await fetch(img, { mode: "cors" });
+          const blob = await res.blob();
+          const ext = (blob.type && blob.type.split("/")[1]) || "jpg";
+          const filename = `${slugify(productTitle)}.${ext}`;
+          const file = new File([blob], filename, { type: blob.type || "image/jpeg" });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: productTitle,
+              text: productText,
+              url: productUrl
+            });
+            toast.success('✅ Producto compartido');
+            return;
+          }
+        } catch (err) {
+          // Si falla la obtención de la imagen o compartir archivos, continuamos con el fallback
+          console.warn("Compartir con imagen falló:", err);
+        }
+      }
+
+      // Fallback 1: Web Share sin archivos (si está disponible)
+      if (navigator.share) {
+        await navigator.share({
+          title: productTitle,
+          text: productText,
+          url: productUrl
+        });
+        toast.success('✅ Producto compartido');
+        return;
+      }
+
+      // Fallback final: copiar enlace al portapapeles
+      if (navigator.clipboard && productUrl) {
+        await navigator.clipboard.writeText(productUrl);
+        toast.success('🔗 Enlace copiado al portapapeles', {
+          description: 'Pega y comparte donde prefieras.'
+        });
+        return;
+      }
+
+      toast.error('No fue posible compartir el producto en este navegador.');
+    } catch (error) {
+      console.error("Error al compartir:", error);
+      toast.error('Error al intentar compartir el producto.');
+    }
+  };
+
   const imgRef = useRef(null);
   const [zoom, setZoom] = useState(1);
   const [origin, setOrigin] = useState("50% 50%");
@@ -137,9 +200,6 @@ export default function ProductDetail({
     }
     return String(raw);
   }, [product]);
-
-  const slugify = (s = "") =>
-    s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
 
   const getStockColor = (stock) => {
     if (!stock || stock <= 0) return "text-red-600 bg-red-50";
@@ -343,6 +403,17 @@ export default function ProductDetail({
                 ? '✓ Agregado al carrito'
                 : 'Agregar al carrito'
               }
+            </button>
+
+            {/* Nuevo botón: Compartir producto */}
+            <button
+              onClick={handleShare}
+              type="button"
+              className="mt-3 w-full py-3 rounded-lg font-semibold transition-all bg-white text-blue-600 border border-blue-100 hover:shadow-sm flex items-center justify-center gap-2"
+              aria-label="Compartir producto"
+            >
+              <FiShare className="w-5 h-5" />
+              Compartir producto
             </button>
           </div>
 
