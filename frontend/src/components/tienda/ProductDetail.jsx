@@ -13,7 +13,12 @@ export default function ProductDetail({
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const img = resolveImageUrl(product.imagen_url);
+
+  const productTitle = product.nombre_producto || "Producto";
+  const productText = product.subtitulo || product.descripcion || productTitle;
+  const productUrl = typeof window !== "undefined" ? window.location.href : "";
 
   const inc = () => {
     const stockDisponible = product.stock || 0;
@@ -76,43 +81,77 @@ export default function ProductDetail({
     }
   };
 
-  // Nuevo: función para compartir
-  const slugify = (s = "") =>
-    s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+  const closeShare = () => setShareOpen(false);
 
-  const handleShare = async () => {
+  const tryFetchImageFile = async () => {
+    if (!img) return null;
     try {
-      const productTitle = product.nombre_producto || "Producto";
-      const productText = product.subtitulo || product.descripcion || productTitle;
-      // Usar la URL actual como enlace de producto (puedes adaptar si necesitas un slug específico)
-      const productUrl = window.location.href;
+      const res = await fetch(img, { mode: "cors" });
+      const blob = await res.blob();
+      const ext = (blob.type && blob.type.split("/")[1]) || "jpg";
+      const filename = `${slugify(productTitle)}.${ext}`;
+      return new File([blob], { type: blob.type || "image/jpeg" });
+    } catch (e) {
+      return null;
+    }
+  };
 
-      // Intentar compartir imagen + datos si el navegador lo permite
-      if (img && navigator.canShare) {
-        try {
-          const res = await fetch(img, { mode: "cors" });
-          const blob = await res.blob();
-          const ext = (blob.type && blob.type.split("/")[1]) || "jpg";
-          const filename = `${slugify(productTitle)}.${ext}`;
-          const file = new File([blob], filename, { type: blob.type || "image/jpeg" });
+  // Prioridad: WhatsApp
+  const shareWhatsApp = () => {
+    const text = `${productTitle}\n${productText}\n${img || ""}\n${productUrl}`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+    closeShare();
+  };
 
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: productTitle,
-              text: productText,
-              url: productUrl
-            });
-            toast.success('✅ Producto compartido');
-            return;
-          }
-        } catch (err) {
-          // Si falla la obtención de la imagen o compartir archivos, continuamos con el fallback
-          console.warn("Compartir con imagen falló:", err);
+  // Messenger (intenta abrir app; si no, usa fallback a Facebook share)
+  const shareMessenger = async () => {
+    const appUrl = `fb-messenger://share?link=${encodeURIComponent(productUrl)}`;
+    const fbShare = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+    // Intentar abrir esquema nativo (solo móviles); luego fallback
+    window.location.href = appUrl;
+    setTimeout(() => {
+      window.open(fbShare, "_blank");
+    }, 600);
+    closeShare();
+  };
+
+  // Facebook share (web)
+  const shareFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+    window.open(url, "_blank", "noopener");
+    closeShare();
+  };
+
+  // Copiar enlace
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(productUrl);
+      toast.success('🔗 Enlace copiado al portapapeles');
+    } catch (e) {
+      toast.error('No se pudo copiar el enlace');
+    }
+    closeShare();
+  };
+
+  // Otros: intentar Web Share API (con imagen cuando sea posible) o fallback a copiar
+  const shareOther = async () => {
+    try {
+      // intentar compartir imagen + datos cuando sea posible
+      if (navigator.canShare) {
+        const file = await tryFetchImageFile();
+        if (file && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: productTitle,
+            text: productText,
+            url: productUrl
+          });
+          toast.success('✅ Producto compartido');
+          closeShare();
+          return;
         }
       }
-
-      // Fallback 1: Web Share sin archivos (si está disponible)
       if (navigator.share) {
         await navigator.share({
           title: productTitle,
@@ -120,23 +159,14 @@ export default function ProductDetail({
           url: productUrl
         });
         toast.success('✅ Producto compartido');
+        closeShare();
         return;
       }
-
-      // Fallback final: copiar enlace al portapapeles
-      if (navigator.clipboard && productUrl) {
-        await navigator.clipboard.writeText(productUrl);
-        toast.success('🔗 Enlace copiado al portapapeles', {
-          description: 'Pega y comparte donde prefieras.'
-        });
-        return;
-      }
-
-      toast.error('No fue posible compartir el producto en este navegador.');
-    } catch (error) {
-      console.error("Error al compartir:", error);
-      toast.error('Error al intentar compartir el producto.');
+    } catch (err) {
+      console.warn("shareOther error:", err);
     }
+    // fallback final
+    await copyLink();
   };
 
   const imgRef = useRef(null);
@@ -406,15 +436,27 @@ export default function ProductDetail({
             </button>
 
             {/* Nuevo botón: Compartir producto */}
-            <button
-              onClick={handleShare}
-              type="button"
-              className="mt-3 w-full py-3 rounded-lg font-semibold transition-all bg-white text-blue-600 border border-blue-100 hover:shadow-sm flex items-center justify-center gap-2"
-              aria-label="Compartir producto"
-            >
-              <FiShare className="w-5 h-5" />
-              Compartir producto
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShareOpen(o => !o)}
+                type="button"
+                className="mt-3 w-full py-3 rounded-lg font-semibold transition-all bg-white text-blue-600 border border-blue-100 hover:shadow-sm flex items-center justify-center gap-2"
+                aria-label="Compartir producto"
+              >
+                <FiShare className="w-5 h-5" />
+                Compartir producto
+              </button>
+
+              {shareOpen && (
+                <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-30 p-2">
+                  <button onClick={shareWhatsApp} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">WhatsApp</button>
+                  <button onClick={shareMessenger} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Messenger</button>
+                  <button onClick={shareFacebook} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Facebook</button>
+                  <button onClick={copyLink} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Copiar enlace</button>
+                  <button onClick={shareOther} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Compartir con otras apps</button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Descripción */}
