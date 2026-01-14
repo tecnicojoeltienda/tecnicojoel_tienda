@@ -15,8 +15,9 @@ const MAX_ATT_IP = Number(process.env.MAX_ATTEMPTS_PER_IP || 30);
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: { user: SMTP_USER, pass: SMTP_PASS }
+  secure: Number(process.env.SMTP_PORT) === 465, // use SSL en 465
+  auth: { user: SMTP_USER, pass: SMTP_PASS },
+  connectionTimeout: 10000
 });
 
 // In-memory stores (production: use Redis for persistence / horizontal scaling)
