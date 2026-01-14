@@ -15,14 +15,14 @@ const MAX_ATT_IP = Number(process.env.MAX_ATTEMPTS_PER_IP || 30);
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: Number(process.env.SMTP_PORT) || 587,
-  secure: Number(process.env.SMTP_PORT) === 465, // use SSL en 465
+  secure: Number(process.env.SMTP_PORT) === 465,
   auth: { user: SMTP_USER, pass: SMTP_PASS },
   connectionTimeout: 10000
 });
 
-// In-memory stores (production: use Redis for persistence / horizontal scaling)
-const codes = new Map(); // email -> { code, expiresAt, lastSentAt, attempts }
-const ipCounts = new Map(); // ip -> { count, resetAt }
+// In-memory stores
+const codes = new Map();
+const ipCounts = new Map();
 
 function genCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -35,6 +35,38 @@ function cleanExpired() {
 }
 setInterval(cleanExpired, 60_000);
 
+// SendGrid fallback
+async function sendWithSendGrid(to, subject, html) {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  const from = process.env.SENDGRID_FROM || process.env.SMTP_FROM || process.env.SMTP_USER;
+  if (!apiKey) throw new Error("SENDGRID_API_KEY no configurado");
+
+  const payload = {
+    personalizations: [{ to: [{ email: to }] }],
+    from: { email: from },
+    subject,
+    content: [{ type: "text/html", value: html }]
+  };
+
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    const e = new Error(`SendGrid error ${res.status}: ${text}`);
+    e.status = res.status;
+    e.body = text;
+    throw e;
+  }
+  return true;
+}
+
 export async function solicitar(req, res) {
   try {
     const { email } = req.body;
@@ -43,12 +75,6 @@ export async function solicitar(req, res) {
     console.log(`📥 Solicitud de recuperación desde IP: ${ip} para email: ${email}`);
     
     if (!email) return res.status(400).json({ error: "Email requerido" });
-
-    // Verificar configuración SMTP
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error("❌ ERROR: Variables SMTP no configuradas");
-      return res.status(500).json({ error: "Servicio de correo no configurado" });
-    }
 
     // Verificar si el email existe en la BD
     const conn = await conexion;
@@ -104,30 +130,42 @@ export async function solicitar(req, res) {
     console.log(`📤 Intentando enviar email a: ${email}`);
     
     try {
-      const info = await transporter.sendMail({ 
-        from: `"TecnicoJoel" <${process.env.SMTP_FROM || SMTP_USER}>`, 
-        to: email, 
-        subject: "🔐 Código de recuperación - TecnicoJoel", 
-        html 
-      });
-      
-      console.log(`✅ Email enviado exitosamente. MessageId: ${info.messageId}`);
-      return res.json({ message: "Código enviado", email });
-      
+      // Intenta nodemailer primero
+      try {
+        const info = await transporter.sendMail({
+          from: `"TecnicoJoel" <${process.env.SMTP_FROM || SMTP_USER}>`,
+          to: email,
+          subject: "🔐 Código de recuperación - TecnicoJoel",
+          html
+        });
+        console.log(`✅ Email enviado (nodemailer). MessageId: ${info.messageId}`);
+        return res.json({ message: "Código enviado", email });
+      } catch (mailErr) {
+        console.warn("⚠️ nodemailer falló:", mailErr?.code || mailErr?.message);
+        // Fallback a SendGrid
+        if (process.env.SENDGRID_API_KEY) {
+          try {
+            await sendWithSendGrid(email, "🔐 Código de recuperación - TecnicoJoel", html);
+            console.log("✅ Email enviado via SendGrid API");
+            return res.json({ message: "Código enviado", email });
+          } catch (sgErr) {
+            console.error("❌ SendGrid ERROR:", sgErr.message || sgErr);
+            throw sgErr;
+          }
+        }
+        throw mailErr;
+      }
     } catch (mailError) {
       console.error("❌ ERROR enviando email:", mailError);
-      console.error("❌ ERROR COMPLETO:", JSON.stringify(mailError, null, 2));
-
       codes.delete(email);
       ipRec.count--;
-
       return res.status(500).json({
         error: "Error enviando código. Verifica tu correo o intenta más tarde.",
         mailError: {
           message: mailError.message,
           code: mailError.code,
-          response: mailError.response,
-          responseCode: mailError.responseCode
+          response: mailError.response || mailError.body || null,
+          responseCode: mailError.responseCode || mailError.status || null
         }
       });
     }
@@ -148,8 +186,7 @@ export async function validar(req, res) {
     if (!rec || rec.code !== String(code) || rec.expiresAt <= now) {
       return res.status(400).json({ error: "Código inválido o expirado" });
     }
-    // issue one-time token (short JWT)
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: Math.floor(CODE_TTL/1000) }); // same TTL
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: Math.floor(CODE_TTL/1000) });
     return res.json({ token, expiresIn: Math.floor((rec.expiresAt - now)/1000) });
   } catch (err) {
     console.error("rec.validar:", err);
@@ -164,28 +201,22 @@ export async function cambiar(req, res) {
     let payload;
     try { payload = jwt.verify(token, JWT_SECRET); } catch { return res.status(400).json({ error: "Token inválido o expirado" }); }
     const email = payload.email;
-    // Verify code still exists (optional)
     const rec = codes.get(email);
     if (!rec) return res.status(400).json({ error: "Código consumido o expirado" });
 
-    // Hash password and update cliente table (DB required to persist password)
     const hashed = await bcrypt.hash(nuevaContrasena, 10);
     const conn = await conexion;
     const [result] = await conn.query("UPDATE cliente SET clave = ? WHERE email = ?", [hashed, email]);
     if (result.affectedRows === 0) return res.status(404).json({ error: "No existe cuenta con ese email" });
 
-    // consume code
     codes.delete(email);
     return res.json({ message: "Contraseña actualizada" });
   } catch (err) {
     console.error("rec.cambiar:", err);
     return res.status(500).json({ error: "Error cambiando contraseña" });
   }
-
-  
 }
 
-// SOLO PARA DESARROLLO - Limpiar contadores
 export async function limpiar(req, res) {
   try {
     codes.clear();
