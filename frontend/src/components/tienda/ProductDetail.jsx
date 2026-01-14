@@ -1,6 +1,7 @@
 import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { resolveImageUrl } from "../../service/api";
+import CompartirProductoNodal from "../CompartirProductoModal";
 import { FiPlus, FiMinus, FiArrowLeft, FiShoppingCart, FiPackage, FiStar, FiInfo, FiSettings, FiShare } from "react-icons/fi";
 import { toast } from 'sonner';
 
@@ -83,91 +84,17 @@ export default function ProductDetail({
 
   const closeShare = () => setShareOpen(false);
 
-  const tryFetchImageFile = async () => {
-    if (!img) return null;
-    try {
-      const res = await fetch(img, { mode: "cors" });
-      const blob = await res.blob();
-      const ext = (blob.type && blob.type.split("/")[1]) || "jpg";
-      const filename = `${slugify(productTitle)}.${ext}`;
-      return new File([blob], { type: blob.type || "image/jpeg" });
-    } catch (e) {
-      return null;
+  // Nueva lógica: detectar si está en promoción (acepta "si", "true", true)
+  const isPromo = (() => {
+    const v = product.en_promocion;
+    if (v === true) return true;
+    if (typeof v === "string") {
+      const s = v.trim().toLowerCase();
+      return s === "si" || s === "sí" || s === "true" || s === "1";
     }
-  };
-
-  // Prioridad: WhatsApp
-  const shareWhatsApp = () => {
-    const text = `${productTitle}\n${productText}\n${img || ""}\n${productUrl}`;
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank");
-    closeShare();
-  };
-
-  // Messenger (intenta abrir app; si no, usa fallback a Facebook share)
-  const shareMessenger = async () => {
-    const appUrl = `fb-messenger://share?link=${encodeURIComponent(productUrl)}`;
-    const fbShare = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
-    // Intentar abrir esquema nativo (solo móviles); luego fallback
-    window.location.href = appUrl;
-    setTimeout(() => {
-      window.open(fbShare, "_blank");
-    }, 600);
-    closeShare();
-  };
-
-  // Facebook share (web)
-  const shareFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
-    window.open(url, "_blank", "noopener");
-    closeShare();
-  };
-
-  // Copiar enlace
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(productUrl);
-      toast.success('🔗 Enlace copiado al portapapeles');
-    } catch (e) {
-      toast.error('No se pudo copiar el enlace');
-    }
-    closeShare();
-  };
-
-  // Otros: intentar Web Share API (con imagen cuando sea posible) o fallback a copiar
-  const shareOther = async () => {
-    try {
-      // intentar compartir imagen + datos cuando sea posible
-      if (navigator.canShare) {
-        const file = await tryFetchImageFile();
-        if (file && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: productTitle,
-            text: productText,
-            url: productUrl
-          });
-          toast.success('✅ Producto compartido');
-          closeShare();
-          return;
-        }
-      }
-      if (navigator.share) {
-        await navigator.share({
-          title: productTitle,
-          text: productText,
-          url: productUrl
-        });
-        toast.success('✅ Producto compartido');
-        closeShare();
-        return;
-      }
-    } catch (err) {
-      console.warn("shareOther error:", err);
-    }
-    // fallback final
-    await copyLink();
-  };
+    if (typeof v === "number") return v === 1;
+    return false;
+  })();
 
   const imgRef = useRef(null);
   const [zoom, setZoom] = useState(1);
@@ -242,18 +169,6 @@ export default function ProductDetail({
     if (stock <= 5) return `Solo ${stock} disponibles`;
     return "En stock";
   };
-
-  // Nueva lógica: detectar si está en promoción (acepta "si", "true", true)
-  const isPromo = (() => {
-    const v = product.en_promocion;
-    if (v === true) return true;
-    if (typeof v === "string") {
-      const s = v.trim().toLowerCase();
-      return s === "si" || s === "sí" || s === "true" || s === "1";
-    }
-    if (typeof v === "number") return v === 1;
-    return false;
-  })();
 
   return (
     <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden ${className}`}>
@@ -438,7 +353,7 @@ export default function ProductDetail({
             {/* Nuevo botón: Compartir producto */}
             <div className="relative">
               <button
-                onClick={() => setShareOpen(o => !o)}
+                onClick={() => setShareOpen(true)}
                 type="button"
                 className="mt-3 w-full py-3 rounded-lg font-semibold transition-all bg-white text-blue-600 border border-blue-100 hover:shadow-sm flex items-center justify-center gap-2"
                 aria-label="Compartir producto"
@@ -446,16 +361,7 @@ export default function ProductDetail({
                 <FiShare className="w-5 h-5" />
                 Compartir producto
               </button>
-
-              {shareOpen && (
-                <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-30 p-2">
-                  <button onClick={shareWhatsApp} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">WhatsApp</button>
-                  <button onClick={shareMessenger} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Messenger</button>
-                  <button onClick={shareFacebook} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Facebook</button>
-                  <button onClick={copyLink} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Copiar enlace</button>
-                  <button onClick={shareOther} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded">Compartir con otras apps</button>
-                </div>
-              )}
+              <CompartirProductoModal open={shareOpen} onClose={() => setShareOpen(false)} product={product} />
             </div>
           </div>
 
