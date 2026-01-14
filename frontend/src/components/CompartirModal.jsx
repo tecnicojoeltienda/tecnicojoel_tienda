@@ -1,6 +1,8 @@
 import React from "react";
 import { resolveImageUrl } from "../service/api";
 import { toast } from "sonner";
+import { FaWhatsapp } from "react-icons/fa";
+import { FiLink, FiMoreHorizontal } from "react-icons/fi";
 
 const VERCEL_HOST = "https://tiendatecnicojoel.vercel.app";
 
@@ -83,7 +85,7 @@ export default function CompartirModal({ open, onClose, product = {} }) {
         onClick={onClose}
         aria-hidden
       >
-        <div className="w-full h-full bg-gradient-to-br from-blue-800/50 via-blue-700/30 to-transparent backdrop-blur-sm" />
+        <div className="w-full h-full bg-gradient-to-br from-black/20 via-black/10 to-transparent backdrop-blur-sm" />
       </div>
 
       <div className="relative max-w-md w-[92%] bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -97,29 +99,35 @@ export default function CompartirModal({ open, onClose, product = {} }) {
           </div>
         </div>
 
-        <div className="p-4 space-y-3">
+        <div className="p-4 flex items-center justify-around gap-4">
           <button
             onClick={shareWhatsApp}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 flex items-center gap-3"
+            className="p-3 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            aria-label="Compartir vía WhatsApp"
+            title="WhatsApp"
           >
-            <span className="font-medium">WhatsApp</span>
-            <span className="text-sm text-gray-500">Compartir vía WhatsApp</span>
+            <FaWhatsapp className="w-6 h-6 text-green-600" />
+            <span className="sr-only">WhatsApp</span>
           </button>
 
           <button
             onClick={copyLink}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 flex items-center gap-3"
+            className="p-3 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            aria-label="Copiar enlace"
+            title="Copiar enlace"
           >
-            <span className="font-medium">Copiar enlace</span>
-            <span className="text-sm text-gray-500">Copiar URL al portapapeles</span>
+            <FiLink className="w-6 h-6 text-gray-700" />
+            <span className="sr-only">Copiar enlace</span>
           </button>
 
           <button
             onClick={shareOther}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 flex items-center gap-3"
+            className="p-3 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            aria-label="Compartir con otras aplicaciones"
+            title="Más opciones"
           >
-            <span className="font-medium">Compartir con otras apps</span>
-            <span className="text-sm text-gray-500">Intentar Web Share API (imagen cuando sea posible)</span>
+            <FiMoreHorizontal className="w-6 h-6 text-gray-700" />
+            <span className="sr-only">Compartir otras apps</span>
           </button>
         </div>
 
