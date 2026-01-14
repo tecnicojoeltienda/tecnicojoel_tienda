@@ -2,7 +2,7 @@ import React from "react";
 import { resolveImageUrl } from "../service/api";
 import { toast } from "sonner";
 import { FaWhatsapp } from "react-icons/fa";
-import { FiLink, FiMoreHorizontal } from "react-icons/fi";
+import { FiLink, FiMoreHorizontal, FiX } from "react-icons/fi";
 
 const VERCEL_HOST = "https://tiendatecnicojoel.vercel.app";
 
@@ -95,39 +95,41 @@ export default function CompartirModal({ open, onClose, product = {} }) {
               <div className="text-lg font-bold text-gray-900">Compartir producto</div>
               <div className="text-sm text-gray-500">{title}</div>
             </div>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">Cerrar</button>
+            <button onClick={onClose} className="text-red-500 hover:text-red-600">
+              <FiX className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
         <div className="p-4 flex items-center justify-around gap-4">
           <button
             onClick={shareWhatsApp}
-            className="p-3 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            className="p-3 rounded-lg hover:bg-gray-100 flex items-center gap-3"
             aria-label="Compartir vía WhatsApp"
             title="WhatsApp"
           >
             <FaWhatsapp className="w-6 h-6 text-green-600" />
-            <span className="sr-only">WhatsApp</span>
+            <span className="font-medium">WhatsApp</span>
           </button>
 
           <button
             onClick={copyLink}
-            className="p-3 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            className="p-3 rounded-lg hover:bg-gray-100 flex items-center gap-3"
             aria-label="Copiar enlace"
             title="Copiar enlace"
           >
             <FiLink className="w-6 h-6 text-gray-700" />
-            <span className="sr-only">Copiar enlace</span>
+            <span className="font-medium">Copiar enlace</span>
           </button>
 
           <button
             onClick={shareOther}
-            className="p-3 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+            className="p-3 rounded-lg hover:bg-gray-100 flex items-center gap-3"
             aria-label="Compartir con otras aplicaciones"
             title="Más opciones"
           >
             <FiMoreHorizontal className="w-6 h-6 text-gray-700" />
-            <span className="sr-only">Compartir otras apps</span>
+            <span className="font-medium">Otros</span>
           </button>
         </div>
 
