@@ -1,7 +1,7 @@
 import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { resolveImageUrl } from "../../service/api";
-import CompartirModal from "../CompartirProductoModal";
+import CompartirModal from "../CompartirModal";
 import { FiPlus, FiMinus, FiArrowLeft, FiShoppingCart, FiPackage, FiStar, FiInfo, FiSettings, FiShare } from "react-icons/fi";
 import { toast } from 'sonner';
 
