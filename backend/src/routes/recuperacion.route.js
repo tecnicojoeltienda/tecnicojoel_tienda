@@ -12,6 +12,7 @@ router.post("/limpiar", ctrl.limpiar);
 
 // ENDPOINT TEMPORAL DE DIAGNÓSTICO SMTP
 router.get("/check-smtp-conn", async (req, res) => {
+  console.log("🔍 /check-smtp-conn called");
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT) || 587;
   const timeoutMs = 8000;
