@@ -7,10 +7,7 @@ const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_FROM = process.env.SMTP_FROM || SMTP_USER;
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
-// const CODE_TTL = Number(process.env.CODE_TTL_MS || 15 * 60 * 1000);
-// const COOLDOWN = Number(process.env.CODE_COOLDOWN_MS || 60 * 1000);
-// const MAX_ATT_EMAIL = Number(process.env.MAX_ATTEMPTS_PER_EMAIL || 5);
-// const MAX_ATT_IP = Number(process.env.MAX_ATTEMPTS_PER_IP || 30);
+const CODE_TTL = 15 * 60 * 1000; // 15 minutos fijo
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -22,7 +19,6 @@ const transporter = nodemailer.createTransport({
 
 // In-memory stores
 const codes = new Map();
-const ipCounts = new Map();
 
 function genCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -30,8 +26,9 @@ function genCode() {
 
 function cleanExpired() {
   const now = Date.now();
-  for (const [email, rec] of codes) if (rec.expiresAt <= now) codes.delete(email);
-  for (const [ip, rec] of ipCounts) if (rec.resetAt <= now) ipCounts.delete(ip);
+  for (const [email, rec] of codes) {
+    if (rec.expiresAt <= now) codes.delete(email);
+  }
 }
 setInterval(cleanExpired, 60_000);
 
@@ -86,29 +83,11 @@ export async function solicitar(req, res) {
 
     console.log(`✅ Email encontrado en BD: ${email}`);
 
-    // IP rate limit
-    const now = Date.now();
-    const ipRec = ipCounts.get(ip) || { count: 0, resetAt: now + 15 * 60 * 1000 };
-    if (ipRec.count >= MAX_ATT_IP && ipRec.resetAt > now) {
-      console.log(`⚠️ Rate limit IP alcanzado para: ${ip}`);
-      return res.status(429).json({ error: "Demasiadas solicitudes desde esta IP. Intenta más tarde." });
-    }
-    ipRec.count++; ipCounts.set(ip, ipRec);
-
-    const rec = codes.get(email) || { attempts: 0, lastSentAt: 0 };
-    if (rec.lastSentAt && now - rec.lastSentAt < COOLDOWN) {
-      console.log(`⚠️ Cooldown activo para email: ${email}`);
-      return res.status(429).json({ error: `Espera ${Math.ceil((COOLDOWN - (now - rec.lastSentAt))/1000)}s antes de reintentarlo.` });
-    }
-    if (rec.attempts >= MAX_ATT_EMAIL) {
-      console.log(`⚠️ Máximo de intentos alcanzado para: ${email}`);
-      return res.status(429).json({ error: "Demasiados intentos para este email. Contacta soporte." });
-    }
-
-    // generate and save
+    // generate and save (sin límites)
     const code = genCode();
+    const now = Date.now();
     const expiresAt = now + CODE_TTL;
-    codes.set(email, { code, expiresAt, lastSentAt: now, attempts: (rec.attempts || 0) + 1 });
+    codes.set(email, { code, expiresAt });
 
     console.log(`📧 Código generado para ${email}: ${code}`);
 
@@ -158,7 +137,6 @@ export async function solicitar(req, res) {
     } catch (mailError) {
       console.error("❌ ERROR enviando email:", mailError);
       codes.delete(email);
-      ipRec.count--;
       return res.status(500).json({
         error: "Error enviando código. Verifica tu correo o intenta más tarde.",
         mailError: {
@@ -220,7 +198,6 @@ export async function cambiar(req, res) {
 export async function limpiar(req, res) {
   try {
     codes.clear();
-    ipCounts.clear();
     console.log("🧹 Contadores limpiados");
     return res.json({ message: "Contadores limpiados exitosamente" });
   } catch (err) {
