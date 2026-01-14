@@ -7,10 +7,10 @@ const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_FROM = process.env.SMTP_FROM || SMTP_USER;
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
-const CODE_TTL = Number(process.env.CODE_TTL_MS || 15 * 60 * 1000);
-const COOLDOWN = Number(process.env.CODE_COOLDOWN_MS || 60 * 1000);
-const MAX_ATT_EMAIL = Number(process.env.MAX_ATTEMPTS_PER_EMAIL || 5);
-const MAX_ATT_IP = Number(process.env.MAX_ATTEMPTS_PER_IP || 30);
+// const CODE_TTL = Number(process.env.CODE_TTL_MS || 15 * 60 * 1000);
+// const COOLDOWN = Number(process.env.CODE_COOLDOWN_MS || 60 * 1000);
+// const MAX_ATT_EMAIL = Number(process.env.MAX_ATTEMPTS_PER_EMAIL || 5);
+// const MAX_ATT_IP = Number(process.env.MAX_ATTEMPTS_PER_IP || 30);
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
