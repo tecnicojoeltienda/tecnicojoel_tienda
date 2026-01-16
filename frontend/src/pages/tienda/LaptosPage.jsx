@@ -229,7 +229,22 @@ export default function LaptopsPage() {
       }
     };
 
-    const offerBadge = isOnOffer(p) ? (
+    const isPromo = (() => {
+      const v = p?.en_promocion;
+      if (v === true) return true;
+      if (typeof v === "string") {
+        const s = v.trim().toLowerCase();
+        return s === "si" || s === "sí" || s === "true" || s === "1";
+      }
+      if (typeof v === "number") return v === 1;
+      return false;
+    })();
+
+    const offerBadge = isPromo ? (
+      <span className="ml-2 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+        PROMO
+      </span>
+    ) : isOnOffer(p) ? (
       <span className="ml-2 inline-flex items-center bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">
         OFERTA
       </span>
