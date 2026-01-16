@@ -32,7 +32,7 @@ export default function TarjetasGraficasPage() {
     async function cargar() {
       try {
         setLoading(true);
-        const res = await api.get("/apij/productos/categoria/nombre/tarjetas-graficas");
+        const res = await api.get("/apij/productos/categoria/nombre/tarjetas%20graficas");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
         setProductos(shuffleArray(rows));
       } catch (err) {
