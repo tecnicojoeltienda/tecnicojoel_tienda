@@ -32,7 +32,7 @@ export default function DiscosSolidosPage() {
     async function cargar() {
       try {
         setLoading(true);
-        const res = await api.get("/apij/productos/categoria/nombre/discos-solidos");
+        const res = await api.get("/apij/productos/categoria/nombre/discos%20solidos");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
         setProductos(shuffleArray(rows));
       } catch (err) {
