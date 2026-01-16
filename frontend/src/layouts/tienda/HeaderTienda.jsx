@@ -169,15 +169,19 @@ function HeaderTienda() {
     "Accesorios",
     "Componentes",
     "Computadoras",
+    "Discos solidos",
     "Estabilizadores",
     "Impresoras",
     "Laptops",
-    "Licencia",
+    "Licencias",
     "Monitores",
-    "Mouse",
-    "Segunda mano",
+    "Mouses",
     "Redes",
-    "Sonido",
+    "Repuestos",
+    "Segunda mano",
+    "Sonidos",
+    "Tarjetas graficas",
+    "Teclados",
     "Tintas"
   ];
 
@@ -196,15 +200,25 @@ function HeaderTienda() {
     laptops: "/laptops",
     impresoras: "/impresoras",
     monitores: "/monitores",
+    // keep existing single/plural compatibility:
     mouse: "/mouse",
+    mouses: "/mouse",
     accesorios: "/accesorios",
     componentes: "/componentes",
     sonido: "/sonido",
+    sonidos: "/sonido",
     tintas: "/tintas",
     licencia: "/licencia",
+    licencias: "/licencia",
     "segunda-mano": "/segunda-mano",
     redes: "/redes",
-    estabilizadores: "/estabilizadores"
+    estabilizadores: "/estabilizadores",
+    "tarjetas-graficas": "/tarjetas-graficas",
+    tarjetas: "/tarjetas-graficas",
+    teclados: "/teclados",
+    repuestos: "/repuestos",
+    "discos-solidos": "/discos-solidos",
+    discos: "/discos-solidos"
   };
 
   const getRoute = (name) => {
