@@ -8,13 +8,12 @@ export default function FiltersPanel({
   productCount = 0
 }) {
   const handleApplyPrice = () => {
-    
     onChange("applyPrice", true);
   };
 
   return (
     <div className={`space-y-6 ${className}`}> 
-      <div className="bg-white rounded-lg shadow-sm p-6 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto"> 
+      <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto"> 
         <div className="flex items-center justify-between mb-4"> 
           <h3 className="text-sm font-semibold text-gray-900 tracking-wide leading-6">Filtros</h3>
           <span className="text-sm font-medium text-gray-600 ml-2">{productCount} productos</span>

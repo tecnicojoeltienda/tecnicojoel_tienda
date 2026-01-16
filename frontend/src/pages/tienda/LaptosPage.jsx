@@ -12,7 +12,6 @@ export default function LaptopsPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
 
- 
   const { addToCart } = useCart();
 
   const [filters, setFilters] = useState({
@@ -21,7 +20,14 @@ export default function LaptopsPage() {
     sort: "relevance"
   });
 
-  
+  const [page, setPage] = useState(1);
+
+  const itemsPerPage = useMemo(() => {
+    if (filters.view === "list") return 5;
+    if (filters.view === "grid-large") return 6;
+    return 9; 
+  }, [filters.view]);
+
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -37,7 +43,6 @@ export default function LaptopsPage() {
         setLoading(true);
         const res = await api.get("/apij/productos/categoria/nombre/laptops");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
-        // Aleatorizar productos al cargar
         setProductos(shuffleArray(rows));
       } catch (err) {
         console.error("Error cargando laptops por categoría:", err);
@@ -48,6 +53,20 @@ export default function LaptopsPage() {
     }
     cargar();
   }, []);
+
+  // Heurística para determinar si un producto está en oferta
+  const isOnOffer = (p) => {
+    if (!p) return false;
+    if (p.oferta === true || p.en_oferta === true) return true;
+    const descuento = Number(p.descuento || p.porcentaje || 0);
+    if (!Number.isNaN(descuento) && descuento > 0) return true;
+    const precioVenta = Number(p.precio_venta || 0);
+    const precioOriginal = Number(p.precio_original || p.precio_normal || p.precio_regular || 0);
+    if (!Number.isNaN(precioOriginal) && precioOriginal > precioVenta) return true;
+    const precioOferta = Number(p.precio_oferta || 0);
+    if (!Number.isNaN(precioOferta) && precioOferta > 0 && precioOferta < precioVenta) return true;
+    return false;
+  };
 
   const isInStock = (p) => {
     const candidates = [p.stock, p.cantidad, p.cantidad_stock, p.stock_actual, p.stock_minimo];
@@ -62,11 +81,12 @@ export default function LaptopsPage() {
 
   const resetFilters = () => {
     setFilters({ availability: "all", view: "grid", sort: "relevance" });
+    setPage(1);
   };
 
   const filteredProducts = useMemo(() => {
     let res = productos.slice();
-    
+
     // Filtro de disponibilidad
     if (filters.availability === "in") res = res.filter(isInStock);
     if (filters.availability === "out") res = res.filter(p => !isInStock(p));
@@ -93,6 +113,18 @@ export default function LaptopsPage() {
 
     return res;
   }, [productos, filters]);
+
+  useEffect(() => {
+    // reset page when view or filters change
+    setPage(1);
+  }, [filters.view, filters.sort, filters.min, filters.max, filters.availability, productos.length]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (page - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, page, itemsPerPage]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
 
   const getGridClasses = () => {
     switch (filters.view) {
@@ -157,7 +189,7 @@ export default function LaptopsPage() {
     const handleAddToCart = async (producto) => {
       try {
         const stockDisponible = producto.stock || 0;
-        
+
         if (stockDisponible <= 0 || producto.estado === 'agotado') {
           toast.error('⚠️ Producto agotado', {
             description: `${producto.nombre_producto} ya no está disponible.`,
@@ -166,12 +198,11 @@ export default function LaptopsPage() {
           return;
         }
 
-        // Verificar si ya está en el carrito
         const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
         const itemInCart = cartItems.find(item => 
           (item.id_producto || item.id) === producto.id_producto
         );
-        
+
         if (itemInCart) {
           const currentQty = itemInCart.quantity || itemInCart.cantidad || 0;
           if (currentQty >= stockDisponible) {
@@ -197,7 +228,12 @@ export default function LaptopsPage() {
       }
     };
 
-    {/* Reemplaza la vista LIST completa (líneas ~201-295) */}
+    const offerBadge = isOnOffer(p) ? (
+      <span className="ml-2 inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">
+        OFERTA
+      </span>
+    ) : null;
+
     if (filters.view === "list") {
       return (
         <article
@@ -233,16 +269,20 @@ export default function LaptopsPage() {
               {p.descripcion || p.resumen || "Sin descripción disponible"}
             </p>
 
-            {/* Estado de stock con cantidad */}
-            {p.stock > 0 && p.estado !== 'agotado' ? (
-              <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium mb-3">
-                Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
-              </span>
-            ) : (
-              <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold mb-3">
-                 AGOTADO
-              </span>
-            )}
+            {/* Estado de stock con cantidad + badge de oferta */}
+            <div className="mb-3">
+              {p.stock > 0 && p.estado !== 'agotado' ? (
+                <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                  Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
+                  {offerBadge}
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold">
+                  AGOTADO
+                  {offerBadge}
+                </span>
+              )}
+            </div>
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="text-base sm:text-lg font-semibold text-gray-900">
@@ -298,19 +338,20 @@ export default function LaptopsPage() {
           </h2>
           <p className={styles.descClass}>{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
 
-          {/* Estado de stock con cantidad */}
-          {p.stock > 0 && p.estado !== 'agotado' && (
-            <div className="text-xs text-green-600 font-medium mb-2">
-              Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
-            </div>
-          )}
-
-          {/* Estado de agotado */}
-          {(!p.stock || p.stock <= 0 || p.estado === 'agotado') && (
-            <div className="text-xs text-red-600 font-bold mb-2">
-              AGOTADO
-            </div>
-          )}
+          {/* Estado de stock con cantidad + badge de oferta */}
+          <div className="mb-2">
+            {p.stock > 0 && p.estado !== 'agotado' ? (
+              <div className="inline-flex items-center text-xs text-green-600 font-medium">
+                Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
+                {offerBadge}
+              </div>
+            ) : (
+              <div className="inline-flex items-center text-xs text-red-600 font-bold">
+                AGOTADO
+                {offerBadge}
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
@@ -381,9 +422,45 @@ export default function LaptopsPage() {
                 </button>
               </div>
             ) : (
-              <div className={getGridClasses()}>
-                {filteredProducts.map(renderProduct)}
-              </div>
+              <>
+                <div className={getGridClasses()}>
+                  {paginatedProducts.map(renderProduct)}
+                </div>
+
+                {/* Paginación */}
+                <div className="mt-6 flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className={`px-3 py-2 rounded-md ${page === 1 ? 'bg-gray-200 text-gray-400' : 'bg-white border'} `}
+                  >
+                    Anterior
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: pageCount }).map((_, i) => {
+                      const pageNumber = i + 1;
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => setPage(pageNumber)}
+                          className={`px-3 py-2 rounded-md ${pageNumber === page ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+                    disabled={page === pageCount}
+                    className={`px-3 py-2 rounded-md ${page === pageCount ? 'bg-gray-200 text-gray-400' : 'bg-white border'} `}
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </>
             )}
           </section>
         </div>
