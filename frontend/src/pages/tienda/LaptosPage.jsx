@@ -7,6 +7,7 @@ import FooterTienda from "../../layouts/tienda/FooterTienda";
 import FiltersPanel from "../../layouts/tienda/FiltersPanel";
 import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
+import ScrollToTop from "../../components/ScrollToTop";
 
 export default function LaptopsPage() {
   const [productos, setProductos] = useState([]);
@@ -229,7 +230,7 @@ export default function LaptopsPage() {
     };
 
     const offerBadge = isOnOffer(p) ? (
-      <span className="ml-2 inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">
+      <span className="ml-2 inline-flex items-center bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">
         OFERTA
       </span>
     ) : null;
@@ -383,6 +384,7 @@ export default function LaptopsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderTienda />
+      <ScrollToTop key={page} behavior="smooth" />
       <main className="w-full mx-0 px-4 sm:px-4 lg:px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-72 order-1 ml-4 self-start">
