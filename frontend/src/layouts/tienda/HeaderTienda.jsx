@@ -666,7 +666,7 @@ function HeaderTienda() {
         </div>
       )}
 
-      <div className="h-6" />
+      <div className="h-15" />
     </>
   );
 }
