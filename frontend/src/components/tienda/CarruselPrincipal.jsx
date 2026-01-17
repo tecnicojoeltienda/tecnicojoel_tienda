@@ -50,10 +50,14 @@ export default function CarruselPrincipal() {
             >
               <a
                 href={s.link}
-                className="block w-full h-full"
+                className="block w-full h-full flex items-center justify-center bg-gray-50"
                 aria-label={`Ver productos ${s.link}`}
               >
-                <img src={s.image} alt={`Slide ${s.id}`} className="w-full h-full object-contain object-center bg-gray-50" />
+                <img
+                  src={s.image}
+                  alt={`Slide ${s.id}`}
+                  className="max-w-full max-h-full object-contain object-center"
+                />
               </a>
             </article>
           ))}
@@ -86,9 +90,7 @@ export default function CarruselPrincipal() {
             >
               <span
                 className={`block w-3 h-3 rounded-full transition-all ${
-                  i === index
-                    ? "bg-blue-600 scale-125"
-                    : "bg-white/70 scale-100"
+                  i === index ? "bg-blue-600 scale-125" : "bg-white/70 scale-100"
                 }`}
               />
             </button>
