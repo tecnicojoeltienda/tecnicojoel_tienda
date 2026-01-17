@@ -9,7 +9,7 @@ import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
 import ScrollToTop from "../../components/ScrollToTop";
 
-export default function EstabilizadoresPage() {
+export default function DiscosSolidosPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
@@ -43,11 +43,11 @@ export default function EstabilizadoresPage() {
     async function cargar() {
       try {
         setLoading(true);
-        const res = await api.get("/apij/productos/categoria/nombre/estabilizadores");
+        const res = await api.get("/apij/productos/categoria/nombre/discos%20solidos");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
         setProductos(shuffleArray(rows));
       } catch (err) {
-        console.error("Error cargando estabilizadores por categoría:", err);
+        console.error("Error cargando discos sólidos por categoría:", err);
         setProductos([]);
       } finally {
         setLoading(false);
@@ -164,11 +164,12 @@ export default function EstabilizadoresPage() {
     }
   };
 
-  const slugify = (s = "") => s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+  const slugify = (s = "") =>
+    s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
 
   const renderProduct = (p) => {
     const imageUrl = resolveImageUrl(p.imagen_url);
-    const category = (p.categoria || "estabilizadores").toString().toLowerCase();
+    const category = (p.categoria || "discos-solidos").toString().toLowerCase();
     const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || "")))}`;
     const styles = getCardStyles();
 
@@ -274,8 +275,8 @@ export default function EstabilizadoresPage() {
 
           <section className="flex-1 order-2">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">Estabilizadores</h1>
-              <p className="text-gray-600">Encuentra estabilizadores para proteger tus dispositivos</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">Discos Sólidos</h1>
+              <p className="text-gray-600">Encuentra SSDs y discos de estado sólido para almacenamiento rápido</p>
             </div>
 
             {loading ? (
@@ -284,7 +285,8 @@ export default function EstabilizadoresPage() {
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-lg shadow-sm">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No hay estabilizadores disponibles</h3>
+                <div className="text-6xl mb-4">💾</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No hay discos sólidos disponibles</h3>
                 <p className="text-gray-600">No se encontraron productos que cumplan con los filtros seleccionados.</p>
                 <button onClick={resetFilters} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Limpiar filtros</button>
               </div>

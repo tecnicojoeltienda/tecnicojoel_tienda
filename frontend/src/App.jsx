@@ -49,8 +49,10 @@ import PreacondicionadosPage from "./pages/tienda/PreacondicionadosPage.jsx";
 import ProductosDetallesPage from "./pages/tienda/ProductosDetallesPage.jsx";
 import HistorialPedidoPage from "./pages/tienda/HistorialPedidoPage.jsx";
 import PerfilTiendaPage from "./pages/tienda/PerfilTiendaPage.jsx";
-
-
+import DiscosSolidosPage from "./pages/tienda/DiscosSolidosPage.jsx";
+import RepuestosPage from "./pages/tienda/RepuestosPage.jsx";
+import TarjetasGraficasPage from "./pages/tienda/TarjetasGraficasPage.jsx";
+import TecladosPage from "./pages/tienda/TecladosPage.jsx";
 
 import "./index.css";
 
@@ -125,6 +127,11 @@ function App() {
             <Route path="/tintas" element={<TintasPage />} />
             <Route path="/estabilizadores" element={<EstabilizadoresPage />} />
             <Route path="/segunda-mano" element={<PreacondicionadosPage />} />
+            <Route path="/discos-solidos" element={<DiscosSolidosPage />} />
+            <Route path="/repuestos" element={<RepuestosPage />} />
+            <Route path="/tarjetas-graficas" element={<TarjetasGraficasPage />} />
+            <Route path="/teclados" element={<TecladosPage />} />
+
             <Route path="/carrito" element={<CarritoPage />} />
             <Route path="/:category/:slug" element={<ProductosDetallesPage />} />
 

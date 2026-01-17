@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from 'sonner';
+
 import HeaderTienda from "../../layouts/tienda/HeaderTienda";
 import FooterTienda from "../../layouts/tienda/FooterTienda";
 import FiltersPanel from "../../layouts/tienda/FiltersPanel";
 import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
-import { toast } from 'sonner';
 import ScrollToTop from "../../components/ScrollToTop";
 
-export default function RedesPage() {
+export default function TecladosPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
@@ -18,7 +19,7 @@ export default function RedesPage() {
     view: "grid",
     sort: "relevance",
     min: "",
-    max: "",
+    max: ""
   });
 
   const [page, setPage] = useState(1);
@@ -36,11 +37,11 @@ export default function RedesPage() {
     async function cargar() {
       try {
         setLoading(true);
-        const res = await api.get("/apij/productos/categoria/nombre/redes");
+        const res = await api.get("/apij/productos/categoria/nombre/teclados");
         const rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
         setProductos(shuffleArray(rows));
       } catch (err) {
-        console.error("Error cargando redes por categoría:", err);
+        console.error("Error cargando teclados por categoría:", err);
         setProductos([]);
       } finally {
         setLoading(false);
@@ -70,6 +71,7 @@ export default function RedesPage() {
 
   const filteredProducts = useMemo(() => {
     let res = productos.slice();
+
     if (filters.availability === "in") res = res.filter(isInStock);
     if (filters.availability === "out") res = res.filter(p => !isInStock(p));
 
@@ -119,7 +121,7 @@ export default function RedesPage() {
       .toString()
       .toLowerCase()
       .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "") 
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^\w\s-]/g, "")
       .trim()
       .replace(/\s+/g, "-");
@@ -146,83 +148,77 @@ export default function RedesPage() {
 
   const renderProduct = (p) => {
     const imageUrl = resolveImageUrl(p.imagen_url);
-    const category = (p.categoria || "redes").toString().toLowerCase();
+    const category = (p.categoria || "teclados").toString().toLowerCase();
     const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || "")))}`;
     const styles = getCardStyles();
 
     const promoBadge = <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">promocion</span>;
     const ofertaBadge = <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">OFERTA</span>;
 
+    const handleAddToCart = async (producto) => {
+      try {
+        const stockDisponible = producto.stock || 0;
+
+        if (stockDisponible <= 0 || producto.estado === 'agotado') {
+          toast.error('⚠️ Producto agotado', {
+            description: `${producto.nombre_producto} ya no está disponible.`,
+            duration: 3000,
+          });
+          return;
+        }
+
+        const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+        const itemInCart = cartItems.find(item => (item.id_producto || item.id) === producto.id_producto);
+
+        if (itemInCart) {
+          const currentQty = itemInCart.quantity || itemInCart.cantidad || 0;
+          if (currentQty >= stockDisponible) {
+            toast.warning('⚠️ Stock máximo alcanzado', {
+              description: `Ya tienes el máximo disponible (${stockDisponible} unidades) en el carrito.`,
+              duration: 4000,
+            });
+            return;
+          }
+        }
+
+        addToCart(producto);
+        toast.success('Agregado al carrito', {
+          description: producto.nombre_producto,
+          duration: 2000,
+        });
+      } catch (error) {
+        console.error('Error al agregar:', error);
+        toast.error('Error al agregar al carrito', {
+          description: 'Por favor intenta nuevamente.',
+          duration: 3000,
+        });
+      }
+    };
+
     if (filters.view === "list") {
       return (
-        <article
-          key={p.id_producto || p.id || p.codigo}
-          className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 rounded-xl hover:shadow-lg transition-all duration-200 bg-white"
-        >
+        <article key={p.id_producto || p.id || p.codigo} className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 rounded-xl hover:shadow-lg transition-all duration-200 bg-white">
           <div className="w-full sm:w-40 h-52 sm:h-40 flex items-center justify-center bg-white-50 rounded-lg overflow-hidden flex-shrink-0">
-            {imageUrl ? (
-              <Link
-                to={detailPath}
-                className="block w-full h-full flex items-center justify-center"
-                title={p.nombre_producto}
-              >
-                <img
-                  src={imageUrl}
-                  alt={p.nombre_producto}
-                  className="max-w-full max-h-full object-contain p-2"
-                />
-              </Link>
-            ) : (
-              <div className="text-xs text-gray-400">Sin imagen</div>
-            )}
+            {imageUrl ? <Link to={detailPath} className="block w-full h-full flex items-center justify-center" title={p.nombre_producto}><img src={imageUrl} alt={p.nombre_producto} className="max-w-full max-h-full object-contain p-2" /></Link> : <div className="text-xs text-gray-400">Sin imagen</div>}
           </div>
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
-              <Link to={detailPath} className="hover:underline">
-                {p.nombre_producto}
-              </Link>
-            </h2>
-
-            <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-              {p.descripcion || p.resumen || "Sin descripción disponible"}
-            </p>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1"><Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link></h2>
+            <p className="text-sm text-gray-600 mb-3 line-clamp-3">{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
 
             <div className="flex items-center gap-2 mb-3">
-              {isInStock(p) ? (
-                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">En stock</span>
-              ) : (
-                <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold">AGOTADO</span>
-              )}
+              {isInStock(p) ? <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">Stock: {p.stock ?? '-'}</span> : <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold">AGOTADO</span>}
               {isPromo(p) && promoBadge}
               {isOnOffer(p) && ofertaBadge}
             </div>
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="text-base sm:text-lg font-semibold text-gray-900">
-                S/. {Number(p.precio_venta || 0).toFixed(2)}
-              </div>
+              <div className="text-base sm:text-lg font-semibold text-gray-900">S/. {Number(p.precio_venta || 0).toFixed(2)}</div>
 
               <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
-                <Link
-                  to={detailPath}
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-1 sm:inline-block px-3 py-2 bg-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-300 text-center"
-                >
-                  Ver detalles
-                </Link>
+                <Link to={detailPath} onClick={(e) => e.stopPropagation()} className="flex-1 sm:inline-block px-3 py-2 bg-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-300 text-center">Ver detalles</Link>
 
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    addToCart(p);
-                  }}
-                  className="flex-1 sm:inline-block px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                  aria-label={`Añadir ${p.nombre_producto} al carrito`}
-                >
-                  Añadir
-                </button>
+                <button onClick={() => handleAddToCart(p)} disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'} className={`flex-1 sm:inline-block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!p.stock || p.stock <= 0 || p.estado === 'agotado' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`} aria-label={`Añadir ${p.nombre_producto} al carrito`}>{(!p.stock || p.stock <= 0 || p.estado === 'agotado') ? 'Agotado' : 'Añadir'}</button>
               </div>
             </div>
           </div>
@@ -232,38 +228,25 @@ export default function RedesPage() {
 
     return (
       <article key={p.id_producto || p.id || p.codigo} className={styles.cardClass}>
-        <div className={`w-full flex items-center justify-center bg-white-50 ${styles.imageHeight} relative overflow-hidden`}>
-          {imageUrl ? (
-            <Link to={detailPath} className="block w-full h-full flex items-center justify-center" title={p.nombre_producto}>
-              <img src={imageUrl} alt={p.nombre_producto} className="max-w-full max-h-full object-contain p-2" />
-            </Link>
-          ) : (
-            <div className="text-xs text-gray-400">Sin imagen</div>
-          )}
-        </div>
+        <div className={`w-full flex items-center justify-center bg-white-50 ${styles.imageHeight} relative overflow-hidden`}>{imageUrl ? <Link to={detailPath} className="block w-full h-full flex items-center justify-center" title={p.nombre_producto}><img src={imageUrl} alt={p.nombre_producto} className="max-w-full max-h-full object-contain p-2" /></Link> : <div className="text-xs text-gray-400">Sin imagen</div>}</div>
 
         <div className={styles.contentClass}>
-          <h2 className={styles.titleClass}>
-            <Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link>
-          </h2>
+          <h2 className={styles.titleClass}><Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link></h2>
           <p className={styles.descClass}>{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
+
           <div className="flex items-center gap-2 mt-2">
             {isInStock(p) ? <span className="text-xs text-green-600 font-medium">Stock</span> : <span className="text-xs text-red-600 font-bold">AGOTADO</span>}
-            {isPromo(p) && <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">promocion</span>}
-            {isOnOffer(p) && <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">OFERTA</span>}
+            {isPromo(p) && promoBadge}
+            {isOnOffer(p) && ofertaBadge}
           </div>
+
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
               <div className={styles.priceClass}>S/. {Number(p.precio_venta || 0).toFixed(2)}</div>
               <div className={styles.oldPriceClass}>S/. {(Number(p.precio_venta || 0) * 1.2).toFixed(2)}</div>
             </div>
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p); }}
-              className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-              aria-label={`Añadir ${p.nombre_producto} al carrito`}
-            >
-              Añadir
-            </button>
+
+            <button onClick={() => handleAddToCart(p)} disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'} className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!p.stock || p.stock <= 0 || p.estado === 'agotado' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`} aria-label={`Añadir ${p.nombre_producto} al carrito`}>{(!p.stock || p.stock <= 0 || p.estado === 'agotado') ? 'Agotado' : 'Añadir'}</button>
           </div>
         </div>
       </article>
@@ -277,38 +260,19 @@ export default function RedesPage() {
       <main className="w-full mx-0 px-4 sm:px-4 lg:px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-72 order-1 ml-4 self-start">
-            <div className="sticky top-20 max-h-[calc(100vh-5rem)] overflow-auto">
-              <FiltersPanel
-                values={filters}
-                onChange={(key, value) => setFilters(f => ({ ...f, [key]: value }))}
-                onReset={resetFilters}
-                productCount={filteredProducts.length}
-              />
-            </div>
+            <FiltersPanel values={filters} onChange={(key, value) => setFilters(f => ({ ...f, [key]: value }))} onReset={resetFilters} productCount={filteredProducts.length} />
           </aside>
 
           <section className="flex-1 order-2">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">Redes</h1>
-              <p className="text-gray-600">Encuentra productos de redes para tu setup</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">Teclados</h1>
+              <p className="text-gray-600">Encuentra teclados mecánicos y membrana para gaming y oficina</p>
             </div>
 
             {loading ? (
-              <div className={getGridClasses()}>
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg animate-pulse shadow-sm">
-                    <div className={`bg-gray-200 ${"h-46"}`}></div>
-                    <div className="p-4 space-y-2"><div className="h-4 bg-gray-200 rounded"></div><div className="h-3 bg-gray-200 rounded w-2/3"></div></div>
-                  </div>
-                ))}
-              </div>
+              <div className={getGridClasses()}>{[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-lg animate-pulse shadow-sm"><div className={`bg-gray-200 ${"h-46"}`}></div><div className="p-4 space-y-2"><div className="h-4 bg-gray-200 rounded"></div><div className="h-3 bg-gray-200 rounded w-2/3"></div></div></div>)}</div>
             ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-lg shadow-sm">
-                <div className="text-6xl mb-4"></div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No hay redes disponibles</h3>
-                <p className="text-gray-600">No se encontraron productos que cumplan con los filtros seleccionados.</p>
-                <button onClick={resetFilters} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Limpiar filtros</button>
-              </div>
+              <div className="text-center py-16 bg-white rounded-lg shadow-sm"><div className="text-6xl mb-4">⌨️</div><h3 className="text-lg font-medium text-gray-900 mb-2">No hay teclados disponibles</h3><p className="text-gray-600">No se encontraron productos que cumplan con los filtros seleccionados.</p><button onClick={resetFilters} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Limpiar filtros</button></div>
             ) : (
               <>
                 <div className={getGridClasses()}>{paginatedProducts.map(renderProduct)}</div>
@@ -317,9 +281,7 @@ export default function RedesPage() {
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50">Anterior</button>
                   {Array.from({ length: pageCount }).map((_, idx) => {
                     const pNum = idx + 1;
-                    return (
-                      <button key={pNum} onClick={() => setPage(pNum)} className={`px-3 py-1 rounded ${pNum === page ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>{pNum}</button>
-                    );
+                    return <button key={pNum} onClick={() => setPage(pNum)} className={`px-3 py-1 rounded ${pNum === page ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>{pNum}</button>;
                   })}
                   <button onClick={() => setPage(p => Math.min(pageCount, p + 1))} disabled={page === pageCount} className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50">Siguiente</button>
                 </div>
@@ -328,6 +290,7 @@ export default function RedesPage() {
           </section>
         </div>
       </main>
+
       <FooterTienda />
     </div>
   );
