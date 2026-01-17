@@ -3,19 +3,23 @@ import { FiChevronLeft, FiChevronRight, FiGrid } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const categories = [
-    { id: "computadoras", label: "Computadoras", img: "/assets/computadora.webp" },
-    { id: "laptops", label: "Laptops", img: "/assets/laptop.webp" },
-    { id: "impresoras", label: "Impresoras", img: "/assets/impresora.jpg" },
-    { id: "monitores", label: "Monitores", img: "/assets/monitor.jfif" },
-    { id: "mouse", label: "Mouse", img: "/assets/mouse.jpg" },
     { id: "accesorios", label: "Accesorios", img: "/assets/accesorios.webp" },
     { id: "componentes", label: "Componentes", img: "/assets/componente.png" },
-    { id: "sonido", label: "Sonido", img: "/assets/sonido.webp" },
-    { id: "tintas", label: "Tintas", img: "/assets/tintas.jfif" },
-    { id: "licencia", label: "Licencia", img: "/assets/licencias.avif" },
-    { id: "reacondicionados", label: "Preacondicionados", img: "/assets/reacondicionado.webp" },
-    { id: "redes", label: "Redes", img: "/assets/redes.png" },
+    { id: "computadoras", label: "Computadoras", img: "/assets/computadora.webp" },
+    { id: "discos-solidos", label: "Discos Solidos", img: "/assets/SSD T-FORCE VULCAN Z.jfif" },
     { id: "estabilizadores", label: "Estabilizadores", img: "/assets/estabilizadores.png" },
+    { id: "impresoras", label: "Impresoras", img: "/assets/impresora.jpg" },
+    { id: "laptops", label: "Laptops", img: "/assets/laptop.webp" },
+    { id: "licencia", label: "Licencia", img: "/assets/licencias.avif" },
+    { id: "monitores", label: "Monitores", img: "/assets/monitor.jfif" },
+    { id: "mouse", label: "Mouse", img: "/assets/mouse.jpg" },
+    { id: "preacondicionados", label: "Preacondicionados", img: "/assets/reacondicionado.webp" },
+    { id: "redes", label: "Redes", img: "/assets/redes.png" },
+    { id: "repuestos", label: "Repuestos", img: "/assets/componente.png" },
+    { id: "sonido", label: "Sonido", img: "/assets/sonido.webp" },
+    { id: "tarjetas-graficas", label: "Tarjetas Graficas", img: "/assets/componente.png" },
+    { id: "teclados", label: "Teclados", img: "/assets/accesorios.webp" },
+    { id: "tintas", label: "Tintas", img: "/assets/tintas.jfif" },
 ];
 
 function slugify(name = "") {
