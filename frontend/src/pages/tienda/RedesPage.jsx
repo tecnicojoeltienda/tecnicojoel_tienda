@@ -6,12 +6,11 @@ import FiltersPanel from "../../layouts/tienda/FiltersPanel";
 import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
 import { toast } from 'sonner';
+import ScrollToTop from "../../components/ScrollToTop";
 
 export default function RedesPage() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // add cart
   const { addToCart } = useCart();
 
   const [filters, setFilters] = useState({
@@ -22,7 +21,8 @@ export default function RedesPage() {
     max: "",
   });
 
-    // Función para aleatorizar array
+  const [page, setPage] = useState(1);
+
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -49,6 +49,10 @@ export default function RedesPage() {
     cargar();
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+  }, [filters.availability, filters.view, filters.sort, filters.min, filters.max]);
+
   const isInStock = (p) => {
     const candidates = [p.stock, p.cantidad, p.cantidad_stock, p.stock_actual, p.stock_minimo];
     for (const c of candidates) {
@@ -69,11 +73,6 @@ export default function RedesPage() {
     if (filters.availability === "in") res = res.filter(isInStock);
     if (filters.availability === "out") res = res.filter(p => !isInStock(p));
 
-    // Filtro de disponibilidad
-    if (filters.availability === "in") res = res.filter(isInStock);
-    if (filters.availability === "out") res = res.filter(p => !isInStock(p));
-
-    // Filtro de precio
     if (filters.min || filters.max) {
       res = res.filter(p => {
         const precio = Number(p.precio_venta) || 0;
@@ -115,7 +114,6 @@ export default function RedesPage() {
     }
   };
 
-  
   const slugify = (s = "") =>
     s
       .toString()
@@ -126,11 +124,34 @@ export default function RedesPage() {
       .trim()
       .replace(/\s+/g, "-");
 
+  const isPromo = (p) => {
+    const v = p.en_promocion ?? p.promocion ?? p.promo;
+    if (typeof v === "boolean") return v;
+    if (typeof v === "string") return ["si", "sí", "true", "1"].includes(v.toLowerCase());
+    if (typeof v === "number") return v === 1;
+    return false;
+  };
+
+  const isOnOffer = (p) => {
+    if (p.oferta || p.en_oferta || p.descuento || p.porcentaje) return true;
+    const precioOferta = Number(p.precio_oferta || p.precio_promocion || 0);
+    const precioVenta = Number(p.precio_venta || 0);
+    if (precioOferta && precioVenta && precioOferta < precioVenta) return true;
+    return false;
+  };
+
+  const itemsPerPage = filters.view === "list" ? 6 : filters.view === "grid-large" ? 6 : filters.view === "grid-medium" ? 12 : 9;
+  const pageCount = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const paginatedProducts = filteredProducts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
   const renderProduct = (p) => {
     const imageUrl = resolveImageUrl(p.imagen_url);
     const category = (p.categoria || "redes").toString().toLowerCase();
     const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || "")))}`;
     const styles = getCardStyles();
+
+    const promoBadge = <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">promocion</span>;
+    const ofertaBadge = <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">OFERTA</span>;
 
     if (filters.view === "list") {
       return (
@@ -168,7 +189,13 @@ export default function RedesPage() {
             </p>
 
             <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">En stock</span>
+              {isInStock(p) ? (
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">En stock</span>
+              ) : (
+                <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold">AGOTADO</span>
+              )}
+              {isPromo(p) && promoBadge}
+              {isOnOffer(p) && ofertaBadge}
             </div>
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -203,7 +230,6 @@ export default function RedesPage() {
       );
     }
 
-    
     return (
       <article key={p.id_producto || p.id || p.codigo} className={styles.cardClass}>
         <div className={`w-full flex items-center justify-center bg-white-50 ${styles.imageHeight} relative overflow-hidden`}>
@@ -221,6 +247,11 @@ export default function RedesPage() {
             <Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link>
           </h2>
           <p className={styles.descClass}>{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
+          <div className="flex items-center gap-2 mt-2">
+            {isInStock(p) ? <span className="text-xs text-green-600 font-medium">Stock</span> : <span className="text-xs text-red-600 font-bold">AGOTADO</span>}
+            {isPromo(p) && <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">promocion</span>}
+            {isOnOffer(p) && <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">OFERTA</span>}
+          </div>
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
               <div className={styles.priceClass}>S/. {Number(p.precio_venta || 0).toFixed(2)}</div>
@@ -242,6 +273,7 @@ export default function RedesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderTienda />
+      <ScrollToTop key={page} behavior="smooth" />
       <main className="w-full mx-0 px-4 sm:px-4 lg:px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-72 order-1 ml-4 self-start">
@@ -278,7 +310,20 @@ export default function RedesPage() {
                 <button onClick={resetFilters} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Limpiar filtros</button>
               </div>
             ) : (
-              <div className={getGridClasses()}>{filteredProducts.map(renderProduct)}</div>
+              <>
+                <div className={getGridClasses()}>{paginatedProducts.map(renderProduct)}</div>
+
+                <div className="flex items-center justify-center gap-2 mt-8">
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50">Anterior</button>
+                  {Array.from({ length: pageCount }).map((_, idx) => {
+                    const pNum = idx + 1;
+                    return (
+                      <button key={pNum} onClick={() => setPage(pNum)} className={`px-3 py-1 rounded ${pNum === page ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>{pNum}</button>
+                    );
+                  })}
+                  <button onClick={() => setPage(p => Math.min(pageCount, p + 1))} disabled={page === pageCount} className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50">Siguiente</button>
+                </div>
+              </>
             )}
           </section>
         </div>
