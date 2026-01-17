@@ -52,6 +52,7 @@ function HeaderTienda() {
     }
   };
 
+  
   const getCategoryAndSlug = (product) => {
     const slugify = (s = "") =>
       s
@@ -79,12 +80,14 @@ function HeaderTienda() {
       13: "estabilizadores"
     };
 
+   
     let categoryRaw =
       product.categoria ||
       product.category ||
       product.categoria_nombre ||
       product.tipo ||
       null;
+
 
     if ((!categoryRaw || categoryRaw === "") && (product.id_categoria || product.idCategoria || product.categoryId)) {
       const id = Number(product.id_categoria ?? product.idCategoria ?? product.categoryId);
@@ -93,6 +96,7 @@ function HeaderTienda() {
       }
     }
 
+ 
     if (!categoryRaw || String(categoryRaw).trim() === "") {
       return null;
     }
@@ -123,22 +127,10 @@ function HeaderTienda() {
           return name.includes(qLower);
         });
 
-        // Only keep products that we can build a route for
-        const productRows = rows.filter(p => !!getCategoryAndSlug(p));
+      
+        rows = rows.filter(p => !!getCategoryAndSlug(p));
 
-        // Also include matching categories as synthetic results (so user can jump to category pages)
-        const categoryMatches = (categorias || [])
-          .filter(cat => cat.toLowerCase().includes(qLower))
-          .map(cat => ({ isCategory: true, label: cat, route: getRoute(cat) }));
-
-        const max = 8;
-        // Favor showing categories first, then products, up to max items
-        const combined = [
-          ...categoryMatches.slice(0, max),
-          ...productRows.slice(0, Math.max(0, max - categoryMatches.length))
-        ].slice(0, max);
-
-        setSearchResults(combined);
+        setSearchResults((rows || []).slice(0, 8));
       } catch (err) {
         console.warn("Search error", err);
         setSearchResults([]);
@@ -329,27 +321,6 @@ function HeaderTienda() {
                       ) : (
                         <ul className="max-h-72 overflow-auto">
                           {searchResults.map((p) => {
-                            if (p.isCategory) {
-                              return (
-                                <li
-                                  key={`cat-${p.route}`}
-                                  className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
-                                  onClick={() => {
-                                    setShowSearchDropdown(false);
-                                    setSearchQuery("");
-                                    setSearchResults([]);
-                                    navigate(p.route);
-                                  }}
-                                >
-                                  <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-blue-50 text-blue-700 font-bold text-lg">📂</div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-medium text-gray-900 truncate">{p.label}</div>
-                                    <div className="text-xs text-gray-500">Categoría</div>
-                                  </div>
-                                </li>
-                              );
-                            }
-
                             const id = p.id_producto ?? p.id ?? p.codigo ?? p._id ?? "";
                             const title = (p.nombre_producto || p.title || p.name || "").toString();
                             const img = pickImageUrl(p);
@@ -523,30 +494,10 @@ function HeaderTienda() {
               {searchResults.length > 0 && (
                 <div className="bg-white rounded-lg shadow-lg max-h-60 overflow-auto">
                   {searchResults.map((p) => {
-                    if (p.isCategory) {
-                      return (
-                        <div
-                          key={`cat-mobile-${p.route}`}
-                          className="flex items-center gap-3 p-3 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50"
-                          onClick={() => {
-                            setSearchQuery("");
-                            setSearchResults([]);
-                            setIsMenuOpen(false);
-                            navigate(p.route);
-                          }}
-                        >
-                          <div className="w-10 h-10 flex items-center justify-center rounded bg-blue-50 text-blue-700">📂</div>
-                          <span className="text-sm text-gray-900 truncate">{p.label}</span>
-                        </div>
-                      );
-                    }
-
                     const id = p.id_producto ?? p.id ?? p.codigo ?? p._id ?? "";
                     const title = (p.nombre_producto || p.title || p.name || "").toString();
                     const img = pickImageUrl(p);
-                    const info = getCategoryAndSlug(p);
-                    if (!info) return null;
-                    const { categorySlug, productSlug } = info;
+                    const { categorySlug, productSlug } = getCategoryAndSlug(p);
                     const detailPath = `/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}`;
 
                     return (
