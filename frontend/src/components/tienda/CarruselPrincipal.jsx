@@ -53,11 +53,7 @@ export default function CarruselPrincipal() {
                 className="block w-full h-full"
                 aria-label={`Ver productos ${s.link}`}
               >
-                <img
-                  src={s.image}
-                  alt={`Slide ${s.id}`}
-                  className="w-full h-full object-cover"
-                />
+                <img src={s.image} alt={`Slide ${s.id}`} className="w-full h-full object-contain object-center bg-gray-50" />
               </a>
             </article>
           ))}
