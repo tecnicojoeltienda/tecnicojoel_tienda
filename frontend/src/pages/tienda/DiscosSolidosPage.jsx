@@ -7,6 +7,7 @@ import FooterTienda from "../../layouts/tienda/FooterTienda";
 import FiltersPanel from "../../layouts/tienda/FiltersPanel";
 import api, { resolveImageUrl } from "../../service/api";
 import { useCart } from "../../context/CartContext";
+import ScrollToTop from "../../components/ScrollToTop";
 
 export default function DiscosSolidosPage() {
   const [productos, setProductos] = useState([]);
@@ -16,8 +17,18 @@ export default function DiscosSolidosPage() {
   const [filters, setFilters] = useState({
     availability: "all",
     view: "grid",
-    sort: "relevance"
+    sort: "relevance",
+    min: "",
+    max: ""
   });
+
+  const [page, setPage] = useState(1);
+
+  const itemsPerPage = useMemo(() => {
+    if (filters.view === "list") return 5;
+    if (filters.view === "grid-large") return 6;
+    return 9;
+  }, [filters.view]);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -45,6 +56,19 @@ export default function DiscosSolidosPage() {
     cargar();
   }, []);
 
+  const isOnOffer = (p) => {
+    if (!p) return false;
+    if (p.oferta === true || p.en_oferta === true) return true;
+    const descuento = Number(p.descuento || p.porcentaje || 0);
+    if (!Number.isNaN(descuento) && descuento > 0) return true;
+    const precioVenta = Number(p.precio_venta || 0);
+    const precioOriginal = Number(p.precio_original || p.precio_normal || p.precio_regular || 0);
+    if (!Number.isNaN(precioOriginal) && precioOriginal > precioVenta) return true;
+    const precioOferta = Number(p.precio_oferta || 0);
+    if (!Number.isNaN(precioOferta) && precioOferta > 0 && precioOferta < precioVenta) return true;
+    return false;
+  };
+
   const isInStock = (p) => {
     const candidates = [p.stock, p.cantidad, p.cantidad_stock, p.stock_actual, p.stock_minimo];
     for (const c of candidates) {
@@ -57,12 +81,12 @@ export default function DiscosSolidosPage() {
   };
 
   const resetFilters = () => {
-    setFilters({ availability: "all", view: "grid", sort: "relevance" });
+    setFilters({ availability: "all", view: "grid", sort: "relevance", min: "", max: "" });
+    setPage(1);
   };
 
   const filteredProducts = useMemo(() => {
     let res = productos.slice();
-
     if (filters.availability === "in") res = res.filter(isInStock);
     if (filters.availability === "out") res = res.filter(p => !isInStock(p));
 
@@ -86,6 +110,15 @@ export default function DiscosSolidosPage() {
 
     return res;
   }, [productos, filters]);
+
+  useEffect(() => setPage(1), [filters.view, filters.sort, filters.min, filters.max, filters.availability, productos.length]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (page - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, page, itemsPerPage]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
 
   const getGridClasses = () => {
     switch (filters.view) {
@@ -132,14 +165,7 @@ export default function DiscosSolidosPage() {
   };
 
   const slugify = (s = "") =>
-    s
-      .toString()
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-");
+    s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
 
   const renderProduct = (p) => {
     const imageUrl = resolveImageUrl(p.imagen_url);
@@ -147,122 +173,59 @@ export default function DiscosSolidosPage() {
     const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || "")))}`;
     const styles = getCardStyles();
 
-    const handleAddToCart = async (producto) => {
+    const handleAddToCart = (producto) => {
       try {
         const stockDisponible = producto.stock || 0;
-
         if (stockDisponible <= 0 || producto.estado === 'agotado') {
-          toast.error('⚠️ Producto agotado', {
-            description: `${producto.nombre_producto} ya no está disponible.`,
-            duration: 3000,
-          });
+          toast.error('⚠️ Producto agotado', { description: `${producto.nombre_producto} ya no está disponible.`, duration: 3000 });
           return;
         }
-
-        const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
-        const itemInCart = cartItems.find(item => 
-          (item.id_producto || item.id) === producto.id_producto
-        );
-
-        if (itemInCart) {
-          const currentQty = itemInCart.quantity || itemInCart.cantidad || 0;
-          if (currentQty >= stockDisponible) {
-            toast.warning('⚠️ Stock máximo alcanzado', {
-              description: `Ya tienes el máximo disponible (${stockDisponible} unidades) en el carrito.`,
-              duration: 4000,
-            });
-            return;
-          }
-        }
-
         addToCart(producto);
-        toast.success('Agregado al carrito', {
-          description: producto.nombre_producto,
-          duration: 2000,
-        });
-      } catch (error) {
-        console.error('Error al agregar:', error);
-        toast.error('Error al agregar al carrito', {
-          description: 'Por favor intenta nuevamente.',
-          duration: 3000,
-        });
+        toast.success('Agregado al carrito', { description: producto.nombre_producto, duration: 2000 });
+      } catch (err) {
+        console.error(err);
+        toast.error('Error al agregar al carrito', { duration: 3000 });
       }
     };
 
+    const isPromo = (() => {
+      const v = p?.en_promocion;
+      if (v === true) return true;
+      if (typeof v === "string") {
+        const s = v.trim().toLowerCase();
+        return s === "si" || s === "sí" || s === "true" || s === "1";
+      }
+      if (typeof v === "number") return v === 1;
+      return false;
+    })();
+
+    const promoBadge = isPromo ? <span className="ml-2 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">promocion</span> : null;
+    const ofertaBadge = !isPromo && isOnOffer(p) ? <span className="ml-2 inline-flex items-center bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">OFERTA</span> : null;
+    const badgeToShow = promoBadge || ofertaBadge;
+
     if (filters.view === "list") {
       return (
-        <article
-          key={p.id_producto || p.id || p.codigo}
-          className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 rounded-xl hover:shadow-lg transition-all duration-200 bg-white"
-        >
+        <article key={p.id_producto || p.id || p.codigo} className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 rounded-xl hover:shadow-lg transition-all duration-200 bg-white">
           <div className="w-full sm:w-40 h-52 sm:h-40 flex items-center justify-center bg-white-50 rounded-lg overflow-hidden flex-shrink-0">
-            {imageUrl ? (
-              <Link
-                to={detailPath}
-                className="block w-full h-full flex items-center justify-center"
-                title={p.nombre_producto}
-              >
-                <img
-                  src={imageUrl}
-                  alt={p.nombre_producto}
-                  className="max-w-full max-h-full object-contain p-2"
-                />
-              </Link>
-            ) : (
-              <div className="text-xs text-gray-400">Sin imagen</div>
-            )}
+            {imageUrl ? <Link to={detailPath} className="block w-full h-full flex items-center justify-center" title={p.nombre_producto}><img src={imageUrl} alt={p.nombre_producto} className="max-w-full max-h-full object-contain p-2" /></Link> : <div className="text-xs text-gray-400">Sin imagen</div>}
           </div>
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
-              <Link to={detailPath} className="hover:underline">
-                {p.nombre_producto}
-              </Link>
-            </h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1"><Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link></h2>
+            <p className="text-sm text-gray-600 mb-3 line-clamp-3">{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
 
-            <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-              {p.descripcion || p.resumen || "Sin descripción disponible"}
-            </p>
-
-            {p.stock > 0 && p.estado !== 'agotado' ? (
-              <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium mb-3">
-                Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
-              </span>
-            ) : (
-              <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold mb-3">
-                 AGOTADO
-              </span>
-            )}
+            <div className="mb-3 flex items-center">
+              {p.stock > 0 && p.estado !== 'agotado' ? <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}</span> : <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold">AGOTADO</span>}
+              {badgeToShow}
+            </div>
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="text-base sm:text-lg font-semibold text-gray-900">
-                S/. {Number(p.precio_venta || 0).toFixed(2)}
-              </div>
+              <div className="text-base sm:text-lg font-semibold text-gray-900">S/. {Number(p.precio_venta || 0).toFixed(2)}</div>
 
               <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
-                <Link
-                  to={detailPath}
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-1 sm:inline-block px-3 py-2 bg-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-300 text-center"
-                >
-                  Ver detalles
-                </Link>
+                <Link to={detailPath} onClick={(e) => e.stopPropagation()} className="flex-1 sm:inline-block px-3 py-2 bg-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-300 text-center">Ver detalles</Link>
 
-                <button
-                  onClick={() => handleAddToCart(p)}
-                  disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'}
-                  className={`flex-1 sm:inline-block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    !p.stock || p.stock <= 0 || p.estado === 'agotado'
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                  aria-label={`Añadir ${p.nombre_producto} al carrito`}
-                >
-                  {!p.stock || p.stock <= 0 || p.estado === 'agotado' 
-                    ? 'Agotado' 
-                    : 'Añadir'
-                  }
-                </button>
+                <button onClick={() => handleAddToCart(p)} disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'} className={`flex-1 sm:inline-block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!p.stock || p.stock <= 0 || p.estado === 'agotado' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>Añadir</button>
               </div>
             </div>
           </div>
@@ -273,32 +236,17 @@ export default function DiscosSolidosPage() {
     return (
       <article key={p.id_producto || p.id || p.codigo} className={styles.cardClass}>
         <div className={`w-full flex items-center justify-center bg-white-50 ${styles.imageHeight} relative overflow-hidden`}>
-          {imageUrl ? (
-            <Link to={detailPath} className="block w-full h-full flex items-center justify-center" title={p.nombre_producto}>
-              <img src={imageUrl} alt={p.nombre_producto} className="max-w-full max-h-full object-contain p-2" />
-            </Link>
-          ) : (
-            <div className="text-xs text-gray-400">Sin imagen</div>
-          )}
+          {imageUrl ? <Link to={detailPath} className="block w-full h-full flex items-center justify-center" title={p.nombre_producto}><img src={imageUrl} alt={p.nombre_producto} className="max-w-full max-h-full object-contain p-2" /></Link> : <div className="text-xs text-gray-400">Sin imagen</div>}
         </div>
 
         <div className={styles.contentClass}>
-          <h2 className={styles.titleClass}>
-            <Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link>
-          </h2>
+          <h2 className={styles.titleClass}><Link to={detailPath} className="hover:underline">{p.nombre_producto}</Link></h2>
           <p className={styles.descClass}>{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
 
-          {p.stock > 0 && p.estado !== 'agotado' && (
-            <div className="text-xs text-green-600 font-medium mb-2">
-              Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
-            </div>
-          )}
-
-          {(!p.stock || p.stock <= 0 || p.estado === 'agotado') && (
-            <div className="text-xs text-red-600 font-bold mb-2">
-              AGOTADO
-            </div>
-          )}
+          <div className="mb-2 flex items-center">
+            {p.stock > 0 && p.estado !== 'agotado' ? <div className="inline-flex items-center text-xs text-green-600 font-medium">Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}</div> : <div className="inline-flex items-center text-xs text-red-600 font-bold">AGOTADO</div>}
+            {badgeToShow}
+          </div>
 
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
@@ -306,21 +254,7 @@ export default function DiscosSolidosPage() {
               <div className={styles.oldPriceClass}>S/. {(Number(p.precio_venta || 0) * 1.2).toFixed(2)}</div>
             </div>
 
-            <button
-              onClick={() => handleAddToCart(p)}
-              disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                !p.stock || p.stock <= 0 || p.estado === 'agotado'
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-              aria-label={`Añadir ${p.nombre_producto} al carrito`}
-            >
-              {!p.stock || p.stock <= 0 || p.estado === 'agotado' 
-                ? 'Agotado' 
-                : 'Añadir'
-              }
-            </button>
+            <button onClick={() => handleAddToCart(p)} disabled={!p.stock || p.stock <= 0 || p.estado === 'agotado'} className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!p.stock || p.stock <= 0 || p.estado === 'agotado' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>Añadir</button>
           </div>
         </div>
       </article>
@@ -330,15 +264,13 @@ export default function DiscosSolidosPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderTienda />
+      <ScrollToTop key={page} behavior="smooth" />
       <main className="w-full mx-0 px-4 sm:px-4 lg:px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-72 order-1 ml-4 self-start">
-            <FiltersPanel
-              values={filters}
-              onChange={(key, value) => setFilters(f => ({ ...f, [key]: value }))}
-              onReset={resetFilters}
-              productCount={filteredProducts.length}
-            />
+            <div className="sticky top-20 max-h-[calc(100vh-5rem)] overflow-auto">
+              <FiltersPanel values={filters} onChange={(key, value) => setFilters(f => ({ ...f, [key]: value }))} onReset={resetFilters} productCount={filteredProducts.length} />
+            </div>
           </aside>
 
           <section className="flex-1 order-2">
@@ -349,29 +281,32 @@ export default function DiscosSolidosPage() {
 
             {loading ? (
               <div className={getGridClasses()}>
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg animate-pulse shadow-sm">
-                    <div className={`bg-gray-200 ${"h-46"}`}></div>
-                    <div className="p-4 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                  </div>
-                ))}
+                {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-lg animate-pulse shadow-sm"><div className={`bg-gray-200 ${"h-46"}`}></div><div className="p-4 space-y-2"><div className="h-4 bg-gray-200 rounded"></div><div className="h-3 bg-gray-200 rounded w-2/3"></div></div></div>)}
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-lg shadow-sm">
                 <div className="text-6xl mb-4">💾</div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No hay discos sólidos disponibles</h3>
                 <p className="text-gray-600">No se encontraron productos que cumplan con los filtros seleccionados.</p>
-                <button onClick={resetFilters} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-                  Limpiar filtros
-                </button>
+                <button onClick={resetFilters} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Limpiar filtros</button>
               </div>
             ) : (
-              <div className={getGridClasses()}>
-                {filteredProducts.map(renderProduct)}
-              </div>
+              <>
+                <div className={getGridClasses()}>{paginatedProducts.map(renderProduct)}</div>
+
+                <div className="mt-6 flex items-center justify-center gap-3">
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className={`px-3 py-2 rounded-md ${page === 1 ? 'bg-gray-200 text-gray-400' : 'bg-white border'}`}>Anterior</button>
+
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: pageCount }).map((_, i) => {
+                      const pageNumber = i + 1;
+                      return <button key={pageNumber} onClick={() => setPage(pageNumber)} className={`px-3 py-2 rounded-md ${pageNumber === page ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}>{pageNumber}</button>;
+                    })}
+                  </div>
+
+                  <button onClick={() => setPage(p => Math.min(pageCount, p + 1))} disabled={page === pageCount} className={`px-3 py-2 rounded-md ${page === pageCount ? 'bg-gray-200 text-gray-400' : 'bg-white border'}`}>Siguiente</button>
+                </div>
+              </>
             )}
           </section>
         </div>
