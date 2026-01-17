@@ -3,17 +3,17 @@ import { useState, useEffect, useRef } from "react";
 const slides = [
   {
     id: 1,
-    image: "/assets/laptop.avif",
+    image: "/assets/laptops-carrusel2.webp",
     link: "/laptops",
   },
   {
     id: 2,
-    image: "/assets/licencias.avif",
-    link: "/licencias",
+    image: "/assets/pc-carrusel.webp",
+    link: "/computadoras",
   },
   {
     id: 3,
-    image: "/assets/tarjetas_video.png",
+    image: "/assets/tarjeta-carrusel.webp",
     link: "/tarjetas-graficas",
   },
 ];
