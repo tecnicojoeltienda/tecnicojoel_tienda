@@ -18,11 +18,11 @@ export default function PromoDoble({
             className="block w-full focus:outline-none group"
             aria-label={altLeft}
           >
-            <div className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100 h-48 sm:h-56 md:h-64 lg:h-72 flex items-center justify-center">
+            <div className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100 h-48 sm:h-56 md:h-64 lg:h-72">
               <img
                 src={leftImage}
                 alt={altLeft}
-                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
             </div>
@@ -34,11 +34,11 @@ export default function PromoDoble({
             className="block w-full focus:outline-none group"
             aria-label={altRight}
           >
-            <div className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100 h-48 sm:h-56 md:h-64 lg:h-72 flex items-center justify-center">
+            <div className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100 h-48 sm:h-56 md:h-64 lg:h-72">
               <img
                 src={rightImage}
                 alt={altRight}
-                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
             </div>

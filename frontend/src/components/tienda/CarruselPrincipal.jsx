@@ -50,13 +50,13 @@ export default function CarruselPrincipal() {
             >
               <a
                 href={s.link}
-                className="block w-full h-full flex items-center justify-center bg-gray-100"
+                className="block w-full h-full overflow-hidden"
                 aria-label={`Ver productos ${s.link}`}
               >
                 <img
                   src={s.image}
                   alt={`Slide ${s.id}`}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover object-center"
                 />
               </a>
             </article>
