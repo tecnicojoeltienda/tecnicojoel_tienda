@@ -37,7 +37,7 @@ export default function CarruselPrincipal() {
 
   return (
     <section className="w-full overflow-hidden relative">
-      <div className="relative w-full sm:h-[360px] md:h-[420px] lg:h-[520px]">
+      <div className="relative w-full h-[280px] sm:h-[320px] md:h-[380px] lg:h-[420px]">
         <div
           className="flex h-full transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${index * 100}%)` }}

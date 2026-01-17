@@ -1,8 +1,8 @@
 import React from "react";
 
 export default function PromoDoble({
-  leftImage = "/assets/monitores-promo.webp",
-  rightImage = "/assets/licencias-promo.webp",
+  leftImage = "/assets/monitores-grid.webp",
+  rightImage = "/assets/licencia-grid.png",
   leftLink = "/monitores",
   rightLink = "/licencias",
   altLeft = "Promoción monitores",
@@ -18,10 +18,7 @@ export default function PromoDoble({
             className="block w-full focus:outline-none group"
             aria-label={altLeft}
           >
-            <div
-              className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100"
-              style={{ aspectRatio: "2/3" }}
-            >
+            <div className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100 h-32 sm:h-40 md:h-44">
               <img
                 src={leftImage}
                 alt={altLeft}
@@ -37,10 +34,7 @@ export default function PromoDoble({
             className="block w-full focus:outline-none group"
             aria-label={altRight}
           >
-            <div
-              className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100"
-              style={{ aspectRatio: "2/3" }}
-            >
+            <div className="w-full rounded-xl overflow-hidden shadow-lg bg-gray-100 h-32 sm:h-40 md:h-44">
               <img
                 src={rightImage}
                 alt={altRight}
