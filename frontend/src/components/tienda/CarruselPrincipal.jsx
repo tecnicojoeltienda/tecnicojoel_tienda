@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 const slides = [
   {
     id: 1,
-    image: "/assets/laptops-carrusel2.webp",
+    image: "/assets/laptops-carrusel2-1.webp",
     link: "/laptops",
   },
   {

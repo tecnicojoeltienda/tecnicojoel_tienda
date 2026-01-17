@@ -15,10 +15,10 @@ const categories = [
     { id: "mouse", label: "Mouse", img: "/assets/mouse.jpg" },
     { id: "preacondicionados", label: "Preacondicionados", img: "/assets/reacondicionado.webp" },
     { id: "redes", label: "Redes", img: "/assets/redes.jfif" },
-    { id: "repuestos", label: "Repuestos", img: "/assets/respuestos.png" },
+    { id: "repuestos", label: "Repuestos", img: "/assets/repuestos.png" },
     { id: "sonido", label: "Sonido", img: "/assets/sonido.webp" },
     { id: "tarjetas-graficas", label: "Tarjetas Graficas", img: "/assets/componente.png" },
-    { id: "teclados", label: "Teclados", img: "/assets/accesorios.webp" },
+    { id: "teclados", label: "Teclados", img: "/assets/teclado.jpg" },
     { id: "tintas", label: "Tintas", img: "/assets/tintas.jfif" },
 ];
 
