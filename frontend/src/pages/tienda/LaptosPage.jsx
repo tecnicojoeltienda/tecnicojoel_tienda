@@ -240,15 +240,19 @@ export default function LaptopsPage() {
       return false;
     })();
 
-    const offerBadge = isPromo ? (
+    const promoBadge = isPromo ? (
       <span className="ml-2 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
-        PROMO
+        promocion
       </span>
-    ) : isOnOffer(p) ? (
+    ) : null;
+
+    const ofertaBadge = !isPromo && isOnOffer(p) ? (
       <span className="ml-2 inline-flex items-center bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">
         OFERTA
       </span>
     ) : null;
+
+    const badgeToShow = promoBadge || ofertaBadge;
 
     if (filters.view === "list") {
       return (
@@ -285,19 +289,18 @@ export default function LaptopsPage() {
               {p.descripcion || p.resumen || "Sin descripción disponible"}
             </p>
 
-            {/* Estado de stock con cantidad + badge de oferta */}
-            <div className="mb-3">
+            {/* Estado de stock con cantidad + badge (badge separado para que no queden unidos) */}
+            <div className="mb-3 flex items-center">
               {p.stock > 0 && p.estado !== 'agotado' ? (
                 <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
                   Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
-                  {offerBadge}
                 </span>
               ) : (
                 <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-bold">
                   AGOTADO
-                  {offerBadge}
                 </span>
               )}
+              {badgeToShow}
             </div>
 
             <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -354,19 +357,18 @@ export default function LaptopsPage() {
           </h2>
           <p className={styles.descClass}>{p.descripcion || p.resumen || "Sin descripción disponible"}</p>
 
-          {/* Estado de stock con cantidad + badge de oferta */}
-          <div className="mb-2">
+          {/* Estado de stock con cantidad + badge (separado del span de stock) */}
+          <div className="mb-2 flex items-center">
             {p.stock > 0 && p.estado !== 'agotado' ? (
               <div className="inline-flex items-center text-xs text-green-600 font-medium">
                 Stock: {p.stock} {p.stock === 1 ? 'unidad' : 'unidades'}
-                {offerBadge}
               </div>
             ) : (
               <div className="inline-flex items-center text-xs text-red-600 font-bold">
                 AGOTADO
-                {offerBadge}
               </div>
             )}
+            {badgeToShow}
           </div>
 
           <div className="flex items-center justify-between mt-auto">
