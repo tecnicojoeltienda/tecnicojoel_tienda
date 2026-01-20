@@ -148,8 +148,11 @@ export default function TarjetasGraficasPage() {
 
   const renderProduct = (p) => {
     const imageUrl = resolveImageUrl(p.imagen_url);
-    const category = (p.categoria || "tarjetas-graficas").toString().toLowerCase();
-    const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || "")))}`;
+    // CORREGIDO: aplicar slugify a la categoría
+    const categoryRaw = p.categoria || "tarjetas graficas";
+    const category = slugify(categoryRaw);
+    const productSlug = slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || ""));
+    const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(productSlug)}`;
     const styles = getCardStyles();
 
     const promoBadge = <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">promocion</span>;

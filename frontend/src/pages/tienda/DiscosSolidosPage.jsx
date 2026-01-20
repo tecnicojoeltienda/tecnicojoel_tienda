@@ -169,8 +169,11 @@ export default function DiscosSolidosPage() {
 
   const renderProduct = (p) => {
     const imageUrl = resolveImageUrl(p.imagen_url);
-    const category = (p.categoria || "discos-solidos").toString().toLowerCase();
-    const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || "")))}`;
+    // CORREGIDO: aplicar slugify a la categoría
+    const categoryRaw = p.categoria || "discos solidos";
+    const category = slugify(categoryRaw);
+    const productSlug = slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || ""));
+    const detailPath = `/${encodeURIComponent(category)}/${encodeURIComponent(productSlug)}`;
     const styles = getCardStyles();
 
     const handleAddToCart = (producto) => {
