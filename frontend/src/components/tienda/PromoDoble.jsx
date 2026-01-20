@@ -4,7 +4,7 @@ export default function PromoDoble({
   leftImage = "/assets/monitores-grid.webp",
   rightImage = "/assets/licencia-grid.png",
   leftLink = "/monitores",
-  rightLink = "/licencias",
+  rightLink = "/licencia",
   altLeft = "Promoción monitores",
   altRight = "Promoción licencias",
 }) {
