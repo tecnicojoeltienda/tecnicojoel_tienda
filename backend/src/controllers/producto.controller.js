@@ -317,3 +317,27 @@ export async function verificarStock(req, res) {
     return res.status(500).json({ error: "Error al verificar stock" });
   }
 }
+
+// En producto.controller.js
+export const buscarPorSlug = async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const result = await pool.query(
+      `SELECT p.*, c.nombre AS categoria
+       FROM productos p
+       LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
+       WHERE LOWER(REPLACE(REPLACE(NORMALIZE(p.nombre_producto, NFD), ' ', '-'), 'á', 'a')) = $1
+       OR CAST(p.id_producto AS TEXT) = $1`,
+      [slug.toLowerCase()]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error buscando producto por slug:", error);
+    res.status(500).json({ message: "Error al buscar producto" });
+  }
+};

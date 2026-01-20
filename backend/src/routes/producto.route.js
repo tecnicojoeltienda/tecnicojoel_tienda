@@ -33,6 +33,6 @@ router.get("/:id", ctrl.ver);
 router.post("/", upload.single("imagen"), ctrl.crear);
 router.put("/:id", upload.single("imagen"), ctrl.actualizar);
 router.delete("/:id", ctrl.eliminar);
-
+router.get("/slug/:slug", ctrl.buscarPorSlug);
 
 export default router;

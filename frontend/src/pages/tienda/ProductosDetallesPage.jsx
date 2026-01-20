@@ -38,31 +38,50 @@ export default function ProductosDetallesPage() {
     let mounted = true;
     async function load() {
       setLoading(true);
+      setError("");
       try {
         let data = null;
 
         if (slug && category) {
+          // Convertir el slug de categoría (tarjetas-graficas) a nombre con espacios
+          const categoryName = category.replace(/-/g, ' ');
+          
+          console.log("🔍 Buscando producto:", { category, categoryName, slug });
           
           try {
+            // Primero intentar buscar por slug del producto
             const res = await api.get(`/apij/productos/slug/${encodeURIComponent(slug)}`);
             data = Array.isArray(res.data) ? res.data[0] : (res.data.rows ? res.data.rows[0] : res.data);
+            console.log("✅ Producto encontrado por slug:", data);
           } catch (errSlug) {
+            console.log("⚠️ No encontrado por slug, buscando en categoría:", categoryName);
             
-            const res2 = await api.get(`/apij/productos/categoria/nombre/${encodeURIComponent(category)}`);
+            // Si falla, buscar en la categoría (usando nombre con espacios)
+            const res2 = await api.get(`/apij/productos/categoria/nombre/${encodeURIComponent(categoryName)}`);
             const rows = Array.isArray(res2.data) ? res2.data : (res2.data.rows || []);
+            
+            console.log(`📦 Productos en categoría "${categoryName}":`, rows.length);
+            
+            // Buscar por nombre slugificado
             data = rows.find((p) => slugify(p.nombre_producto || p.title || "") === slug);
             
             if (!data) {
+              // Buscar por ID como último recurso
               data = rows.find((p) => String(p.id_producto || p.id) === slug);
             }
+            
+            console.log("🎯 Producto encontrado en categoría:", data ? "Sí" : "No");
           }
         } else if (id) {
-          
+          // Búsqueda directa por ID
           const res = await api.get(`/apij/productos/${encodeURIComponent(id)}`);
           data = Array.isArray(res.data) ? res.data[0] : (res.data.rows ? res.data.rows[0] : res.data);
         }
 
         if (mounted) {
+          if (!data) {
+            setError("Producto no encontrado");
+          }
           setProduct(data || null);
           
           // Cargar productos relacionados
@@ -71,7 +90,7 @@ export default function ProductosDetallesPage() {
           }
         }
       } catch (err) {
-        console.error("Error cargando producto:", err);
+        console.error("❌ Error cargando producto:", err);
         if (mounted) setError("No se encontró el producto");
       } finally {
         if (mounted) setLoading(false);
