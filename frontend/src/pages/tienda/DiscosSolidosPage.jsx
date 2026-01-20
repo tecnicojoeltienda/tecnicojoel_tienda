@@ -24,11 +24,7 @@ export default function DiscosSolidosPage() {
 
   const [page, setPage] = useState(1);
 
-  const itemsPerPage = useMemo(() => {
-    if (filters.view === "list") return 5;
-    if (filters.view === "grid-large") return 6;
-    return 9;
-  }, [filters.view]);
+  const itemsPerPage = 20;
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -169,7 +165,7 @@ export default function DiscosSolidosPage() {
 
   const renderProduct = (p) => {
     const imageUrl = resolveImageUrl(p.imagen_url);
-    // CORREGIDO: aplicar slugify a la categoría
+
     const categoryRaw = p.categoria || "discos solidos";
     const category = slugify(categoryRaw);
     const productSlug = slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || ""));

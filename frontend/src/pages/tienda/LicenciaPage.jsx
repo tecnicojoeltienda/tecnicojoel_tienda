@@ -24,13 +24,9 @@ export default function LicenciaPage() {
 
   const [page, setPage] = useState(1);
 
-  const itemsPerPage = useMemo(() => {
-    if (filters.view === "list") return 5;
-    if (filters.view === "grid-large") return 6;
-    return 9;
-  }, [filters.view]);
+const itemsPerPage = 20;
 
-  // Función para aleatorizar array
+
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
