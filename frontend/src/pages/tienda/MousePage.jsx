@@ -140,7 +140,7 @@ export default function MousePage() {
     return false;
   };
 
-  const itemsPerPage = filters.view === "list" ? 6 : filters.view === "grid-large" ? 6 : filters.view === "grid-medium" ? 12 : 9;
+  const itemsPerPage = 20;
   const pageCount = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
   const paginatedProducts = filteredProducts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 

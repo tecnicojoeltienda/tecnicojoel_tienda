@@ -24,11 +24,7 @@ export default function EstabilizadoresPage() {
 
   const [page, setPage] = useState(1);
 
-  const itemsPerPage = useMemo(() => {
-    if (filters.view === "list") return 5;
-    if (filters.view === "grid-large") return 6;
-    return 9;
-  }, [filters.view]);
+  const itemsPerPage = 20;
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
