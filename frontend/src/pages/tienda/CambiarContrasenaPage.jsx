@@ -13,12 +13,18 @@ export default function CambiarContrasenaPage() {
     e.preventDefault();
     
     if (pass.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
+      toast.error("❌ Contraseña muy corta", {
+        description: "La contraseña debe tener al menos 6 caracteres",
+        duration: 4000
+      });
       return;
     }
     
     if (pass !== confirmPass) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error("❌ Las contraseñas no coinciden", {
+        description: "Verifica que ambas contraseñas sean iguales",
+        duration: 4000
+      });
       return;
     }
     
@@ -27,7 +33,10 @@ export default function CambiarContrasenaPage() {
       const token = sessionStorage.getItem("pw_reset_token");
       
       if (!token) {
-        toast.error("Token no encontrado. Vuelve a solicitar el código.");
+        toast.error("❌ Sesión expirada", {
+          description: "Vuelve a solicitar el código de recuperación",
+          duration: 4000
+        });
         setTimeout(() => navigate("/recuperar"), 2000);
         return;
       }
@@ -40,15 +49,26 @@ export default function CambiarContrasenaPage() {
       sessionStorage.removeItem("recovery_started");
       sessionStorage.removeItem("recovery_email");
       
-      toast.success("✅ Contraseña actualizada. Redirigiendo al login...");
+      toast.success("✅ Contraseña actualizada exitosamente", {
+        description: "Redirigiendo al login...",
+        duration: 3000
+      });
       
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error) {
       console.error("❌ Error cambiando contraseña:", error);
-      const msg = error?.response?.data?.error || "Error cambiando contraseña";
-      toast.error(`❌ ${msg}`);
+      
+      const errorData = error?.response?.data;
+      const errorMsg = errorData?.error || "Error al cambiar la contraseña";
+      const errorDetails = errorData?.details || "Intenta nuevamente o solicita un nuevo código";
+      
+      toast.error(`❌ ${errorMsg}`, {
+        description: errorDetails,
+        duration: 5000
+      });
+      
       setChanging(false);
     }
   }
@@ -57,14 +77,15 @@ export default function CambiarContrasenaPage() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
       <form onSubmit={submit} className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-2 text-gray-800">Nueva contraseña</h2>
-        <p className="text-sm text-gray-600 mb-6">Ingresa tu nueva contraseña</p>
+        <p className="text-sm text-gray-600 mb-6">Ingresa tu nueva contraseña segura</p>
         
         <input
           type="password"
           value={pass}
           onChange={e => setPass(e.target.value)}
           required
-          placeholder="Nueva contraseña"
+          minLength={6}
+          placeholder="Nueva contraseña (mínimo 6 caracteres)"
           className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={changing}
         />
@@ -74,6 +95,7 @@ export default function CambiarContrasenaPage() {
           value={confirmPass}
           onChange={e => setConfirmPass(e.target.value)}
           required
+          minLength={6}
           placeholder="Confirmar contraseña"
           className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={changing}
