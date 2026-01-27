@@ -271,7 +271,7 @@ export default function Novedades() {
   return (
     <section className="w-full py-8 md:py-12">
       {/* Cambiado a w-full con padding más pequeño para que ocupe más ancho */}
-      <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+      <div className="w-full mx-0 px-2 sm:px-4 lg:px-6">
         {/* Contenedor con border-radius y box-shadow */}
         <div 
           className="bg-white rounded-2xl overflow-hidden"
