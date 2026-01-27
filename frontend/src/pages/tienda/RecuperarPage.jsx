@@ -11,7 +11,9 @@ export default function RecuperarPage() {
   async function send(e) {
     e.preventDefault();
     if (!email || !email.includes("@")) {
-      toast.error("Ingresa un correo válido.");
+      toast.error("Correo inválido", {
+        description: "Por favor ingresa un correo electrónico válido con formato correcto."
+      });
       return;
     }
     
@@ -20,7 +22,10 @@ export default function RecuperarPage() {
       const res = await api.post("/apij/recuperacion/solicitar", { email });
       console.log("✅ Respuesta del backend:", res.data);
       
-      toast.success("✅ Código enviado. Revisa tu correo.");
+      toast.success("Código enviado exitosamente", {
+        description: `Revisa tu bandeja de entrada en ${email}. El código expira en 15 minutos.`
+      });
+      
       sessionStorage.setItem("recovery_started", "1");
       sessionStorage.setItem("recovery_email", email);
       
@@ -30,8 +35,57 @@ export default function RecuperarPage() {
       }, 1500);
     } catch (err) {
       console.error("❌ Error en solicitar:", err);
-      const msg = err?.response?.data?.error || err.message || "Error enviando código";
-      toast.error(`❌ ${msg}`);
+      
+      // Extraer información detallada del error
+      const statusCode = err?.response?.status;
+      const errorData = err?.response?.data;
+      const errorMessage = errorData?.error || "Error al enviar código";
+      const errorDetails = errorData?.details || "";
+      const technicalError = errorData?.technicalError || "";
+      
+      // Mensajes específicos según el código de estado
+      switch (statusCode) {
+        case 400:
+          toast.error(errorMessage, {
+            description: errorDetails || "Verifica que el correo sea correcto."
+          });
+          break;
+        case 404:
+          toast.error("Correo no registrado", {
+            description: "Este correo no está asociado a ninguna cuenta. Verifica que sea el correo correcto o regístrate primero."
+          });
+          break;
+        case 429:
+          toast.error("Demasiados intentos", {
+            description: errorDetails || "Has intentado enviar códigos múltiples veces. Espera unos minutos antes de intentar nuevamente."
+          });
+          break;
+        case 500:
+          toast.error("Error del servidor", {
+            description: errorDetails || technicalError || "Ocurrió un problema al procesar tu solicitud. Intenta nuevamente en unos momentos."
+          });
+          break;
+        case 503:
+          toast.error("Servicio de correo no disponible", {
+            description: "El servicio de envío de correos está temporalmente fuera de línea. Por favor intenta más tarde."
+          });
+          break;
+        default:
+          if (err.code === "ERR_NETWORK") {
+            toast.error("Error de conexión", {
+              description: "No se pudo conectar con el servidor. Verifica tu conexión a internet."
+            });
+          } else if (err.code === "ECONNABORTED") {
+            toast.error("Tiempo de espera agotado", {
+              description: "La solicitud tardó demasiado. Verifica tu conexión e intenta nuevamente."
+            });
+          } else {
+            toast.error(errorMessage, {
+              description: errorDetails || technicalError || "Ocurrió un error inesperado. Por favor intenta nuevamente."
+            });
+          }
+      }
+      
       setSending(false);
     }
   }
@@ -62,6 +116,14 @@ export default function RecuperarPage() {
           }`}
         >
           {sending ? "Enviando..." : "Enviar código"}
+        </button>
+        
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="w-full mt-3 p-3 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+        >
+          Volver al inicio de sesión
         </button>
       </form>
     </div>
