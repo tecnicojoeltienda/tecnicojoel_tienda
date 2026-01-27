@@ -14,7 +14,7 @@ export default function ValidarCodigoPage() {
     e.preventDefault();
     
     if (!code || code.length !== 6) {
-      toast.error("Ingresa un código de 6 dígitos");
+      toast.error("❌ Ingresa un código de 6 dígitos");
       return;
     }
     
@@ -31,8 +31,16 @@ export default function ValidarCodigoPage() {
       }, 1000);
     } catch (err) {
       console.error("❌ Error validando código:", err);
-      const msg = err?.response?.data?.error || "Código inválido o expirado";
-      toast.error(`❌ ${msg}`);
+      
+      const errorData = err?.response?.data;
+      const errorMsg = errorData?.error || "Error al validar el código";
+      const errorDetails = errorData?.details || "Verifica el código e intenta nuevamente";
+      
+      toast.error(`❌ ${errorMsg}`, {
+        description: errorDetails,
+        duration: 5000
+      });
+      
       setValidating(false);
     }
   }
