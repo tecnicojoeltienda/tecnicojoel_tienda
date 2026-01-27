@@ -1,9 +1,13 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import conexion from "../config/db.js";
+import { Resend } from "resend";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const CODE_TTL = 15 * 60 * 1000; // 15 minutos
+
+// Inicializar Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // In-memory stores
 const codes = new Map();
@@ -20,47 +24,26 @@ function cleanExpired() {
 }
 setInterval(cleanExpired, 60_000);
 
-// Resend Email Service
+// Enviar email con Resend
 async function sendWithResend(to, subject, html) {
-  const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM || "onboarding@resend.dev";
   
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY no está configurado en las variables de entorno");
+  console.log(`📤 Enviando email desde: ${from} hacia: ${to}`);
+
+  try {
+    const data = await resend.emails.send({
+      from,
+      to: [to],
+      subject,
+      html
+    });
+
+    console.log(`✅ Email enviado. ID: ${data.id}`);
+    return data;
+  } catch (error) {
+    console.error("❌ Error Resend:", error);
+    throw error;
   }
-
-  const payload = {
-    from,
-    to: [to],
-    subject,
-    html
-  };
-
-  console.log(`📤 Enviando email via Resend a: ${to}`);
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  const responseText = await res.text();
-  console.log(`📨 Resend response status: ${res.status}`);
-  console.log(`📨 Resend response body: ${responseText}`);
-
-  if (!res.ok) {
-    const e = new Error(`Error de Resend (${res.status}): ${responseText}`);
-    e.status = res.status;
-    e.body = responseText;
-    throw e;
-  }
-
-  const data = JSON.parse(responseText);
-  console.log(`✅ Email enviado exitosamente. ID: ${data.id}`);
-  return data;
 }
 
 export async function solicitar(req, res) {
@@ -68,54 +51,54 @@ export async function solicitar(req, res) {
     const { email } = req.body;
     const ip = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     
-    console.log(`📥 Solicitud de recuperación desde IP: ${ip} para email: ${email}`);
+    console.log(`📥 Solicitud desde IP: ${ip} para: ${email}`);
     
     if (!email) {
       return res.status(400).json({ 
-        error: "Email es obligatorio",
-        details: "Debes proporcionar un correo electrónico válido"
+        error: "Email requerido",
+        details: "Ingresa un correo válido"
       });
     }
 
-    // Validar formato de email
+    // Validar formato
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
-        error: "Formato de email inválido",
-        details: "El correo electrónico proporcionado no tiene un formato válido"
+        error: "Formato inválido",
+        details: "El correo no tiene un formato válido"
       });
     }
 
-    // Verificar configuración de Resend
+    // Verificar API Key
     if (!process.env.RESEND_API_KEY) {
-      console.error("❌ ERROR: RESEND_API_KEY no configurado");
+      console.error("❌ RESEND_API_KEY no configurado");
       return res.status(500).json({ 
-        error: "Servicio de correo no configurado",
-        details: "El servidor no tiene configurado el servicio de envío de emails. Contacta al administrador."
+        error: "Servicio no configurado",
+        details: "Contacta al administrador"
       });
     }
 
-    // Verificar si el email existe en la BD
+    // Verificar si existe en BD
     const conn = await conexion;
     const [usuarios] = await conn.query("SELECT id_cliente FROM cliente WHERE email = ? LIMIT 1", [email]);
     
     if (!usuarios || usuarios.length === 0) {
-      console.log(`⚠️ Email no encontrado en BD: ${email}`);
+      console.log(`⚠️ Email no encontrado: ${email}`);
       return res.status(404).json({ 
-        error: "Correo no encontrado",
-        details: "No existe una cuenta registrada con este correo electrónico"
+        error: "Correo no registrado",
+        details: "Este correo no existe en el sistema"
       });
     }
 
-    console.log(`✅ Email encontrado en BD: ${email}`);
+    console.log(`✅ Email encontrado: ${email}`);
 
-    // Generar y guardar código
+    // Generar código
     const code = genCode();
     const now = Date.now();
     const expiresAt = now + CODE_TTL;
     codes.set(email, { code, expiresAt });
 
-    console.log(`📧 Código generado para ${email}: ${code}`);
+    console.log(`🔑 Código generado: ${code}`);
 
     // HTML del email
     const html = `
@@ -131,16 +114,16 @@ export async function solicitar(req, res) {
             <h2 style="color:#1f2937;margin-top:0;font-size:24px;">🔐 Recuperación de contraseña</h2>
             <p style="color:#4b5563;font-size:16px;line-height:1.5;">Hola,</p>
             <p style="color:#4b5563;font-size:16px;line-height:1.5;">
-              Recibimos una solicitud para recuperar tu contraseña. Tu código de verificación es:
+              Tu código de verificación es:
             </p>
-            <div style="background:#3b82f6;color:white;font-size:36px;font-weight:700;letter-spacing:12px;padding:24px;text-align:center;border-radius:12px;margin:24px 0;">
+            <div style="background:#3b82f6;color:white;font-size:36px;font-weight:700;letter-spacing:8px;padding:24px;text-align:center;border-radius:12px;margin:24px 0;">
               ${code}
             </div>
             <p style="color:#6b7280;font-size:14px;margin-top:20px;">
               <strong>Este código expira en 15 minutos.</strong>
             </p>
             <p style="color:#6b7280;font-size:14px;">
-              Si no solicitaste este código, puedes ignorar este mensaje de forma segura.
+              Si no solicitaste este código, ignora este mensaje.
             </p>
             <hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0;">
             <p style="color:#9ca3af;font-size:12px;text-align:center;margin:0;">
@@ -151,7 +134,7 @@ export async function solicitar(req, res) {
       </body>
       </html>`;
     
-    console.log(`📤 Intentando enviar email a: ${email}`);
+    console.log(`📤 Enviando email...`);
     
     try {
       const result = await sendWithResend(
@@ -160,50 +143,44 @@ export async function solicitar(req, res) {
         html
       );
       
-      console.log(`✅ Email enviado exitosamente via Resend`);
+      console.log(`✅ Email enviado exitosamente`);
       return res.json({ 
-        message: "Código enviado exitosamente",
-        email,
-        emailId: result.id
+        message: "Código enviado",
+        email
       });
       
     } catch (mailError) {
-      console.error("❌ ERROR enviando email:", mailError);
+      console.error("❌ Error al enviar:", mailError);
       
-      codes.delete(email); // Limpiar código si falla el envío
+      codes.delete(email);
       
-      let errorMessage = "Error al enviar el correo electrónico";
-      let errorDetails = mailError.message;
+      let errorMsg = "Error al enviar correo";
+      let details = "";
       
-      if (mailError.status === 401) {
-        errorMessage = "Error de autenticación con el servicio de correo";
-        errorDetails = "La API key de Resend no es válida o ha expirado";
-      } else if (mailError.status === 422) {
-        errorMessage = "Error en los datos del correo";
-        errorDetails = "El formato del correo electrónico o los datos son inválidos";
-      } else if (mailError.status === 429) {
-        errorMessage = "Límite de envíos alcanzado";
-        errorDetails = "Se ha excedido el límite de correos por hora. Intenta más tarde.";
+      if (mailError.statusCode === 403) {
+        errorMsg = "Correo no verificado";
+        details = "El remitente debe estar verificado en Resend";
+      } else if (mailError.statusCode === 422) {
+        errorMsg = "Datos inválidos";
+        details = "Revisa la configuración";
+      } else if (mailError.statusCode === 429) {
+        errorMsg = "Límite excedido";
+        details = "Espera un momento";
+      } else {
+        details = mailError.message || "Intenta nuevamente";
       }
       
       return res.status(500).json({
-        error: errorMessage,
-        details: errorDetails,
-        technicalError: {
-          message: mailError.message,
-          status: mailError.status,
-          body: mailError.body
-        }
+        error: errorMsg,
+        details
       });
     }
     
   } catch (err) {
-    console.error("❌ ERROR rec.solicitar:", err);
-    console.error("Stack trace:", err.stack);
+    console.error("❌ ERROR:", err);
     return res.status(500).json({ 
-      error: "Error interno del servidor",
-      details: "Ocurrió un error inesperado. Por favor, intenta nuevamente.",
-      technicalError: err.message
+      error: "Error del servidor",
+      details: "Intenta nuevamente"
     });
   }
 }
@@ -215,128 +192,107 @@ export async function validar(req, res) {
     if (!email || !code) {
       return res.status(400).json({ 
         error: "Datos incompletos",
-        details: "Email y código son requeridos"
+        details: "Email y código requeridos"
       });
     }
-    
+
     const rec = codes.get(email);
-    const now = Date.now();
-    
     if (!rec) {
       return res.status(400).json({ 
         error: "Código no encontrado",
-        details: "No existe un código activo para este correo. Solicita uno nuevo."
+        details: "Solicita uno nuevo"
       });
     }
-    
-    if (rec.expiresAt <= now) {
+
+    if (Date.now() > rec.expiresAt) {
       codes.delete(email);
       return res.status(400).json({ 
         error: "Código expirado",
-        details: "El código ha expirado. Por favor, solicita uno nuevo."
+        details: "Solicita uno nuevo"
       });
     }
-    
-    if (rec.code !== String(code)) {
+
+    if (rec.code !== code) {
       return res.status(400).json({ 
         error: "Código incorrecto",
-        details: "El código ingresado no es válido. Verifica e intenta nuevamente."
+        details: "Verifica el código"
       });
     }
-    
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: Math.floor(CODE_TTL/1000) });
-    console.log(`✅ Código validado para: ${email}`);
+
+    codes.delete(email);
+
+    const token = jwt.sign({ email, purpose: "reset_pwd" }, JWT_SECRET, { expiresIn: "15m" });
     
     return res.json({ 
-      token, 
-      expiresIn: Math.floor((rec.expiresAt - now)/1000),
-      message: "Código validado correctamente"
+      message: "Código válido",
+      token 
     });
   } catch (err) {
-    console.error("rec.validar:", err);
+    console.error("❌ ERROR validar:", err);
     return res.status(500).json({ 
-      error: "Error al validar el código",
-      details: "Ocurrió un error al procesar tu solicitud. Intenta nuevamente.",
-      technicalError: err.message
+      error: "Error del servidor",
+      details: "Intenta nuevamente"
     });
   }
 }
 
 export async function cambiar(req, res) {
   try {
-    const { token, nuevaContrasena } = req.body;
+    const { token, newPassword } = req.body;
     
-    if (!token || !nuevaContrasena) {
+    if (!token || !newPassword) {
       return res.status(400).json({ 
         error: "Datos incompletos",
-        details: "Token y nueva contraseña son requeridos"
-      });
-    }
-    
-    if (nuevaContrasena.length < 6) {
-      return res.status(400).json({ 
-        error: "Contraseña muy corta",
-        details: "La contraseña debe tener al menos 6 caracteres"
-      });
-    }
-    
-    let payload;
-    try {
-      payload = jwt.verify(token, JWT_SECRET);
-    } catch (jwtErr) {
-      return res.status(400).json({ 
-        error: "Token inválido o expirado",
-        details: "El token de recuperación ha expirado o no es válido. Solicita un nuevo código."
-      });
-    }
-    
-    const email = payload.email;
-    const rec = codes.get(email);
-    
-    if (!rec) {
-      return res.status(400).json({ 
-        error: "Sesión expirada",
-        details: "La sesión de recuperación ha expirado. Solicita un nuevo código."
+        details: "Token y contraseña requeridos"
       });
     }
 
-    const hashed = await bcrypt.hash(nuevaContrasena, 10);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ 
+        error: "Token inválido",
+        details: "Solicita un nuevo código"
+      });
+    }
+
+    if (decoded.purpose !== "reset_pwd") {
+      return res.status(401).json({ 
+        error: "Token inválido",
+        details: "Tipo de token incorrecto"
+      });
+    }
+
+    const { email } = decoded;
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
     const conn = await conexion;
-    const [result] = await conn.query("UPDATE cliente SET clave = ? WHERE email = ?", [hashed, email]);
-    
+    const [result] = await conn.query(
+      "UPDATE cliente SET password = ? WHERE email = ?",
+      [hashedPassword, email]
+    );
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ 
         error: "Usuario no encontrado",
-        details: "No se encontró una cuenta con este correo electrónico"
+        details: "El correo no existe"
       });
     }
 
-    codes.delete(email);
-    console.log(`✅ Contraseña cambiada para: ${email}`);
+    console.log(`✅ Contraseña actualizada para: ${email}`);
+    return res.json({ message: "Contraseña actualizada" });
     
-    return res.json({ 
-      message: "Contraseña actualizada exitosamente"
-    });
   } catch (err) {
-    console.error("rec.cambiar:", err);
+    console.error("❌ ERROR cambiar:", err);
     return res.status(500).json({ 
-      error: "Error al cambiar la contraseña",
-      details: "Ocurrió un error al actualizar tu contraseña. Intenta nuevamente.",
-      technicalError: err.message
+      error: "Error del servidor",
+      details: "Intenta nuevamente"
     });
   }
 }
 
 export async function limpiar(req, res) {
-  try {
-    codes.clear();
-    console.log("🧹 Contadores limpiados");
-    return res.json({ message: "Contadores limpiados exitosamente" });
-  } catch (err) {
-    console.error("rec.limpiar:", err);
-    return res.status(500).json({ 
-      error: "Error al limpiar contadores",
-      details: err.message
-    });
-  }
+  codes.clear();
+  return res.json({ message: "Códigos limpiados" });
 }
