@@ -27,100 +27,97 @@ function ProductCardSimple({ p, onClick }) {
   };
 
   return (
-    <div
+    <article
       onClick={onClick}
-      className="group w-64 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-      role="button"
+      className="group flex-shrink-0 snap-start bg-white rounded-[1.5rem] border border-slate-200/60 p-4 cursor-pointer transition-all duration-300 hover:border-transparent hover:shadow-[0_15px_40px_-10px_rgba(37,99,235,0.15)] hover:-translate-y-1 flex flex-col w-[240px] sm:w-[260px]"
       title={p.nombre_producto}
     >
-      {/* Imagen del producto */}
-      <div className="relative w-full h-48 bg-gradient-to-br from-white-50 to-white-100 flex items-center justify-center overflow-hidden">
-        {/* Badge de categoría */}
-        {p.categoria && (
-          <div className="absolute top-3 left-3 z-10 px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-lg">
-            {p.categoria}
-          </div>
-        )}
+      {/* MARCO LLAMATIVO: Degradado Azul -> Rojo -> Gris */}
+      <div className="relative w-full aspect-square rounded-2xl p-[3px] bg-gradient-to-br from-blue-600 via-red-500 to-slate-400 mb-4 transition-all duration-500 group-hover:shadow-[0_8px_25px_rgba(37,99,235,0.3)] group-hover:scale-[1.02]">
         
-        {/* Botón favoritos */}
-        <button className="absolute top-3 right-3 z-10 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <FiHeart className="w-4 h-4 text-gray-600 hover:text-red-500" />
-        </button>
-
-        {/* Imagen o placeholder */}
-        {img ? (
-          <img 
-            src={img} 
-            alt={p.nombre_producto} 
-            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" 
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center text-gray-400">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mb-2">
-              <span className="text-lg font-bold text-blue-600">
-                {getInitials(p.nombre_producto)}
-              </span>
+        {/* Fondo interno de la imagen */}
+        <div className="relative w-full h-full bg-white rounded-[13px] flex items-center justify-center p-4 overflow-hidden">
+          
+          {/* Badge de categoría */}
+          {p.categoria && (
+            <div className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-white/95 backdrop-blur-sm text-blue-700 text-[10px] font-bold uppercase tracking-widest rounded-md border border-slate-100 shadow-sm">
+              {p.categoria}
             </div>
-            <span className="text-xs">Sin imagen</span>
-          </div>
-        )}
+          )}
+          
+          {/* Botón favoritos */}
+          <button 
+            onClick={(e) => e.stopPropagation()} 
+            className="absolute top-3 right-3 z-10 w-8 h-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-400 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:text-red-500 hover:scale-110 shadow-sm"
+          >
+            <FiHeart className="w-4 h-4" />
+          </button>
 
-        {/* Overlay al hover */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center gap-2 text-sm font-medium text-gray-800">
-            <FiPackage className="w-4 h-4" />
-            Ver producto
-          </div>
+          {/* Imagen o placeholder */}
+          {img ? (
+            <img 
+              src={img} 
+              alt={p.nombre_producto} 
+              className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-110" 
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center text-slate-400">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center mb-2">
+                <span className="text-lg font-bold text-blue-600">
+                  {getInitials(p.nombre_producto)}
+                </span>
+              </div>
+              <span className="text-xs font-medium">Sin imagen</span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Información del producto */}
-      <div className="p-4">
-        {/* Título */}
-        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem] leading-tight">
+      <div className="flex flex-col flex-grow px-1">
+        <h4 className="text-[14px] sm:text-[15px] font-semibold text-slate-900 line-clamp-2 leading-snug mb-3 group-hover:text-blue-600 transition-colors flex-grow">
           {p.nombre_producto}
-        </h3>
-
-        {/* Rating */}
+        </h4>
+        
+        {/* Rating sutil */}
         <div className="flex items-center gap-1 mb-3">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <FiStar key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-            ))}
+          <FiStar className="w-3.5 h-3.5 text-amber-400 fill-current" />
+          <span className="text-xs font-medium text-slate-500">4.9</span>
+          
+          {/* Stock indicator pequeño */}
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className={`w-1.5 h-1.5 rounded-full ${p.stock > 0 ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+              {p.stock > 0 ? 'Disp.' : 'Agot.'}
+            </span>
           </div>
-          <span className="text-xs text-gray-500 ml-1">(0)</span>
         </div>
 
-        {/* Precio y stock */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <div className="text-lg font-bold text-blue-600">
-              {p.precio_venta != null ? `S/. ${Number(p.precio_venta).toLocaleString()}` : "Consultar"}
-            </div>
+        <div className="flex items-end justify-between pt-3 border-t border-slate-100">
+          <div>
             {p.precio_lista && Number(p.precio_lista) > Number(p.precio_venta) && (
-              <div className="text-xs text-gray-400 line-through">
+              <div className="text-xs font-medium text-slate-400 line-through mb-0.5">
                 S/. {Number(p.precio_lista).toLocaleString()}
               </div>
             )}
+            <div className="text-lg font-extrabold text-blue-700 tracking-tight">
+              {p.precio_venta != null ? `S/. ${Number(p.precio_venta).toLocaleString()}` : "Consultar"}
+            </div>
           </div>
 
-          {/* Stock indicator */}
-          <div className="flex items-center">
-            {p.stock > 0 ? (
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            ) : (
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            )}
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              // Lógica addToCart si la tienes importada, o onClick wrapper
+            }}
+            className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 text-blue-600 flex items-center justify-center transition-all duration-300 hover:bg-blue-600 hover:text-white hover:shadow-lg hover:shadow-blue-600/30 hover:scale-110 group-hover:bg-blue-50"
+          >
+            <FiShoppingCart className="w-4 h-4" />
+          </button>
         </div>
-
-        {/* Botón de acción al hover */}
-        <button className="w-full mt-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-700 flex items-center justify-center gap-2">
-          <FiShoppingCart className="w-4 h-4" />
-          Ver detalles
-        </button>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -151,7 +148,6 @@ export default function TwoCarrusel({ currentProductId = null }) {
     return () => { mounted = false; };
   }, []);
 
-  // helper para generar slug igual que en ProductDetail/Pages
   const slugify = (s = "") =>
     s
       .toString()
@@ -162,83 +158,30 @@ export default function TwoCarrusel({ currentProductId = null }) {
       .trim()
       .replace(/\s+/g, "-");
 
-  // obtiene el slug de la categoría soportando varios formatos
   const getCategorySlug = (prod = {}) => {
-    // Mapa id_categoria -> slug según tu dump SQL
-    const idToSlug = {
-      1: "pcs",
-      2: "laptops",
-      3: "monitores",
-      4: "mouse",
-      5: "accesorios",
-      6: "sonido",
-      7: "tintas",
-      8: "licencia",
-      9: "reacondicionados",
-      10: "redes",
-      11: "impresoras",
-      12: "componentes",
-      13: "estabilizadores"
-    };
-
-    // intentos directos solo sobre campos que representen la categoría explícita
-    const tryValues = [
-      prod.categoria,
-      prod.categoria_nombre,
-      prod.categoria_slug,
-      prod.category,
-      prod.category_name,
-      prod.categoriaName,
-      prod.categoriaTitle,
-      prod.cat,
-      prod.tipo,
-      prod.tipo_categoria,
-      prod.categoria_text,
-      prod.categoria_texto,
-      prod.categoria?.nombre,
-      prod.categoria?.slug,
-      prod.categoria_nombre?.nombre,
-      prod.categoria_nombre?.slug,
-      prod.categoria?.title,
-      prod.category?.name,
-      prod.category?.slug
-    ];
-
+    const idToSlug = { 1: "pcs", 2: "laptops", 3: "monitores", 4: "mouse", 5: "accesorios", 6: "sonido", 7: "tintas", 8: "licencia", 9: "reacondicionados", 10: "redes", 11: "impresoras", 12: "componentes", 13: "estabilizadores" };
+    const tryValues = [prod.categoria, prod.categoria_nombre, prod.categoria_slug, prod.category, prod.category_name, prod.categoriaName, prod.categoriaTitle, prod.cat, prod.tipo, prod.tipo_categoria, prod.categoria_text, prod.categoria_texto, prod.categoria?.nombre, prod.categoria?.slug, prod.categoria_nombre?.nombre, prod.categoria_nombre?.slug, prod.categoria?.title, prod.category?.name, prod.category?.slug];
     let catRaw = "";
     for (const v of tryValues) {
       if (v === 0 || v === "0") continue;
-      if (v && typeof v === "string" && v.trim() !== "") {
-        catRaw = v;
-        break;
-      }
-      if (v && typeof v === "object") {
-        catRaw = v.slug || v.nombre || v.name || v.title || "";
-        if (catRaw) break;
-      }
+      if (v && typeof v === "string" && v.trim() !== "") { catRaw = v; break; }
+      if (v && typeof v === "object") { catRaw = v.slug || v.nombre || v.name || v.title || ""; if (catRaw) break; }
     }
-
     catRaw = String(catRaw || "").trim();
 
-    // Si no hay categoría explícita en texto, intentar mapear por id_categoria
     if (!catRaw || /^(productos?|producto)s?$/i.test(catRaw)) {
       const id = Number(prod.id_categoria ?? prod.idCategoria ?? prod.categoryId ?? prod.id_categoria);
       if (!Number.isNaN(id) && idToSlug[id]) return idToSlug[id];
-      // Si no se puede determinar explícitamente, devolvemos null para indicar ausencia de categoría
       return null;
     }
-
     return slugify(catRaw);
   };
 
-  // Excluir el producto actual y aquellos sin categoría explícita
   const pool = productos
     .filter(p => String(p.id_producto) !== String(currentProductId))
     .filter(p => {
-      try {
-        return !!getCategorySlug(p);
-      } catch {
-        return false;
-      }
+      try { return !!getCategorySlug(p); } 
+      catch { return false; }
     });
 
   const listA = shuffle(pool).slice(0, Math.min(10, pool.length));
@@ -248,31 +191,26 @@ export default function TwoCarrusel({ currentProductId = null }) {
   function scroll(ref, dir = 1) {
     const el = ref.current;
     if (!el) return;
-    const step = el.clientWidth * 0.8;
+    const step = Math.round(el.clientWidth * 0.8);
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   }
 
   if (loading) {
     return (
-      <div className="mt-12 space-y-8">
+      <div className="w-full mt-12 space-y-12">
         {[0, 1].map(idx => (
-          <section key={idx} className="animate-pulse">
-            <div className="flex items-center justify-between mb-6">
-              <div className="h-6 bg-gray-200 rounded w-48"></div>
+          <section key={idx} className="animate-pulse bg-white border border-slate-200/60 rounded-[2rem] p-6 lg:p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div className="h-8 bg-slate-100 rounded-lg w-64"></div>
               <div className="flex gap-2">
-                <div className="w-10 h-10 bg-gray-200 rounded"></div>
-                <div className="w-10 h-10 bg-gray-200 rounded"></div>
+                <div className="w-10 h-10 bg-slate-100 rounded-full"></div>
+                <div className="w-10 h-10 bg-slate-100 rounded-full"></div>
               </div>
             </div>
             <div className="flex gap-6 overflow-hidden">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-64 flex-shrink-0">
-                  <div className="h-48 bg-gray-200 rounded-2xl mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                  </div>
+                <div key={i} className="w-[240px] flex-shrink-0">
+                  <div className="h-[240px] bg-slate-100 rounded-2xl mb-4"></div>
                 </div>
               ))}
             </div>
@@ -288,64 +226,56 @@ export default function TwoCarrusel({ currentProductId = null }) {
   ];
 
   return (
-    <div className="mt-12 space-y-12">
-      {carousels.map((group, idx) => (
-        <section key={idx} className="relative">
-          {/* Header del carrusel */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-1">{group.title}</h3>
-              <p className="text-gray-600">{group.subtitle}</p>
-            </div>
-            
-            {/* Controles de navegación */}
-            <div className="flex items-center gap-2">
-              <button 
-                aria-label="Anterior" 
-                onClick={() => scroll(group.ref, -1)} 
-                className="group w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
-              >
-                <FiChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
-              </button>
-              <button 
-                aria-label="Siguiente" 
-                onClick={() => scroll(group.ref, 1)} 
-                className="group w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
-              >
-                <FiChevronRight className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
-              </button>
-            </div>
-          </div>
+    <div className="w-full mt-12 space-y-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      {carousels.map((group, idx) => {
+        if (group.items.length === 0) return null;
 
-          {/* Carrusel de productos */}
-          <div className="relative">
-            {/* Gradientes de fade en los bordes */}
-            <div className="absolute left-0 top-0 w-8 h-full bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none"></div>
-            <div className="absolute right-0 top-0 w-8 h-full bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
-            
-            <div 
-              ref={group.ref} 
-              className="flex gap-6 overflow-x-auto scrollbar-hide py-2 px-2"
-              style={{ 
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitScrollbar: { display: 'none' }
-              }}
-            >
-              {group.items.length === 0 ? (
-                <div className="w-full flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <FiPackage className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-500 text-lg font-medium">No hay productos disponibles</p>
-                  <p className="text-gray-400 text-sm mt-1">Intenta recargar la página</p>
-                </div>
-              ) : (
-                group.items.map(p => {
+        return (
+          <section key={idx} className="bg-white border border-slate-200/60 rounded-[2rem] p-6 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+            {/* Header del carrusel */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                  <FiPackage className="text-blue-600" /> {group.title}
+                </h3>
+                <p className="text-slate-500 font-medium mt-1">{group.subtitle}</p>
+              </div>
+              
+              {/* Controles de navegación */}
+              <div className="flex gap-2">
+                <button 
+                  aria-label="Anterior" 
+                  onClick={() => scroll(group.ref, -1)} 
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 border border-slate-200 text-blue-600 hover:bg-blue-50 transition-all"
+                >
+                  <FiChevronLeft className="w-5 h-5" />
+                </button>
+                <button 
+                  aria-label="Siguiente" 
+                  onClick={() => scroll(group.ref, 1)} 
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 border border-slate-200 text-blue-600 hover:bg-blue-50 transition-all"
+                >
+                  <FiChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Carrusel de productos */}
+            <div className="relative">
+              {/* Sombras difusas a los lados para indicar scroll */}
+              <div className="absolute left-0 top-0 w-8 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+              <div className="absolute right-0 top-0 w-8 h-full bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+              
+              <div 
+                ref={group.ref} 
+                className="flex gap-4 sm:gap-6 overflow-x-auto custom-scrollbar pb-6 pt-2 snap-x snap-mandatory"
+              >
+                {group.items.map(p => {
                   const categorySlug = getCategorySlug(p);
-                  if (!categorySlug) return null; // seguridad: ya filtrado, pero guardia extra
+                  if (!categorySlug) return null;
                   const detailSlug = slugify(p.nombre_producto || p.title || String(p.id_producto || p.id || ""));
                   const detailPath = `/${encodeURIComponent(categorySlug)}/${encodeURIComponent(detailSlug)}`;
+                  
                   return (
                     <ProductCardSimple
                       key={p.id_producto || p.id}
@@ -353,30 +283,19 @@ export default function TwoCarrusel({ currentProductId = null }) {
                       onClick={() => nav(detailPath)}
                     />
                   );
-                })
-               )}
-             </div>
-           </div>
-
-          {/* Indicador de scroll (puntos) */}
-          {group.items.length > 4 && (
-            <div className="flex items-center justify-center gap-2 mt-6">
-              {[...Array(Math.ceil(group.items.length / 4))].map((_, i) => (
-                <div 
-                  key={i} 
-                  className="w-2 h-2 rounded-full bg-gray-300 hover:bg-blue-600 transition-colors cursor-pointer"
-                  onClick={() => {
-                    const el = group.ref.current;
-                    if (el) {
-                      el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
-                    }
-                  }}
-                ></div>
-              ))}
+                })}
+              </div>
             </div>
-          )}
-        </section>
-      ))}
+          </section>
+        );
+      })}
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      `}</style>
     </div>
   );
 }

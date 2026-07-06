@@ -41,58 +41,33 @@ const SERVICES = [
 
 export default function ServiciosTienda() {
   return (
-    <section className="w-full py-6">
-      {/* reduce lateral padding so container stretches more */}
-      <div className="w-full mx-0 px-2 sm:px-4 lg:px-6">
-        {/* Gradient container (same as CarruselPromocion) with noticeable shadow, border-radius and font-family */}
-        <div
-          className="rounded-2xl overflow-hidden bg-gradient-to-r from-black via-gray-800 to-black/90 text-white py-6 px-4 sm:px-6"
-          style={{
-            boxShadow: "0 34px 90px rgba(2,6,23,0.28)", // shadow más notorio
-            fontFamily:
-              'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-          }}
-        >
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-4">Servicios que ofrecemos</h2>
+    <section className="w-full py-12">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col mb-8">
+          <h2 className="text-3xl font-extrabold text-slate-900">Nuestros Servicios</h2>
+          <p className="text-slate-500 font-medium mt-2">Soluciones completas para tus necesidades tecnológicas</p>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {SERVICES.map(({ id, title, text, Icon, color }) => {
-              const bg = {
-                blue: "bg-blue-50",
-                green: "bg-green-50",
-                purple: "bg-purple-50",
-                orange: "bg-yellow-50",
-                teal: "bg-teal-50",
-              }[color] || "bg-gray-50";
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
+          {SERVICES.map(({ id, title, text, Icon, color }) => {
+            const bgHover = { blue: "hover:border-blue-200", green: "hover:border-green-200", purple: "hover:border-purple-200", orange: "hover:border-orange-200", teal: "hover:border-teal-200" }[color];
+            const iconBg = { blue: "bg-blue-50 text-blue-600", green: "bg-green-50 text-green-600", purple: "bg-purple-50 text-purple-600", orange: "bg-orange-50 text-orange-600", teal: "bg-teal-50 text-teal-600" }[color];
 
-              const iconColor = {
-                blue: "text-blue-600",
-                green: "text-green-600",
-                purple: "text-purple-600",
-                orange: "text-yellow-600",
-                teal: "text-teal-600",
-              }[color] || "text-gray-600";
-
-              return (
-                <div
-                  key={id}
-                  className="bg-white rounded-xl shadow-xl p-5 flex gap-4 items-start"
-                  role="group"
-                  aria-label={title}
-                  style={{ minHeight: 96 }}
-                >
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${bg}`}>
-                    <Icon className={`w-6 h-6 ${iconColor}`} />
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-                    <p className="mt-1 text-sm text-gray-600">{text}</p>
-                  </div>
+            return (
+              <div
+                key={id}
+                className={`bg-white rounded-[2rem] border border-slate-100 p-6 flex flex-col gap-4 transition-all duration-300 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:-translate-y-1 ${bgHover}`}
+              >
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${iconBg}`}>
+                  <Icon className="w-7 h-7" />
                 </div>
-              );
-            })}
-          </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight mb-2">{title}</h3>
+                  <p className="text-sm text-slate-500 font-medium leading-relaxed">{text}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
