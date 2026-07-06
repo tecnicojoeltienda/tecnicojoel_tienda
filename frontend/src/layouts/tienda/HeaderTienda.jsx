@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FiSearch, FiShoppingCart, FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiPackage, FiEdit, FiEye, FiTrash } from "react-icons/fi";
+import { FiSearch, FiShoppingCart, FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiPackage } from "react-icons/fi";
 import { useCart } from "../../context/CartContext";
 import { useNavigate, Link } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
@@ -35,84 +35,31 @@ function HeaderTienda() {
 
   const pickImageUrl = (p) => {
     if (!p) return "/assets/placeholder.png";
-    const candidate =
-      p.imagen_url ||
-      p.imagen ||
-      p.imagenes?.[0] ||
-      p.image ||
-      (Array.isArray(p.images) ? p.images[0] : null) ||
-      p.foto ||
-      p.photo ||
-      p.thumbnail ||
-      "";
-    try {
-      return resolveImageUrl ? resolveImageUrl(candidate) : (candidate || "/assets/placeholder.png");
-    } catch {
-      return candidate || "/assets/placeholder.png";
-    }
+    const candidate = p.imagen_url || p.imagen || p.imagenes?.[0] || p.image || (Array.isArray(p.images) ? p.images[0] : null) || p.foto || p.photo || p.thumbnail || "";
+    try { return resolveImageUrl ? resolveImageUrl(candidate) : (candidate || "/assets/placeholder.png"); } 
+    catch { return candidate || "/assets/placeholder.png"; }
   };
-
   
   const getCategoryAndSlug = (product) => {
-    const slugify = (s = "") =>
-      s
-        .toString()
-        .toLowerCase()
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\w\s-]/g, "")
-        .trim()
-        .replace(/\s+/g, "-");
-
-    const idToSlug = {
-      1: "pcs",
-      2: "laptops",
-      3: "monitores",
-      4: "mouse",
-      5: "accesorios",
-      6: "sonido",
-      7: "tintas",
-      8: "licencia",
-      9: "reacondicionados",
-      10: "redes",
-      11: "impresoras",
-      12: "componentes",
-      13: "estabilizadores"
-    };
-
-   
-    let categoryRaw =
-      product.categoria ||
-      product.category ||
-      product.categoria_nombre ||
-      product.tipo ||
-      null;
-
+    const slugify = (s = "") => s.toString().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+    const idToSlug = { 1: "pcs", 2: "laptops", 3: "monitores", 4: "mouse", 5: "accesorios", 6: "sonido", 7: "tintas", 8: "licencia", 9: "reacondicionados", 10: "redes", 11: "impresoras", 12: "componentes", 13: "estabilizadores" };
+    let categoryRaw = product.categoria || product.category || product.categoria_nombre || product.tipo || null;
 
     if ((!categoryRaw || categoryRaw === "") && (product.id_categoria || product.idCategoria || product.categoryId)) {
       const id = Number(product.id_categoria ?? product.idCategoria ?? product.categoryId);
-      if (!Number.isNaN(id) && idToSlug[id]) {
-        categoryRaw = idToSlug[id];
-      }
+      if (!Number.isNaN(id) && idToSlug[id]) { categoryRaw = idToSlug[id]; }
     }
-
- 
-    if (!categoryRaw || String(categoryRaw).trim() === "") {
-      return null;
-    }
+    if (!categoryRaw || String(categoryRaw).trim() === "") return null;
 
     const categorySlug = slugify(categoryRaw);
     const productSlug = slugify(product.nombre_producto || product.title || product.nombre || String(product.id_producto || product.id || ""));
-
     return { categorySlug, productSlug };
   };
 
   useEffect(() => {
     if (searchDebounce.current) clearTimeout(searchDebounce.current);
     if (!searchQuery || searchQuery.trim().length < 1) {
-      setSearchResults([]);
-      setSearchLoading(false);
-      return;
+      setSearchResults([]); setSearchLoading(false); return;
     }
     const q = searchQuery.trim();
     setSearchLoading(true);
@@ -120,23 +67,17 @@ function HeaderTienda() {
       try {
         const res = await api.get(`/apij/productos?search=${encodeURIComponent(q)}`);
         let rows = extractRows(res) || [];
-
         const qLower = q.toLowerCase();
         rows = rows.filter((p) => {
           const name = (p.nombre_producto || p.title || p.name || "").toString().toLowerCase();
           return name.includes(qLower);
         });
-
-      
         rows = rows.filter(p => !!getCategoryAndSlug(p));
-
         setSearchResults((rows || []).slice(0, 8));
       } catch (err) {
-        console.warn("Search error", err);
-        setSearchResults([]);
+        console.warn("Search error", err); setSearchResults([]);
       } finally {
-        setSearchLoading(false);
-        setShowSearchDropdown(true);
+        setSearchLoading(false); setShowSearchDropdown(true);
       }
     }, 250);
     return () => clearTimeout(searchDebounce.current);
@@ -145,207 +86,130 @@ function HeaderTienda() {
   const { getTotalItems } = useCart();
   const cartCount = getTotalItems ? getTotalItems() : 0;
   const navigate = useNavigate();
-
   const { user, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
 
   useEffect(() => {
     function onDocClick(e) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setIsUserMenuOpen(false);
-      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setIsUserMenuOpen(false);
     }
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-  };
+  const categorias = ["Accesorios", "Componentes", "Computadoras", "Discos solidos", "Estabilizadores", "Impresoras", "Laptops", "Licencias", "Monitores", "Mouses", "Redes", "Repuestos", "Segunda mano", "Sonidos", "Tarjetas graficas", "Teclados", "Tintas"];
 
-  const categorias = [
-    "Accesorios",
-    "Componentes",
-    "Computadoras",
-    "Discos solidos",
-    "Estabilizadores",
-    "Impresoras",
-    "Laptops",
-    "Licencias",
-    "Monitores",
-    "Mouses",
-    "Redes",
-    "Repuestos",
-    "Segunda mano",
-    "Sonidos",
-    "Tarjetas graficas",
-    "Teclados",
-    "Tintas"
-  ];
-
-  const slugify = (str = "") =>
-    str
-      .toString()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-]/g, "")
-      .replace(/\-+/g, "-");
+  const slugify = (str = "") => str.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "").replace(/\-+/g, "-");
 
   const routeMap = {
-    computadoras: "/computadoras",
-    laptops: "/laptops",
-    impresoras: "/impresoras",
-    monitores: "/monitores",
-    // keep existing single/plural compatibility:
-    mouse: "/mouse",
-    mouses: "/mouse",
-    accesorios: "/accesorios",
-    componentes: "/componentes",
-    sonido: "/sonido",
-    sonidos: "/sonido",
-    tintas: "/tintas",
-    licencia: "/licencia",
-    licencias: "/licencia",
-    "segunda-mano": "/segunda-mano",
-    redes: "/redes",
-    estabilizadores: "/estabilizadores",
-    "tarjetas-graficas": "/tarjetas-graficas",
-    tarjetas: "/tarjetas-graficas",
-    teclados: "/teclados",
-    repuestos: "/repuestos",
-    "discos-solidos": "/discos-solidos",
-    discos: "/discos-solidos"
+    computadoras: "/computadoras", laptops: "/laptops", impresoras: "/impresoras", monitores: "/monitores",
+    mouse: "/mouse", mouses: "/mouse", accesorios: "/accesorios", componentes: "/componentes",
+    sonido: "/sonido", sonidos: "/sonido", tintas: "/tintas", licencia: "/licencia", licencias: "/licencia",
+    "segunda-mano": "/segunda-mano", redes: "/redes", estabilizadores: "/estabilizadores",
+    "tarjetas-graficas": "/tarjetas-graficas", tarjetas: "/tarjetas-graficas", teclados: "/teclados",
+    repuestos: "/repuestos", "discos-solidos": "/discos-solidos", discos: "/discos-solidos"
   };
 
   const getRoute = (name) => {
-    const slug = slugify(name);
-    return routeMap[slug] || `/${slug}`;
+    const slug = slugify(name); return routeMap[slug] || `/${slug}`;
   };
 
   useEffect(() => {
     document.body.style.overflow = isCategoryMenuOpen || isMenuOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [isCategoryMenuOpen, isMenuOpen]);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const openLogoutModal = () => setIsLogoutModalOpen(true);
-  const closeLogoutModal = () => {
-    if (loggingOut) return;
-    setIsLogoutModalOpen(false);
-  };
+  const closeLogoutModal = () => { if (!loggingOut) setIsLogoutModalOpen(false); };
 
   const handleConfirmLogout = async () => {
     setLoggingOut(true);
-    try {
-      await logout();
-      setIsLogoutModalOpen(false);
-      navigate("/");
-    } catch (e) {
-      // opcional: mostrar notificación de error
-    } finally {
-      setLoggingOut(false);
-    }
+    try { await logout(); setIsLogoutModalOpen(false); navigate("/"); } 
+    catch (e) {} 
+    finally { setLoggingOut(false); }
   };
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 w-screen bg-gray-900 shadow-xl border-b border-gray-800">
-        <nav className="w-full px-4 sm:px-6 lg:px-8">
-          {/* Header principal */}
-          <div className="flex items-center justify-between h-14 lg:h-20 gap-2 lg:gap-3">
-            {/* Logo, nombre y botón categorías */}
-            <div className="flex items-center gap-2 lg:gap-4">
-              {/* Logo con margen superior en desktop */}
+      <header className="fixed top-0 left-0 right-0 z-50 w-screen bg-slate-900 border-b border-slate-800 shadow-xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <nav className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
+            
+            <div className="flex items-center gap-4 lg:gap-8">
               <Link 
                 to="/" 
-                className="flex items-center gap-3 lg:mt-2"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  setIsCategoryMenuOpen(false);
-                }}
+                className="flex items-center gap-2.5 outline-none group"
+                onClick={() => { setIsMenuOpen(false); setIsCategoryMenuOpen(false); }}
               >
-                <img 
-                  src="/assets/logo.png" 
-                  alt="Logo TecnicoJoel" 
-                  className="h-12 sm:h-14 lg:h-16 w-auto object-contain"
-                />
-                {/* Nombre visible solo en pantallas grandes */}
-                <span className="hidden lg:block text-xl xl:text-2xl font-bold text-white">
+                <div className="bg-white rounded-xl p-1 shadow-inner">
+                  <img src="/assets/logo.png" alt="Logo TecnicoJoel" className="h-9 lg:h-11 w-auto object-contain transition-transform group-hover:scale-105" />
+                </div>
+                <span className="hidden lg:block text-xl font-extrabold text-white tracking-tight">
                   TecnicoJoel
                 </span>
               </Link>
 
-              {/* Botón categorías con icono hamburguesa - SOLO EN MÓVIL Y DESKTOP */}
               <button
                 onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
-                className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded-lg transition-colors"
-                aria-label="Menú de categorías"
+                className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-all font-semibold text-sm"
               >
-                <FiMenu className="w-5 h-5 lg:w-8 lg:h-6 text-white" />
-                <span className="hidden lg:block text-sm xl:text-base font-bold text-white uppercase">Categorías</span>
+                <FiMenu className="w-5 h-5" />
+                <span>Categorías</span>
               </button>
             </div>
 
-            {/* Buscador - desktop */}
             <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">
               <div className="relative w-full">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiSearch className="h-4 w-4 lg:h-5 lg:w-5 text-gray-400" />
+                  <FiSearch className="h-5 w-5 text-slate-400" />
                 </div>
                 <div ref={searchRef} className="w-full">
                   <input
                     type="text"
                     placeholder="Buscar productos..."
                     value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); }}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => { if (searchResults.length) setShowSearchDropdown(true); }}
-                    className="w-full pl-10 lg:pl-12 pr-4 py-1 lg:py-2 rounded-xl text-base lg:text-lg bg-white text-gray-900 placeholder-gray-500 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-md"
+                    className="w-full pl-12 pr-4 py-2.5 rounded-full text-sm bg-slate-800/80 border border-slate-700 text-white placeholder-slate-400 focus:bg-slate-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 outline-none"
                   />
 
-                  {/* Dropdown de resultados */}
                   {showSearchDropdown && (searchResults.length > 0 || searchLoading) && (
-                    <div className="absolute left-0 mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+                    <div className="absolute left-0 mt-3 w-full bg-white rounded-2xl shadow-[0_16px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 z-50 overflow-hidden">
                       {searchLoading ? (
-                        <div className="p-4 text-sm text-gray-600 flex items-center gap-2">
-                          <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                        <div className="p-6 text-sm font-medium text-slate-500 flex items-center justify-center gap-3">
+                          <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
                           Buscando...
                         </div>
                       ) : (
-                        <ul className="max-h-72 overflow-auto">
+                        <ul className="max-h-80 overflow-auto custom-scrollbar p-2">
                           {searchResults.map((p) => {
                             const id = p.id_producto ?? p.id ?? p.codigo ?? p._id ?? "";
                             const title = (p.nombre_producto || p.title || p.name || "").toString();
                             const img = pickImageUrl(p);
-
                             const info = getCategoryAndSlug(p);
                             if (!info) return null;
-
                             const { categorySlug, productSlug } = info;
                             const detailPath = `/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}`;
 
                             return (
                               <li
                                 key={String(id) + "-" + productSlug}
-                                className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                                className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
                                 onClick={() => {
-                                  setShowSearchDropdown(false);
-                                  setSearchQuery("");
-                                  setSearchResults([]);
-                                  navigate(detailPath);
+                                  setShowSearchDropdown(false); setSearchQuery(""); setSearchResults([]); navigate(detailPath);
                                 }}
                               >
-                                <img src={img} alt={title || "Producto"} className="w-12 h-12 object-contain rounded-lg border border-gray-200 flex-shrink-0" />
+                                <div className="w-12 h-12 bg-white border border-slate-100 rounded-lg p-1.5 flex-shrink-0">
+                                  <img src={img} alt={title} className="w-full h-full object-contain" />
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-gray-900 truncate">{title || "Producto"}</div>
-                                  <div className="text-xs text-gray-500 capitalize">{categorySlug.replace(/-/g, ' ')}</div>
+                                  <div className="text-sm font-semibold text-slate-900 truncate">{title || "Producto"}</div>
+                                  <div className="text-xs font-medium text-slate-500 capitalize mt-0.5">{categorySlug.replace(/-/g, ' ')}</div>
                                 </div>
                               </li>
                             );
@@ -358,94 +222,74 @@ function HeaderTienda() {
               </div>
             </div>
 
-            {/* Controles de la derecha */}
-            <div className="flex items-center gap-1 lg:gap-2">
-              {/* Botón menú móvil */}
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-1 lg:p-2 rounded-lg text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
-                aria-label="Menú móvil"
+                className="md:hidden p-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
               >
-                {isMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
+                {isMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
               </button>
 
-              {/* Mis pedidos - desktop */}
               <button
                 onClick={() => (user ? navigate("/pedidos") : navigate("/login"))}
-                className="hidden lg:flex px-2 lg:px-4 py-1 lg:py-2 rounded-lg text-base lg:text-lg font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 items-center gap-2"
-                title={user ? "Mis pedidos" : "Debes iniciar sesión para ver tus pedidos"}
-                aria-label="Historial de pedidos"
+                className="hidden lg:flex items-center gap-2 p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-all font-semibold text-sm"
+                title={user ? "Mis pedidos" : "Iniciar sesión"}
               >
-                <FiPackage className="w-4 h-4 lg:w-5 lg:h-5" />
-                <span className="hidden xl:inline font-bold uppercase">Mis pedidos</span>
-                <span className="xl:hidden font-bold uppercase">Pedidos</span>
+                <FiPackage className="w-5 h-5" />
+                <span className="hidden xl:inline">Pedidos</span>
               </button>
 
-              {/* Usuario */}
               {user ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen((s) => !s)}
-                    className="px-2 lg:px-4 py-1 lg:py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center gap-1 lg:gap-2 transition-all duration-200 shadow-lg"
-                    aria-haspopup="true"
-                    aria-expanded={isUserMenuOpen}
-                    title="Mi cuenta"
+                    className="pl-3 pr-2 py-1.5 rounded-full bg-slate-800 border border-slate-700 hover:border-slate-600 hover:bg-slate-700 text-white font-medium flex items-center gap-2 transition-all shadow-sm"
                   >
-                    <FiUser className="w-4 h-4 lg:w-5 lg:h-5" />
-                    <span className="hidden sm:inline text-sm lg:text-lg leading-none">
-                      {`${user.nombre ?? user.name ?? ''} ${user.apellido ?? ''}`.trim() || "Usuario"}
+                    <span className="hidden sm:inline text-sm font-semibold">
+                      {`${user.nombre ?? user.name ?? ''}`.trim() || "Usuario"}
                     </span>
-                    <FiChevronDown className={`w-3 h-3 lg:w-5 lg:h-5 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">
+                      <FiUser className="w-4 h-4" />
+                    </div>
                   </button>
 
                   <div
-                    role="menu"
-                    aria-hidden={!isUserMenuOpen}
-                    style={{ top: "calc(100% + 8px)", right: 0, zIndex: 100000 }}
-                    className={`absolute w-44 lg:w-48 bg-white text-gray-900 rounded-xl shadow-2xl border border-gray-200 transform transition-all duration-200 origin-top-right ${
-                      isUserMenuOpen ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+                    className={`absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 transform transition-all duration-200 origin-top-right overflow-hidden ${
+                      isUserMenuOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
                     }`}
                   >
                     <button
                       onClick={() => { setIsUserMenuOpen(false); navigate("/perfil"); }}
-                      className="w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center gap-2 rounded-t-xl transition-colors text-sm lg:text-base"
-                      role="menuitem"
+                      className="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center gap-3 transition-colors text-sm font-semibold text-slate-700"
                     >
-                      <FiUser className="w-4 h-4" /> 
-                      <span>Ver mi perfil</span>
+                      <FiUser className="w-4 h-4 text-slate-400" /> Mi perfil
                     </button>
-                    <div className="border-t border-gray-200" />
+                    <div className="h-px bg-slate-100 w-full" />
                     <button
                       onClick={() => { setIsUserMenuOpen(false); openLogoutModal(); }}
-                      className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-2 text-red-600 rounded-b-xl transition-colors text-sm lg:text-base"
-                      role="menuitem"
+                      className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-red-600 transition-colors text-sm font-semibold"
                     >
-                      <FiLogOut className="w-4 h-4" /> 
-                      <span>Cerrar sesión</span>
+                      <FiLogOut className="w-4 h-4" /> Cerrar sesión
                     </button>
                   </div>
                 </div>
               ) : (
                 <button
                   onClick={() => navigate("/login")}
-                  className="px-2 lg:px-4 py-1 lg:py-2 rounded-lg font-semibold text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 lg:gap-2"
-                  aria-label="Iniciar sesión"
+                  className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition-all font-semibold text-sm shadow-md shadow-blue-900/50"
                 >
-                  <FiUser className="w-4 h-4 lg:w-5 lg:h-5" />
-                  <span className="hidden sm:inline text-sm lg:text-lg">Ingresar</span>
+                  <FiUser className="w-4 h-4" />
+                  <span>Ingresar</span>
                 </button>
               )}
 
-              {/* Carrito */}
               <button
-                className="relative inline-flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-1 lg:py-2 rounded-lg text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
-                aria-label="Carrito"
                 onClick={() => navigate("/carrito")}
+                className="relative p-2.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
               >
-                <FiShoppingCart className="h-4 w-4 lg:h-5 lg:w-5" />
-                <span className="hidden sm:inline text-sm lg:text-lg font-medium">Carrito</span>
+                <FiShoppingCart className="w-6 h-6" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 lg:h-6 lg:w-6 flex items-center justify-center font-bold shadow-lg">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold border-2 border-slate-900 shadow-sm">
                     {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 )}
@@ -453,17 +297,13 @@ function HeaderTienda() {
             </div>
           </div>
 
-          {/* Línea divisoria - solo desktop */}
-          <div className="hidden lg:block w-full h-px bg-gray-700 my-0" />
-
-          {/* Navegación secundaria - solo desktop con 4 categorías */}
-          <div className="hidden lg:flex justify-center">
-            <nav className="flex gap-2 xl:gap-4 py-2 px-4">
+          <div className="hidden lg:flex justify-center border-t border-slate-800">
+            <nav className="flex gap-8 py-3">
               {["Computadoras", "Laptops", "Monitores", "Impresoras"].map((c) => (
                 <button
                   key={c}
                   onClick={() => navigate(getRoute(c))}
-                  className="text-gray-200 hover:text-white text-sm lg:text-base xl:text-base font-bold uppercase tracking-tight px-2 lg:px-3 py-1 rounded-lg hover:bg-gray-800 transition-all duration-200 focus:outline-none"
+                  className="text-slate-400 hover:text-white text-sm font-bold uppercase tracking-widest transition-colors"
                 >
                   {c}
                 </button>
@@ -472,193 +312,120 @@ function HeaderTienda() {
           </div>
         </nav>
 
-        {/* Menu móvil */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-gray-800 border-t border-gray-700">
-            <div className="px-4 pt-4 pb-6 space-y-4">
-              {/* Buscador móvil */}
+          <div className="md:hidden bg-slate-900 border-t border-slate-800 shadow-xl absolute w-full left-0">
+            <div className="p-4 space-y-4">
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="h-5 w-5 text-gray-400" />
-                </div>
+                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Buscar productos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-2 text-base rounded-lg bg-white text-gray-900 placeholder-gray-500 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-800 border-transparent focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 text-white transition-all outline-none text-sm placeholder-slate-400"
                 />
               </div>
 
-              {/* Resultados de búsqueda móvil */}
               {searchResults.length > 0 && (
-                <div className="bg-white rounded-lg shadow-lg max-h-60 overflow-auto">
+                <div className="bg-white rounded-xl shadow-lg border border-slate-100 max-h-60 overflow-auto">
                   {searchResults.map((p) => {
                     const id = p.id_producto ?? p.id ?? p.codigo ?? p._id ?? "";
                     const title = (p.nombre_producto || p.title || p.name || "").toString();
                     const img = pickImageUrl(p);
                     const { categorySlug, productSlug } = getCategoryAndSlug(p);
-                    const detailPath = `/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}`;
-
                     return (
                       <div
                         key={String(id) + "-mobile"}
-                        className="flex items-center gap-3 p-3 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50"
+                        className="flex items-center gap-3 p-3 border-b border-slate-50 cursor-pointer hover:bg-slate-50"
                         onClick={() => {
-                          setSearchQuery("");
-                          setSearchResults([]);
-                          setIsMenuOpen(false);
-                          navigate(detailPath);
+                          setSearchQuery(""); setSearchResults([]); setIsMenuOpen(false);
+                          navigate(`/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}`);
                         }}
                       >
-                        <img src={img} alt={title} className="w-10 h-10 object-contain rounded" />
-                        <span className="text-sm text-gray-900 truncate">{title}</span>
+                        <img src={img} alt={title} className="w-10 h-10 object-contain rounded-md" />
+                        <span className="text-sm font-medium text-slate-900 truncate">{title}</span>
                       </div>
                     );
                   })}
                 </div>
               )}
 
-              {/* Botones de acceso rápido móvil */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { 
-                    setIsMenuOpen(false);
-                    user ? navigate("/pedidos") : navigate("/login");
-                  }}
-                  className="flex-1 px-2 py-2 bg-blue-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
-                >
-                  <FiPackage className="w-4 h-4" />
-                  Pedidos
-                </button>
-              </div>
-
-              {/* Grid de categorías principales móvil */}
               <div className="grid grid-cols-2 gap-2">
-                {["Laptops", "Monitores", "Impresoras", "Computadoras"].map((categoria) => {
-                  const route = getRoute(categoria);
-                  return (
-                    <button
-                      key={categoria}
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        navigate(route);
-                      }}
-                      className="text-gray-900 font-semibold px-4 py-3 text-sm w-full text-center bg-white rounded-lg hover:bg-blue-50 transition-all duration-200 shadow-sm"
-                    >
-                      {categoria}
-                    </button>
-                  );
-                })}
+                {["Laptops", "Monitores", "Impresoras", "Computadoras"].map((categoria) => (
+                  <button
+                    key={categoria}
+                    onClick={() => { setIsMenuOpen(false); navigate(getRoute(categoria)); }}
+                    className="bg-slate-800 text-slate-200 font-semibold py-3 rounded-xl hover:bg-slate-700 transition-colors text-sm"
+                  >
+                    {categoria}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         )}
       </header>
 
-      {/* Espaciado para el header fijo */}
-      <div className="h-14 lg:h-20" />
+      <div className="h-16 lg:h-[110px]" />
 
-      {/* Panel lateral de categorías */}
-      <div
-        className={`fixed inset-0 z-60 transition-opacity duration-300 ${isCategoryMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-      >
-        <div
-          className="absolute inset-0 transition-colors duration-300"
-          style={{
-            backgroundColor: isCategoryMenuOpen ? "rgba(0,0,0,0.5)" : "transparent",
-            pointerEvents: isCategoryMenuOpen ? "auto" : "none",
-          }}
-          onClick={() => setIsCategoryMenuOpen(false)}
-          aria-hidden="true"
-        />
-
-        <aside
-          className={`absolute top-0 left-0 h-full w-full sm:w-80 bg-white shadow-2xl transform transition-transform duration-300 ${isCategoryMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Panel de categorías"
-        >
-          {/* Header del panel */}
-          <div className="flex items-center gap-6 p-4 sm:p-6 bg-gray-50 border-b border-gray-200">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-700 shadow-lg">
-              <img src="/assets/logo.png" alt="Logo Tecnico Joel" className="w-10 h-10 object-contain" loading="lazy" />
-            </div>
-
+      {/* Sidebar Categorías Premium */}
+      <div className={`fixed inset-0 z-[60] transition-opacity duration-300 ${isCategoryMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsCategoryMenuOpen(false)} />
+        
+        <aside className={`absolute top-0 left-0 h-full w-[85%] max-w-[320px] bg-white shadow-2xl transform transition-transform duration-300 ${isCategoryMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+          <div className="flex items-center justify-between p-6 border-b border-slate-100">
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-gray-900">Categorías</h2>
-              <p className="text-sm text-gray-600 mt-0.5">Explora por secciones</p>
+              <h2 className="text-xl font-extrabold text-slate-900">Categorías</h2>
+              <p className="text-sm font-medium text-slate-500 mt-1">Explora nuestro catálogo</p>
             </div>
-
-            <button
-              onClick={() => setIsCategoryMenuOpen(false)}
-              className="ml-auto p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-              aria-label="Cerrar categorías"
-            >
-              <FiX className="h-5 w-5 text-gray-600" />
+            <button onClick={() => setIsCategoryMenuOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors">
+              <FiX className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Lista de categorías */}
-          <div className="p-4 sm:p-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 170px)' }}>
-            <div className="flex flex-col gap-2">
-              {categorias.map((categoria, index) => {
-                const route = getRoute(categoria);
-                return (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setIsCategoryMenuOpen(false);
-                      setIsMenuOpen(false);
-                      navigate(route);
-                    }}
-                    className="flex items-center px-4 py-4 text-base text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all duration-200 border border-transparent hover:border-blue-200 group w-full text-left"
-                  >
-                    <span className="w-3 h-3 bg-gradient-to-r from-blue-600 to-red-500 rounded-full mr-4 flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow" />
-                    <span className="truncate font-medium">{categoria}</span>
-                  </button>
-                );
-              })}
+          <div className="p-4 overflow-y-auto custom-scrollbar" style={{ height: 'calc(100vh - 100px)' }}>
+            <div className="flex flex-col space-y-1">
+              {categorias.map((categoria, index) => (
+                <button
+                  key={index}
+                  onClick={() => { setIsCategoryMenuOpen(false); navigate(getRoute(categoria)); }}
+                  className="flex items-center px-4 py-3 text-[15px] font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all group"
+                >
+                  <div className="w-2 h-2 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors mr-4" />
+                  {categoria}
+                </button>
+              ))}
             </div>
           </div>
         </aside>
       </div>
 
-   
+      {/* Modal Logout Elegante */}
       {isLogoutModalOpen && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black opacity-50" aria-hidden="true" onClick={closeLogoutModal} />
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-sm z-10">
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-red-600" viewBox="0 0 24 24" fill="none">
-                  <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={closeLogoutModal} />
+          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-sm z-10 scale-100 animate-in zoom-in-95 duration-200">
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5">
+                <FiLogOut className="w-8 h-8 text-red-500" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">¿Cerrar sesión?</h3>
-              <p className="text-sm text-gray-600 mb-4">¿Estás seguro de que deseas cerrar sesión? Tu carrito y preferencias se guardarán.</p>
+              <h3 className="text-xl font-extrabold text-slate-900 mb-2">¿Cerrar sesión?</h3>
+              <p className="text-sm font-medium text-slate-500 mb-8">Tu carrito y preferencias quedarán guardados de forma segura.</p>
 
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={closeLogoutModal}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200"
-                  aria-label="Cancelar cierre de sesión"
-                >
-                  Cancelar
-                </button>
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={handleConfirmLogout}
-                  className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center justify-center gap-2"
-                  aria-label="Confirmar cierre de sesión"
                   disabled={loggingOut}
+                  className="w-full py-3 text-sm font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-all flex items-center justify-center shadow-sm"
                 >
-                  {loggingOut ? (
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                  ) : (
-                    <FiLogOut className="w-4 h-4" />
-                  )}
-                  Cerrar sesión
+                  {loggingOut ? <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" /> : "Sí, cerrar sesión"}
+                </button>
+                <button
+                  onClick={closeLogoutModal}
+                  className="w-full py-3 text-sm font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 transition-all"
+                >
+                  Cancelar
                 </button>
               </div>
             </div>
@@ -666,7 +433,12 @@ function HeaderTienda() {
         </div>
       )}
 
-      <div className="h-15" />
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      `}</style>
     </>
   );
 }
