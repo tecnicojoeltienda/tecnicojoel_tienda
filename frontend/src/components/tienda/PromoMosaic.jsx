@@ -1,89 +1,57 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FiArrowRight } from "react-icons/fi";
 
 export default function PromoMosaic({
-  leftImage = "/assets/laptopgamer.png",
-  topRightImage = "/assets/imagen2.png",
-  midRightImage = "/assets/mouse1.png",
-  bottomRightImage = "/assets/audifonos.png",
+  leftImage = "/assets/laptopgamer.png", topRightImage = "/assets/setup2.avif",
+  midRightImage = "/assets/audifonos.png", bottomRightImage = "/assets/imagen2.png",
 }) {
   const navigate = useNavigate();
 
   return (
-    <section className="w-full py-6">
-      {/* wrapper full width */}
-      <div className="w-full mx-0 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Large left tile */}
-          <div className="lg:col-span-2 rounded-xl overflow-hidden shadow-lg">
-            <div className="relative w-full h-80 sm:h-96 lg:h-[520px] bg-gray-100">
-              <img src={leftImage} alt="Promo grande" className="w-full h-full object-cover block" loading="lazy" />
-              {/* Texto sobre la imagen */}
-              <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-12 lg:p-16">
-                <h3 className="text-white text-2xl md:text-3xl lg:text-4xl font-extrabold drop-shadow-lg">
-                  Los miembros ganan <span className="text-yellow-300">5% de reembolso</span>
-                </h3>
-                <p className="mt-3 text-white/90 max-w-xl drop-shadow">
-                  Beneficios exclusivos y ofertas especiales. Aprovecha hoy.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right column with three tiles */}
-          <div className="flex flex-col gap-4">
-            <div className="relative rounded-xl overflow-hidden shadow-lg h-40 sm:h-48">
-              <img
-                src={topRightImage}
-                alt="Promo superior derecha"
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 flex flex-col justify-center items-start p-4">
-                <h4 className="text-white font-bold text-lg">Apply today</h4>
-                <p className="text-white/90 text-sm">Cardmembers get so many benefits</p>
-              </div>
-            </div>
-
-            <div className="relative rounded-xl overflow-hidden shadow-lg h-36 sm:h-44">
-              <img
-                src={midRightImage}
-                alt="Promo intermedia derecha"
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 flex flex-col justify-center items-start p-4">
-                <h4 className="text-white font-bold text-lg">Cuidar el resfriado</h4>
-                <p className="text-white/90 text-sm">Encuentra vacunas y alivio rápido</p>
-              </div>
-            </div>
-
-            <div className="relative rounded-xl overflow-hidden shadow-lg h-36 sm:h-44">
-              <img
-                src={bottomRightImage}
-                alt="Promo inferior derecha"
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-              {/* Esta imagen tiene botón */}
-              <div className="absolute inset-0 flex flex-col justify-between items-start p-4">
-                <div>
-                  <h4 className="text-white font-bold text-lg">Servicios de instalación</h4>
-                  <p className="text-white/90 text-sm">Instalación de luces y decoración</p>
-                </div>
-
-                <div className="w-full flex justify-end">
-                  <button
-                    onClick={() => navigate("/servicios/instalacion")}
-                    className="bg-white text-blue-600 px-4 py-2 rounded-full font-semibold shadow-md hover:bg-blue-600 hover:text-white transition-colors"
-                  >
-                    Comprar ahora
-                  </button>
-                </div>
-              </div>
-            </div>
+    <section className="w-full">
+      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 lg:gap-6 md:h-[550px]">
+        
+        {/* Bento Grande */}
+        <div className="md:col-span-2 md:row-span-2 relative rounded-3xl overflow-hidden group bg-slate-900 cursor-pointer">
+          <img src={leftImage} alt="Promo" className="w-full h-full object-cover transition-transform duration-700 opacity-80 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-10 flex flex-col justify-end">
+            <span className="text-blue-400 font-bold tracking-widest text-[11px] uppercase mb-3">Oferta Exclusiva</span>
+            <h3 className="text-white text-3xl md:text-5xl font-extrabold leading-tight mb-6">
+              Domina el juego con nueva tecnología.
+            </h3>
+            <button className="w-fit flex items-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-full font-bold text-sm hover:bg-slate-100 transition-colors">
+              Descubrir más <FiArrowRight />
+            </button>
           </div>
         </div>
+
+        {/* Superiores & Inferiores usando la misma receta: relative, rounded-3xl, flex-col, bg-slate-900 */}
+        <div className="md:col-span-2 md:row-span-1 relative rounded-3xl overflow-hidden group bg-slate-900 cursor-pointer">
+          <img src={topRightImage} alt="Setup" className="w-full h-full object-cover transition-transform duration-700 opacity-70 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent p-8 flex flex-col justify-center">
+            <h4 className="text-white font-extrabold text-2xl mb-2">Arma tu Setup</h4>
+            <p className="text-slate-300 text-sm max-w-[200px]">Componentes de última generación.</p>
+          </div>
+        </div>
+
+        <div className="md:col-span-1 md:row-span-1 relative rounded-3xl overflow-hidden group bg-slate-900 cursor-pointer">
+          <img src={midRightImage} alt="Accesorios" className="w-full h-full object-cover transition-transform duration-700 opacity-70 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent p-6 flex flex-col justify-end">
+            <h4 className="text-white font-bold text-lg">Accesorios</h4>
+          </div>
+        </div>
+
+        <div className="md:col-span-1 md:row-span-1 relative rounded-3xl overflow-hidden group bg-slate-900 cursor-pointer">
+          <img src={bottomRightImage} alt="Audio" className="w-full h-full object-cover transition-transform duration-700 opacity-60 group-hover:scale-105" />
+          <div className="absolute inset-0 p-6 flex flex-col justify-between">
+            <h4 className="text-white font-bold text-lg leading-tight">Servicio Técnico</h4>
+            <button onClick={() => navigate("/servicios/instalacion")} className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-white hover:text-slate-900 transition-colors w-fit">
+              Reservar
+            </button>
+          </div>
+        </div>
+
       </div>
     </section>
   );
