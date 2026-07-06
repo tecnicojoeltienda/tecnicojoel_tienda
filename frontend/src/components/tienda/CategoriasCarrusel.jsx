@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FiChevronLeft, FiChevronRight, FiGrid } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const categories = [
@@ -43,9 +43,9 @@ export default function CategoriasCarrusel() {
             const w = window.innerWidth;
             if (w >= 1536) setVisible(8);
             else if (w >= 1280) setVisible(7);
-            else if (w >= 1024) setVisible(6);
-            else if (w >= 768) setVisible(5);
-            else if (w >= 640) setVisible(4);
+            else if (w >= 1024) setVisible(5); 
+            else if (w >= 768) setVisible(4);
+            else if (w >= 640) setVisible(3);
             else if (w >= 480) setVisible(3);
             else setVisible(2);
         }
@@ -66,142 +66,66 @@ export default function CategoriasCarrusel() {
     };
 
     return (
-        <section className="w-full py-4 md:py-6 lg:py-8">
-            <div className="w-full mx-0 px-2 sm:px-4 lg:px-6">
-                <div
-                    className="bg-white rounded-2xl overflow-hidden shadow-2xl"
-                    style={{
-                        boxShadow: "0 18px 40px rgba(2,6,23,0.22)",
-                        fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                    }}
-                >
-                    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
-                            <div>
-                                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                                    <FiGrid className="w-8 h-8 text-blue-600" />
-                                    Nuestras Categorías
-                                </h3>
-                                <p className="text-sm sm:text-base text-gray-600 font-medium">
-                                    Explora nuestra amplia variedad de productos tecnológicos
-                                </p>
-                            </div>
-
-                            {/* Flechas visibles en pantallas >= sm */}
-                            <div className="hidden sm:flex items-center gap-2 self-start sm:self-auto">
-                                <button
-                                    onClick={() => scrollByWidth(-1)}
-                                    aria-label="Anterior categorías"
-                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                                >
-                                    <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
-                                </button>
-                                <button
-                                    onClick={() => scrollByWidth(1)}
-                                    aria-label="Siguiente categorías"
-                                    className="group p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-md border border-gray-200 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                                >
-                                    <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Carrusel con scroll horizontal nativo */}
-                        <div className="relative">
-                            {/* Fade edges (only desktop) */}
-                            <div className="absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden lg:block" />
-                            <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden lg:block" />
-
-                            <div
-                                ref={containerRef}
-                                className="flex gap-4 overflow-x-auto py-2 custom-scrollbar scroll-pl-4"
-                                style={{
-                                    scrollSnapType: "x mandatory",
-                                    WebkitOverflowScrolling: "touch",
-                                    paddingBottom: 6,
-                                    touchAction: "pan-x",
-                                }}
-                                role="list"
-                            >
-                                {categories.map((c) => (
-                                    <button
-                                        key={c.id}
-                                        onClick={() => goToCategory(c.label)}
-                                        className="group flex-shrink-0 flex flex-col items-center justify-start bg-transparent border-0 p-2 sm:p-3 md:p-4 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl min-w-[120px] sm:min-w-[140px] md:min-w-[160px]"
-                                        style={{ scrollSnapAlign: "start" }}
-                                        aria-label={`Ver categoría ${c.label}`}
-                                        role="listitem"
-                                    >
-                                        <div
-                                            className="w-20 h-20 xs:w-24 xs:h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full relative flex items-center justify-center overflow-hidden group-hover:shadow-2xl transition-all duration-300"
-                                            style={{
-                                                background: "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))",
-                                                border: "2px solid rgba(255,255,255,0.18)",
-                                                backdropFilter: "blur(12px)",
-                                                WebkitBackdropFilter: "blur(12px)",
-                                                boxShadow: "0 14px 30px rgba(2,6,23,0.18), inset 0 4px 10px rgba(255,255,255,0.06)",
-                                            }}
-                                        >
-                                            <img
-                                                src={c.img}
-                                                alt={c.label}
-                                                className="z-10 rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                                loading="lazy"
-                                                style={{
-                                                    width: "82%",
-                                                    height: "82%",
-                                                }}
-                                            />
-                                            <div className="absolute inset-0 rounded-full pointer-events-none bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/10 group-hover:to-blue-500/10 transition-all duration-300" />
-                                        </div>
-
-                                        <span
-                                            className="mt-3 sm:mt-4 md:mt-5 text-center font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 leading-tight px-2"
-                                            style={{
-                                                fontSize: "clamp(0.75rem, 2vw, 1.05rem)",
-                                                lineHeight: 1.2,
-                                                maxWidth: "100%",
-                                                wordWrap: "break-word"
-                                            }}
-                                        >
-                                            {c.label}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="mt-6 text-center">
-                            <p className="text-sm font-semibold text-gray-500">
-                                <span className="text-blue-600 font-bold text-base">{categories.length}</span> categorías disponibles
+        <section className="w-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <div className="bg-white rounded-[2rem] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] overflow-hidden">
+                <div className="p-6 md:p-8 lg:p-10">
+                    
+                    {/* Header Limpio */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                        <div>
+                            <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                                Nuestras Categorías
+                            </h3>
+                            <p className="text-slate-500 font-medium mt-1">
+                                Explora nuestra variedad de productos
                             </p>
+                        </div>
+
+                        <div className="hidden sm:flex items-center gap-3">
+                            <button onClick={() => scrollByWidth(-1)} className="w-11 h-11 flex items-center justify-center rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all text-slate-600 shadow-sm">
+                                <FiChevronLeft className="w-6 h-6" />
+                            </button>
+                            <button onClick={() => scrollByWidth(1)} className="w-11 h-11 flex items-center justify-center rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all text-slate-600 shadow-sm">
+                                <FiChevronRight className="w-6 h-6" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute left-0 top-0 h-full w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden lg:block" />
+                        <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden lg:block" />
+
+                        <div ref={containerRef} className="flex gap-4 sm:gap-6 lg:gap-8 overflow-x-auto pb-6 pt-2 px-2 custom-scrollbar snap-x snap-mandatory">
+                            {categories.map((c) => (
+                                <button
+                                    key={c.id}
+                                    onClick={() => goToCategory(c.label)}
+                                    className="group flex flex-col items-center flex-shrink-0 w-[120px] sm:w-[140px] lg:w-[160px] snap-start outline-none"
+                                >
+                                    {/* Contenedores más grandes: w-28 h-28 -> w-32 h-32 -> w-36 h-36 */}
+                                    <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-4 sm:p-5 lg:p-6 transition-all duration-300 group-hover:bg-blue-50/50 group-hover:scale-105 group-hover:border-blue-100 group-hover:shadow-[0_10px_30px_-10px_rgba(37,99,235,0.2)]">
+                                        <img
+                                            src={c.img}
+                                            alt={c.label}
+                                            className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <span className="mt-4 text-sm sm:text-[15px] font-bold text-slate-600 group-hover:text-blue-700 transition-colors text-center leading-tight">
+                                        {c.label}
+                                    </span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>
             </div>
-
+            
             <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    height: 6px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: #f1f5f9;
-                    border-radius: 10px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #cbd5e1;
-                    border-radius: 10px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #94a3b8;
-                }
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
+                .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
             `}</style>
         </section>
     );

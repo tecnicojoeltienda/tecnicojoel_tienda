@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiTag } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import api, { resolveImageUrl } from "../../service/api";
 
@@ -14,10 +14,9 @@ export default function CarruselPromocion() {
   useEffect(() => {
     function updateVisible() {
       const w = window.innerWidth;
-      if (w >= 1280) setVisible(5);
-      else if (w >= 1024) setVisible(4);
-      else if (w >= 768) setVisible(3);
-      else if (w >= 640) setVisible(2);
+      if (w >= 1280) setVisible(4);
+      else if (w >= 1024) setVisible(3);
+      else if (w >= 768) setVisible(2);
       else setVisible(1);
     }
     updateVisible();
@@ -74,57 +73,20 @@ export default function CarruselPromocion() {
       .replace(/\s+/g, "-");
 
   const getCategorySlug = (prod = {}) => {
-    const idToSlug = {
-      1: "pcs",
-      2: "laptops",
-      3: "monitores",
-      4: "mouse",
-      5: "accesorios",
-      6: "sonido",
-      7: "tintas",
-      8: "licencia",
-      9: "reacondicionados",
-      10: "redes",
-      11: "impresoras",
-      12: "componentes",
-      13: "estabilizadores"
-    };
-
-    const tryValues = [
-      prod.categoria,
-      prod.categoria_nombre,
-      prod.categoria_slug,
-      prod.category,
-      prod.category_name,
-      prod.categoriaName,
-      prod.tipo,
-      prod.categoria?.nombre,
-      prod.categoria?.slug,
-      prod.category?.name,
-      prod.category?.slug
-    ];
-
+    const idToSlug = { 1: "pcs", 2: "laptops", 3: "monitores", 4: "mouse", 5: "accesorios", 6: "sonido", 7: "tintas", 8: "licencia", 9: "reacondicionados", 10: "redes", 11: "impresoras", 12: "componentes", 13: "estabilizadores" };
+    const tryValues = [prod.categoria, prod.categoria_nombre, prod.categoria_slug, prod.category, prod.category_name, prod.categoriaName, prod.tipo, prod.categoria?.nombre, prod.categoria?.slug, prod.category?.name, prod.category?.slug];
     let catRaw = "";
     for (const v of tryValues) {
       if (v === 0 || v === "0") continue;
-      if (v && typeof v === "string" && v.trim() !== "") {
-        catRaw = v;
-        break;
-      }
-      if (v && typeof v === "object") {
-        catRaw = v.slug || v.nombre || v.name || v.title || "";
-        if (catRaw) break;
-      }
+      if (v && typeof v === "string" && v.trim() !== "") { catRaw = v; break; }
+      if (v && typeof v === "object") { catRaw = v.slug || v.nombre || v.name || v.title || ""; if (catRaw) break; }
     }
-
     catRaw = String(catRaw || "").trim();
-
     if (!catRaw || /^(productos?|producto)s?$/i.test(catRaw)) {
       const id = Number(prod.id_categoria ?? prod.idCategoria ?? prod.categoryId);
       if (!Number.isNaN(id) && idToSlug[id]) return idToSlug[id];
       return null;
     }
-
     return slugify(catRaw);
   };
 
@@ -151,148 +113,121 @@ export default function CarruselPromocion() {
     return n === 0 ? "Consultar" : `S/. ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  return (
-    <section className="w-full py-6">
-      <div className="w-full mx-0 px-2 sm:px-4 lg:px-6">
-        <div
-          className="rounded-2xl bg-gradient-to-r from-black via-gray-800 to-black/90 text-white overflow-hidden"
-          style={{
-            boxShadow: "0 34px 90px rgba(2,6,23,0.28)",
-            fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-            padding: "20px",
-          }}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="text-2xl font-extrabold">Ofertas en promoción</h3>
-              <p className="mt-1 text-sm text-white/80">Solo productos que están en promoción — encuentra descuentos destacados.</p>
-            </div>
+  if (!loading && items.length === 0) return null;
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={prev}
-                disabled={index === 0}
-                aria-label="Anterior promociones"
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <FiChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={next}
-                disabled={index >= maxIndex}
-                aria-label="Siguiente promociones"
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <FiChevronRight className="w-5 h-5" />
-              </button>
+  return (
+    <section className="w-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div className="bg-slate-900 rounded-[2rem] p-6 md:p-10 lg:p-12 relative overflow-hidden shadow-2xl">
+        
+        {/* Fondo sutil profesional */}
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-700 via-slate-900 to-slate-900 pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <FiTag className="text-blue-500 w-4 h-4" />
+              <span className="text-blue-400 text-xs font-bold uppercase tracking-[0.2em]">
+                Ofertas Exclusivas
+              </span>
             </div>
+            <h3 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+              Precios Especiales
+            </h3>
           </div>
 
-          <div className="mt-6 relative">
-            <div
-              ref={containerRef}
-              className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${(index * 100) / visible}%)` }}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={prev}
+              disabled={index === 0}
+              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all backdrop-blur-md"
             >
-              {loading ? (
-                Array.from({ length: visible }).map((_, i) => (
-                  <div key={i} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 px-2">
-                    <div className="h-72 bg-white/6 rounded-lg animate-pulse" />
-                  </div>
-                ))
-              ) : items.length === 0 ? (
-                <div className="text-center text-white/80 py-12 w-full">No hay promociones en este momento.</div>
-              ) : (
-                items.map((p) => {
-                  const key = p.id_producto || p.id || JSON.stringify(p);
-                  const src = resolveImageUrl(p.imagen_url || p.imagen) || "/assets/placeholder.png";
+              <FiChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={next}
+              disabled={index >= maxIndex}
+              className="w-12 h-12 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all backdrop-blur-md"
+            >
+              <FiChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
 
-                  // precio_lista = precio original (antes de la promoción)
-                  // precio_venta = precio en promoción (precio actual rebajado)
-                  const precioOriginal = toNumber(p.precio_lista);
-                  const precioPromocion = toNumber(p.precio_venta);
+        <div className="relative z-10 overflow-hidden">
+          <div
+            ref={containerRef}
+            className="flex transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            style={{ transform: `translateX(-${(index * 100) / visible}%)` }}
+          >
+            {loading ? (
+              Array.from({ length: visible }).map((_, i) => (
+                <div key={i} className="flex-shrink-0 px-3" style={{ width: `${100 / visible}%` }}>
+                  <div className="h-[400px] bg-white/5 rounded-[1.5rem] animate-pulse border border-white/10" />
+                </div>
+              ))
+            ) : (
+              items.map((p) => {
+                const src = resolveImageUrl(p.imagen_url || p.imagen) || "/assets/placeholder.png";
+                const precioOriginal = toNumber(p.precio_lista);
+                const precioPromocion = toNumber(p.precio_venta);
+                
+                let descuento = 0;
+                let ahorro = 0;
 
-                  let descuento = 0;
-                  let ahorro = 0;
+                if (precioOriginal > 0 && precioPromocion > 0 && precioOriginal > precioPromocion) {
+                  ahorro = precioOriginal - precioPromocion;
+                  descuento = Math.round((ahorro / precioOriginal) * 100);
+                }
 
-                  if (precioOriginal > 0 && precioPromocion > 0 && precioOriginal > precioPromocion) {
-                    ahorro = precioOriginal - precioPromocion;
-                    descuento = Math.round((ahorro / precioOriginal) * 100);
-                  }
-
-                  return (
+                return (
+                  <div key={p.id_producto || p.id} className="flex-shrink-0 px-3" style={{ width: `${100 / visible}%` }}>
                     <div
-                      key={key}
-                      className="flex-shrink-0 px-2"
-                      style={{ width: `${100 / visible}%` }}
+                      className="group bg-white rounded-[1.5rem] p-5 flex flex-col h-full cursor-pointer transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:-translate-y-2 border border-slate-200"
+                      onClick={() => goTo(p)}
                     >
-                      <div
-                        className="h-96 rounded-xl bg-white p-4 flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-lg"
-                        onClick={() => goTo(p)}
-                        role="button"
-                      >
-                        {/* Imagen más grande */}
-                        <div className="relative flex-1 flex items-center justify-center overflow-hidden rounded-lg bg-white mb-3 p-2">
-                          <img
-                            src={src}
-                            alt={p.nombre_producto || p.nombre || "Producto"}
-                            className="w-full h-full object-contain"
-                            style={{ maxHeight: "230px" }}
-                            loading="lazy"
-                          />
-
-                          <span className="absolute left-1 top-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-md shadow-md">
-                            PROMO
+                      <div className="relative w-full aspect-[4/3] bg-slate-50/50 rounded-xl mb-5 p-6 flex items-center justify-center overflow-hidden">
+                        {descuento > 0 && (
+                          <span className="absolute top-3 left-3 bg-red-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-md z-10 shadow-sm tracking-wider">
+                            -{descuento}%
                           </span>
+                        )}
+                        <img 
+                          src={src} 
+                          alt={p.nombre_producto} 
+                          className="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-110" 
+                          loading="lazy" 
+                        />
+                      </div>
 
-                          {descuento > 0 && (
-                            <span className="absolute right-1 top-1 bg-red-600 text-white text-sm font-bold px-2 py-1 rounded-md shadow-md">
-                              {descuento}%
-                            </span>
-                          )}
+                      <div className="flex flex-col flex-grow px-1">
+                        <div className="text-[15px] font-semibold leading-relaxed text-slate-900 line-clamp-2 mb-4 group-hover:text-blue-600 transition-colors">
+                          {p.nombre_producto}
                         </div>
 
-                        {/* Información del producto */}
-                        <div className="space-y-2">
-                          <div className="text-sm font-semibold leading-tight text-black line-clamp-2 min-h-[2.5rem]">
-                            {p.nombre_producto || p.nombre}
-                          </div>
-
-                          {/* Precios */}
-                          <div className="space-y-1">
-                            {/* Precio original tachado */}
+                        <div className="mt-auto flex items-end justify-between">
+                          <div>
                             {precioOriginal > 0 && descuento > 0 && (
-                              <div className="text-sm text-gray-500 line-through">
-                                Antes: S/. {precioOriginal.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              <div className="text-xs font-medium text-slate-400 line-through mb-1">
+                                S/. {precioOriginal.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </div>
                             )}
-
-                            {/* Precio promoción (actual) */}
-                            <div className="text-2xl font-extrabold text-blue-600">
+                            <div className="text-xl font-extrabold text-slate-900">
                               {formatCurrency(precioPromocion)}
                             </div>
-
-                            {/* Ahorro */}
-                            {ahorro > 0 && (
-                              <div className="text-xs font-semibold text-green-700">
-                                Ahorras S/. {ahorro.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </div>
-                            )}
                           </div>
-
-                          {/* Stock */}
-                          {p.stock != null && (
-                            <div className="text-xs text-gray-600">
-                              Stock: {p.stock} {p.stock > 0 ? "disponibles" : "agotado"}
+                          
+                          {ahorro > 0 && (
+                            <div className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                              Ahorras S/. {ahorro.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                  );
-                })
-              )}
-            </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
